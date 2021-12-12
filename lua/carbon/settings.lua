@@ -1,7 +1,13 @@
+local util = require('carbon.util')
 local settings = {
   auto_open = true,
   disable_netrw = true,
   create_mappings = true,
+  indicators = util.ternary(
+    util.has('multi_byte'),
+    { default = ' ', select = '•', expand = '▸', collapse = '▾' },
+    { default = ' ', select = '*', expand = '+', collapse = '-' }
+  ),
   highlight_groups = {
     CarbonDir = {
       ctermfg = 'DarkBlue',

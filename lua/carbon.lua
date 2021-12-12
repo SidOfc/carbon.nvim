@@ -1,7 +1,7 @@
-local carbon = {}
 local util = require('carbon.util')
 local buffer = require('carbon.buffer')
 local settings = require('carbon.settings')
+local carbon = {}
 
 function carbon.setup(user_settings)
   settings.extend(user_settings)
@@ -12,7 +12,7 @@ end
 function carbon.initialize(user_settings)
   settings.extend(user_settings)
 
-  if vim.fn.has('vim_starting') then
+  if util.has('vim_starting') then
     if settings.disable_netrw then
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1

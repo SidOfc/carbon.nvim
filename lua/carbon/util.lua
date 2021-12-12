@@ -20,6 +20,10 @@ function util.ls(path, depth)
   return entries
 end
 
+function util.has(feature)
+  return vim.fn.has(feature) == 1
+end
+
 function util.entry(path, depth)
   local children = nil
   local entry = {
@@ -63,6 +67,14 @@ end
 
 function util.expand(path)
   return vim.fn.fnamemodify(vim.fn.expand(path), ':p')
+end
+
+function util.ternary(condition, a, b)
+  if condition then
+    return a
+  else
+    return b
+  end
 end
 
 function util.highlight(group, properties)

@@ -23,3 +23,7 @@ endfunction
 function! carbon#buffer#cursor_entry(...)
   return call(s:buffer.cursor_entry, a:000)
 endfunction
+
+function! carbon#buffer#entries_to_lines(...)
+  return call(s:buffer.entries_to_lines, a:000)
+endfunction

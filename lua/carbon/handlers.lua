@@ -1,5 +1,5 @@
-local handlers = {}
 local buffer = require('carbon.buffer')
+local handlers = {}
 
 function handlers.move()
   print('TODO: carbon#handlers#move()')

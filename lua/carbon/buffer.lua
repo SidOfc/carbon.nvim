@@ -1,6 +1,6 @@
-local buffer = {}
 local util = require('carbon.util')
 local settings = require('carbon.settings')
+local buffer = {}
 
 local current = nil
 local root = util.entry(vim.fn.getcwd(), -1)
@@ -59,31 +59,15 @@ end
 
 function buffer.draw()
   local buffer_handle = buffer.current()
-  local entries = root.entries()
-  local lines = vim.tbl_map(function(entry)
-    return string.rep('  ', entry.depth) .. entry.name
-  end, entries)
+  local lines, highlights = unpack(buffer.entries_to_lines())
 
   buffer.set('modifiable', true)
   vim.api.nvim_buf_set_lines(buffer_handle, 0, -1, 1, lines)
   buffer.set('modifiable', false)
   vim.api.nvim_buf_clear_namespace(buffer_handle, namespace, 0, -1)
 
-  for lnum, entry in ipairs(entries) do
-    local group = 'CarbonFile'
-
-    if entry.is_directory then
-      group = 'CarbonDir'
-    end
-
-    vim.api.nvim_buf_add_highlight(
-      buffer_handle,
-      namespace,
-      group,
-      lnum - 1,
-      entry.depth * 2,
-      -1
-    )
+  for _, highlight in ipairs(highlights) do
+    vim.api.nvim_buf_add_highlight(buffer_handle, namespace, unpack(highlight))
   end
 
   return buffer
@@ -91,6 +75,41 @@ end
 
 function buffer.cursor_entry()
   return root.entries()[vim.fn.line('.')]
+end
+
+function buffer.entries_to_lines()
+  local lines = {}
+  local hls = {}
+
+  for lnum, entry in ipairs(root.entries()) do
+    local highlight = 'CarbonFile'
+    local indicator = settings.indicators.default
+    local indent = string.rep('  ', entry.depth)
+
+    if entry.is_directory then
+      highlight = 'CarbonDir'
+
+      if entry.is_open then
+        indicator = settings.indicators.collapse
+      else
+        indicator = settings.indicators.expand
+      end
+    end
+
+    lines[#lines + 1] = indent .. indicator .. ' ' .. entry.name
+    hls[#hls + 1] = { highlight, lnum - 1, #indent + #indicator, -1 }
+
+    if entry.is_directory or entry.is_selected then
+      hls[#hls + 1] = {
+        'CarbonIndicator',
+        lnum - 1,
+        #indent,
+        #indent + #indicator,
+      }
+    end
+  end
+
+  return { lines, hls }
 end
 
 return buffer
