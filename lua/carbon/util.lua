@@ -1,8 +1,8 @@
 local util = {}
 
-function util.ls(path, depth)
+function util.ls(path, depth, parent)
   local entries = vim.tbl_map(function(name)
-    return util.entry(path .. '/' .. name, depth or 0)
+    return util.entry(path .. '/' .. name, depth or 0, parent)
   end, vim.fn.readdir(path))
 
   table.sort(entries, function(a, b)
@@ -24,20 +24,27 @@ function util.has(feature)
   return vim.fn.has(feature) == 1
 end
 
-function util.entry(path, depth)
+function util.entry(path, depth, parent)
   local children = nil
   local entry = {
     name = vim.fn.fnamemodify(path, ':t'),
     path = path,
     depth = depth or 0,
-    is_open = false,
     is_directory = util.is_directory(path),
   }
 
+  if parent and parent.is_selected then
+    entry.is_selected = true
+  end
+
   function entry.sync()
     if entry.is_directory then
-      children = util.ls(entry.path, entry.depth + 1)
+      children = util.ls(entry.path, entry.depth + 1, entry)
     end
+  end
+
+  function entry.parent()
+    return parent
   end
 
   function entry.children()
@@ -46,6 +53,32 @@ function util.entry(path, depth)
     end
 
     return children
+  end
+
+  function entry.has_selected_or_partial_children()
+    if children then
+      for _, child in ipairs(children) do
+        if
+          child.is_selected
+          or child.is_partial
+          or child.has_selected_or_partial_children()
+        then
+          return true
+        end
+      end
+    end
+  end
+
+  function entry.set_children(property, value, recursive)
+    if children then
+      for _, child in ipairs(children) do
+        child[property] = value
+
+        if recursive then
+          child.set_children(property, value, recursive)
+        end
+      end
+    end
   end
 
   function entry.entries(entries)

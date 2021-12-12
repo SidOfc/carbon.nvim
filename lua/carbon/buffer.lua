@@ -27,6 +27,8 @@ function buffer.current()
     buffer.map('n', '<Cr>', '<Plug>(carbon-cursor)')
     buffer.map('n', '<C-x>', '<Plug>(carbon-hsplit)')
     buffer.map('n', '<C-v>', '<Plug>(carbon-vsplit)')
+    buffer.map('n', '<Tab>', '<Plug>(carbon-toggle-down)')
+    buffer.map('n', '<S-Tab>', '<Plug>(carbon-toggle-up)')
   end
 
   return current
@@ -82,12 +84,23 @@ function buffer.entries_to_lines()
   local hls = {}
 
   for lnum, entry in ipairs(root.entries()) do
-    local highlight = 'CarbonFile'
+    local path_hl = 'CarbonFile'
+    local indicator_hl = 'CarbonIndicator'
     local indicator = settings.indicators.default
     local indent = string.rep('  ', entry.depth)
 
+    if entry.is_selected then
+      indicator_hl = 'CarbonIndicatorSelected'
+    elseif entry.is_partial then
+      indicator_hl = 'CarbonIndicatorPartial'
+    end
+
+    if entry.is_selected or entry.is_partial then
+      indicator = settings.indicators.select
+    end
+
     if entry.is_directory then
-      highlight = 'CarbonDir'
+      path_hl = 'CarbonDir'
 
       if entry.is_open then
         indicator = settings.indicators.collapse
@@ -97,16 +110,8 @@ function buffer.entries_to_lines()
     end
 
     lines[#lines + 1] = indent .. indicator .. ' ' .. entry.name
-    hls[#hls + 1] = { highlight, lnum - 1, #indent + #indicator, -1 }
-
-    if entry.is_directory or entry.is_selected then
-      hls[#hls + 1] = {
-        'CarbonIndicator',
-        lnum - 1,
-        #indent,
-        #indent + #indicator,
-      }
-    end
+    hls[#hls + 1] = { path_hl, lnum - 1, #indent + #indicator, -1 }
+    hls[#hls + 1] = { indicator_hl, lnum - 1, #indent, #indent + #indicator }
   end
 
   return { lines, hls }

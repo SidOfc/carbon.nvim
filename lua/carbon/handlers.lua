@@ -41,4 +41,27 @@ function handlers.vsplit()
   end
 end
 
+function handlers.toggle()
+  local entry = buffer.cursor_entry()
+  local parent = entry.parent()
+
+  entry.is_partial = false
+  entry.is_selected = not entry.is_selected
+
+  entry.set_children('is_partial', false, true)
+  entry.set_children('is_selected', entry.is_selected, true)
+
+  while parent do
+    parent.is_partial = parent.has_selected_or_partial_children()
+
+    if not entry.is_selected then
+      parent.is_selected = false
+    end
+
+    parent = parent.parent()
+  end
+
+  buffer.draw()
+end
+
 return handlers
