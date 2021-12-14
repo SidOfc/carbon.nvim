@@ -1,24 +1,44 @@
-local util = require('carbon.util')
 local buffer = require('carbon.buffer')
+local actions = require('carbon.actions')
 local settings = require('carbon.settings')
 local carbon = {}
 
 function carbon.setup(user_settings)
-  settings.extend(user_settings)
+  local next = vim.tbl_deep_extend('force', settings, user_settings or {})
+
+  for setting, value in pairs(next) do
+    settings[setting] = value
+  end
 
   return carbon
 end
 
-function carbon.initialize(user_settings)
-  settings.extend(user_settings)
+function carbon.initialize()
+  if vim.g.carbon_loaded then
+    return
+  end
 
-  if util.has('vim_starting') then
+  vim.g.carbon_loaded = true
+
+  for group, properties in pairs(settings.highlights) do
+    local command = 'highlight ' .. group
+
+    for property, value in pairs(properties) do
+      command = command .. ' ' .. property .. '=' .. value
+    end
+
+    vim.cmd(command)
+  end
+
+  vim.cmd('command Carbon call carbon#action("explore")')
+
+  if vim.fn.has('vim_starting') == 1 then
     if settings.disable_netrw then
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
     end
 
-    if settings.auto_open and util.is_directory(util.expand('%')) then
+    if settings.auto_open and vim.fn.isdirectory(vim.fn.expand('%:p')) == 1 then
       local current_buffer = vim.api.nvim_win_get_buf(0)
 
       buffer.show()
@@ -26,13 +46,13 @@ function carbon.initialize(user_settings)
     end
   end
 
-  for group, properties in pairs(settings.highlight_groups) do
-    util.highlight(group, properties)
-  end
-
-  vim.cmd('command Carbon call carbon#buffer#show()')
-
   return carbon
+end
+
+function carbon.action(name)
+  if type(actions[name]) == 'function' then
+    actions[name]()
+  end
 end
 
 return carbon

@@ -7,3 +7,7 @@ endfunction
 function! carbon#initialize(...)
   return call(s:carbon.initialize, a:000)
 endfunction
+
+function! carbon#action(...)
+  return call(s:carbon.action, a:000)
+endfunction

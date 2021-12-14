@@ -1,9 +1,9 @@
-local util = require('carbon.util')
+local entry = require('carbon.entry')
 local settings = require('carbon.settings')
 local buffer = {}
 
 local current = nil
-local root = util.entry(vim.fn.getcwd(), -1)
+local root = entry:new(vim.fn.getcwd())
 local namespace = vim.api.nvim_create_namespace('carbon')
 
 function buffer.current()
@@ -13,43 +13,20 @@ function buffer.current()
 
   current = vim.api.nvim_create_buf(false, true)
 
-  buffer.set('name', vim.fn.fnamemodify(vim.fn.getcwd(), ':t'))
-  buffer.set('swapfile', false)
-  buffer.set('filetype', 'carbon')
-  buffer.set('bufhidden', 'hide')
-  buffer.set('buftype', 'nofile')
-  buffer.set('modifiable', false)
+  vim.api.nvim_buf_set_name(current, 'carbon')
+  vim.api.nvim_buf_set_option(current, 'swapfile', false)
+  vim.api.nvim_buf_set_option(current, 'filetype', 'carbon')
+  vim.api.nvim_buf_set_option(current, 'bufhidden', 'hide')
+  vim.api.nvim_buf_set_option(current, 'buftype', 'nofile')
+  vim.api.nvim_buf_set_option(current, 'modifiable', false)
 
-  if settings.create_mappings then
-    buffer.map('n', 'm', '<Plug>(carbon-move)')
-    buffer.map('n', 'c', '<Plug>(carbon-create)')
-    buffer.map('n', 'd', '<Plug>(carbon-destroy)')
-    buffer.map('n', '<Cr>', '<Plug>(carbon-cursor)')
-    buffer.map('n', '<C-x>', '<Plug>(carbon-hsplit)')
-    buffer.map('n', '<C-v>', '<Plug>(carbon-vsplit)')
-    buffer.map('n', '<Tab>', '<Plug>(carbon-toggle-down)')
-    buffer.map('n', '<S-Tab>', '<Plug>(carbon-toggle-up)')
+  if type(settings.mappings) == 'table' then
+    for lhs, rhs in pairs(settings.mappings) do
+      vim.api.nvim_buf_set_keymap(current, 'n', lhs, rhs, { silent = true })
+    end
   end
 
   return current
-end
-
-function buffer.set(option, value)
-  if option == 'name' then
-    vim.api.nvim_buf_set_name(buffer.current(), value)
-  else
-    vim.api.nvim_buf_set_option(buffer.current(), option, value)
-  end
-
-  return buffer
-end
-
-function buffer.map(mode, lhs, rhs, options)
-  options = vim.tbl_deep_extend('force', { silent = true }, options or {})
-
-  vim.api.nvim_buf_set_keymap(buffer.current(), mode, lhs, rhs, options)
-
-  return buffer
 end
 
 function buffer.show()
@@ -60,61 +37,112 @@ function buffer.show()
 end
 
 function buffer.draw()
-  local buffer_handle = buffer.current()
-  local lines, highlights = unpack(buffer.entries_to_lines())
+  local current = buffer.current()
+  local lines = {}
+  local hls = {}
 
-  buffer.set('modifiable', true)
-  vim.api.nvim_buf_set_lines(buffer_handle, 0, -1, 1, lines)
-  buffer.set('modifiable', false)
-  vim.api.nvim_buf_clear_namespace(buffer_handle, namespace, 0, -1)
+  for lnum, data in ipairs(buffer.lines()) do
+    lines[#lines + 1] = data.line
 
-  for _, highlight in ipairs(highlights) do
-    vim.api.nvim_buf_add_highlight(buffer_handle, namespace, unpack(highlight))
+    for _, hl in ipairs(data.highlights) do
+      hls[#hls + 1] = { hl[1], lnum - 1, hl[2], hl[3] }
+    end
+  end
+
+  vim.api.nvim_buf_set_option(current, 'modifiable', true)
+  vim.api.nvim_buf_set_lines(current, 0, -1, 1, lines)
+  vim.api.nvim_buf_set_option(current, 'modifiable', false)
+  vim.api.nvim_buf_clear_namespace(current, namespace, 0, -1)
+
+  for _, highlight in ipairs(hls) do
+    vim.api.nvim_buf_add_highlight(current, namespace, unpack(highlight))
   end
 
   return buffer
 end
 
-function buffer.cursor_entry()
-  return root.entries()[vim.fn.line('.')]
+function buffer.entry()
+  return buffer.lines()[vim.fn.line('.')].entry
 end
 
-function buffer.entries_to_lines()
-  local lines = {}
-  local hls = {}
+function buffer.lines(entry, lines, depth)
+  entry = entry or root
+  lines = lines or {}
+  depth = depth or 0
 
-  for lnum, entry in ipairs(root.entries()) do
-    local path_hl = 'CarbonFile'
-    local indicator_hl = 'CarbonIndicator'
-    local indicator = settings.indicators.default
-    local indent = string.rep('  ', entry.depth)
+  for _, child in ipairs(entry:children()) do
+    local tmp = child
+    local hls = {}
+    local path = {}
+    local indent = string.rep('  ', depth)
+    local is_empty = true
+    local indicator = ' '
+    local path_suffix = ''
 
-    if entry.is_selected then
-      indicator_hl = 'CarbonIndicatorSelected'
-    elseif entry.is_partial then
-      indicator_hl = 'CarbonIndicatorPartial'
+    while tmp.is_directory and #tmp:children() == 1 do
+      path[#path + 1] = tmp.name
+      tmp = tmp:children()[1]
     end
 
-    if entry.is_selected or entry.is_partial then
-      indicator = settings.indicators.select
+    if tmp.is_selected or tmp.is_partial then
+      indicator = settings.indicators.selected
     end
 
-    if entry.is_directory then
-      path_hl = 'CarbonDir'
+    if tmp.is_directory then
+      is_empty = #tmp:children() == 0
+      path_suffix = '/'
 
-      if entry.is_open then
-        indicator = settings.indicators.collapse
-      else
-        indicator = settings.indicators.expand
+      if not is_empty and tmp.is_open then
+        indicator = settings.indicators.expanded
+      elseif not is_empty then
+        indicator = settings.indicators.collapsed
       end
     end
 
-    lines[#lines + 1] = indent .. indicator .. ' ' .. entry.name
-    hls[#hls + 1] = { path_hl, lnum - 1, #indent + #indicator, -1 }
-    hls[#hls + 1] = { indicator_hl, lnum - 1, #indent, #indent + #indicator }
+    local dir_path = table.concat(path, '/')
+    local full_path = tmp.name .. path_suffix
+    local indent_end = #indent
+    local path_start = indent_end + #indicator + 1
+
+    if path[1] then
+      full_path = dir_path .. '/' .. full_path
+    end
+
+    if not is_empty or tmp.is_selected or tmp.is_partial then
+      local group = 'CarbonIndicator'
+
+      if tmp.is_selected then
+        group = 'CarbonIndicatorSelected'
+      elseif tmp.is_partial then
+        group = 'CarbonIndicatorPartial'
+      end
+
+      hls[#hls + 1] = { group, indent_end, path_start - 1 }
+    end
+
+    if tmp.is_directory then
+      hls[#hls + 1] = { 'CarbonDir', path_start, -1 }
+    elseif path[1] then
+      local dir_end = path_start + #dir_path + 1
+
+      hls[#hls + 1] = { 'CarbonDir', path_start, dir_end }
+      hls[#hls + 1] = { 'CarbonFile', dir_end, -1 }
+    else
+      hls[#hls + 1] = { 'CarbonFile', path_start, -1 }
+    end
+
+    lines[#lines + 1] = {
+      entry = tmp,
+      line = indent .. indicator .. ' ' .. full_path,
+      highlights = hls,
+    }
+
+    if tmp.is_directory and tmp.is_open then
+      buffer.lines(tmp, lines, depth + 1)
+    end
   end
 
-  return { lines, hls }
+  return lines
 end
 
 return buffer

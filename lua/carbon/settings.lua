@@ -1,14 +1,19 @@
-local util = require('carbon.util')
 local settings = {
   auto_open = true,
   disable_netrw = true,
-  create_mappings = true,
-  indicators = util.ternary(
-    util.has('multi_byte'),
-    { default = ' ', select = '•', expand = '▸', collapse = '▾' },
-    { default = ' ', select = '*', expand = '+', collapse = '-' }
-  ),
-  highlight_groups = {
+  mappings = {
+    ['<cr>'] = ':call carbon#action("edit")<cr>',
+    ['<c-x>'] = ':call carbon#action("split")<cr>',
+    ['<c-v>'] = ':call carbon#action("vsplit")<cr>',
+    ['<tab>'] = ':call carbon#action("select")<cr>j',
+    ['<s-tab>'] = ':call carbon#action("select")<cr>k',
+  },
+  indicators = {
+    selected = '*',
+    expanded = '-',
+    collapsed = '+',
+  },
+  highlights = {
     CarbonDir = {
       ctermfg = 'DarkBlue',
       guifg = '#00aaff',
@@ -59,6 +64,14 @@ local settings = {
     },
   },
 }
+
+if vim.fn.has('multi_byte') == 1 then
+  settings.indicators = {
+    selected = '•',
+    expanded = '▾',
+    collapsed = '▸',
+  }
+end
 
 function settings.extend(user_settings)
   local next = vim.tbl_deep_extend('force', settings, user_settings or {})
