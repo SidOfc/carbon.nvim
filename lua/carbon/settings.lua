@@ -1,6 +1,7 @@
 local settings = {
   auto_open = true,
   disable_netrw = true,
+  compress = true,
   exclude = { '.git' },
   actions = {
     edit = '<cr>',

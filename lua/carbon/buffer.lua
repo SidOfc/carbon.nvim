@@ -87,9 +87,11 @@ function buffer.lines(entry, lines, depth)
     local indicator = ' '
     local path_suffix = ''
 
-    while tmp.is_directory and #tmp:children() == 1 do
-      path[#path + 1] = tmp.name
-      tmp = tmp:children()[1]
+    if settings.compress then
+      while tmp.is_directory and #tmp:children() == 1 do
+        path[#path + 1] = tmp.name
+        tmp = tmp:children()[1]
+      end
     end
 
     if tmp.is_selected or tmp.is_partial then
