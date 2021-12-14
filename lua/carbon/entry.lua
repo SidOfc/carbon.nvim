@@ -1,3 +1,4 @@
+local settings = require('carbon.settings')
 local entry = {}
 local children = {}
 local empty_table = {}
@@ -32,6 +33,18 @@ function entry:get_children()
   local entries = vim.tbl_map(function(name)
     return entry:new(self.path .. '/' .. name, self)
   end, vim.fn.readdir(self.path))
+
+  if type(settings.exclude) == 'table' then
+    entries = vim.tbl_filter(function(entry)
+      for _, pattern in ipairs(settings.exclude) do
+        if string.find(entry.path, pattern) then
+          return false
+        end
+      end
+
+      return true
+    end, entries)
+  end
 
   table.sort(entries, function(a, b)
     if a.is_directory and b.is_directory then

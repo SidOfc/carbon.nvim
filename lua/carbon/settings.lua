@@ -1,6 +1,7 @@
 local settings = {
   auto_open = true,
   disable_netrw = true,
+  exclude = { '.git' },
   actions = {
     edit = '<cr>',
     split = '<c-x>',
