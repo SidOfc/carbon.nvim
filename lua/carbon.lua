@@ -1,10 +1,11 @@
+local util = require('carbon.util')
 local buffer = require('carbon.buffer')
 local actions = require('carbon.actions')
 local settings = require('carbon.settings')
 local carbon = {}
 
 function carbon.setup(user_settings)
-  local next = vim.tbl_deep_extend('force', settings, user_settings or {})
+  local next = vim.tbl_deep_extend('force', settings, user_settings)
 
   for setting, value in pairs(next) do
     settings[setting] = value
@@ -14,23 +15,17 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
-  if vim.g.carbon_loaded then
-    return
-  end
-
-  vim.g.carbon_loaded = true
-
-  for group, properties in pairs(settings.highlights) do
-    local command = 'highlight ' .. group
-
-    for property, value in pairs(properties) do
-      command = command .. ' ' .. property .. '=' .. value
-    end
-
-    vim.cmd(command)
-  end
-
   vim.cmd('command Carbon call carbon#action("explore")')
+
+  for action, _ in pairs(settings.actions) do
+    util.map({ util.plug_name(action), util.plug_call(action) })
+  end
+
+  if type(settings.highlights) == 'table' then
+    for group, properties in pairs(settings.highlights) do
+      util.highlight(group, properties)
+    end
+  end
 
   if vim.fn.has('vim_starting') == 1 then
     if settings.disable_netrw then

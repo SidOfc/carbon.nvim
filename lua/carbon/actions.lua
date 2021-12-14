@@ -29,6 +29,10 @@ function actions.vsplit()
   end
 end
 
+function actions.explore()
+  buffer.show()
+end
+
 function actions.select()
   local entry = buffer.entry()
   local parent = entry.parent
@@ -52,8 +56,14 @@ function actions.select()
   buffer.draw()
 end
 
-function actions.explore()
-  buffer.show()
+function actions.select_up()
+  actions.select()
+  vim.fn.cursor(vim.fn.line('.') - 1, 1)
+end
+
+function actions.select_down()
+  actions.select()
+  vim.fn.cursor(vim.fn.line('.') + 1, 1)
 end
 
 return actions

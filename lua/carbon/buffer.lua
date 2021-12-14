@@ -1,3 +1,4 @@
+local util = require('carbon.util')
 local entry = require('carbon.entry')
 local settings = require('carbon.settings')
 local buffer = {}
@@ -20,9 +21,16 @@ function buffer.current()
   vim.api.nvim_buf_set_option(current, 'buftype', 'nofile')
   vim.api.nvim_buf_set_option(current, 'modifiable', false)
 
-  if type(settings.mappings) == 'table' then
-    for lhs, rhs in pairs(settings.mappings) do
-      vim.api.nvim_buf_set_keymap(current, 'n', lhs, rhs, { silent = true })
+  if type(settings.actions) == 'table' then
+    for action, mapping in pairs(settings.actions) do
+      if mapping then
+        util.map({
+          mapping,
+          util.plug_name(action),
+          buffer = current,
+          silent = true,
+        })
+      end
     end
   end
 

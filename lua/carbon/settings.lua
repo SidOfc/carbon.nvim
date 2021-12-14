@@ -1,12 +1,13 @@
 local settings = {
   auto_open = true,
   disable_netrw = true,
-  mappings = {
-    ['<cr>'] = ':call carbon#action("edit")<cr>',
-    ['<c-x>'] = ':call carbon#action("split")<cr>',
-    ['<c-v>'] = ':call carbon#action("vsplit")<cr>',
-    ['<tab>'] = ':call carbon#action("select")<cr>j',
-    ['<s-tab>'] = ':call carbon#action("select")<cr>k',
+  actions = {
+    edit = '<cr>',
+    split = '<c-x>',
+    vsplit = '<c-v>',
+    select = '<space>',
+    select_up = '<s-tab>',
+    select_down = '<tab>',
   },
   indicators = {
     selected = '*',
