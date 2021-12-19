@@ -4,13 +4,20 @@ local children = {}
 local empty_table = {}
 
 function entry:new(path, parent)
+  local resolved = vim.fn.resolve(path)
   local instance = setmetatable({
     path = path,
     name = vim.fn.fnamemodify(path, ':t'),
     parent = parent,
+    is_symlink = false,
     is_selected = parent and parent.is_selected,
     is_directory = vim.fn.isdirectory(path) == 1,
+    is_executable = vim.fn.executable(path) == 1,
   }, self)
+
+  if resolved ~= path then
+    instance.is_symlink = vim.fn.getftime(resolved) == -1 and 2 or 1
+  end
 
   self.__index = self
 
