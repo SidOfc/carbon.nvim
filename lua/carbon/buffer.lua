@@ -7,6 +7,10 @@ local current = nil
 local root = entry:new(vim.fn.getcwd())
 local namespace = vim.api.nvim_create_namespace('carbon')
 
+entry:set_watch_handler(function(path, action)
+  buffer.draw()
+end)
+
 function buffer.current()
   if current and vim.api.nvim_buf_is_loaded(current) then
     return current

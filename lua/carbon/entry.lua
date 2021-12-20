@@ -1,7 +1,15 @@
 local settings = require('carbon.settings')
 local entry = {}
+
+local entries = {}
+local watchers = {}
 local children = {}
 local empty_table = {}
+local watch_handler = nil
+
+function entry:set_watch_handler(handler)
+  watch_handler = handler
+end
 
 function entry:new(path, parent)
   local resolved = vim.fn.resolve(path)
@@ -15,13 +23,96 @@ function entry:new(path, parent)
     is_executable = vim.fn.executable(path) == 1,
   }, self)
 
+  self.__index = self
+  entries[path] = instance
+
   if resolved ~= path then
     instance.is_symlink = vim.fn.getftime(resolved) == -1 and 2 or 1
   end
 
-  self.__index = self
-
   return instance
+end
+
+function entry:destroy()
+  entries[self.path] = nil
+  children[self.path] = nil
+
+  for path, path_children in pairs(children) do
+    children[path] = vim.tbl_filter(function(entry)
+      return entry.path ~= self.path
+    end, children[path])
+  end
+
+  if self:has_children() then
+    for _, child in ipairs(self:children()) do
+      child:destroy()
+    end
+  end
+end
+
+function entry:watch(options)
+  if self.is_directory and not watchers[self.path] then
+    watchers[self.path] = vim.loop.new_fs_event()
+
+    watchers[self.path]:start(
+      self.path,
+      options or {},
+      vim.schedule_wrap(function(error, filename, status)
+        local full_path = self.path
+        local current_time = os.time()
+
+        if filename ~= vim.fn.fnamemodify(self.path, ':t') then
+          full_path = self.path .. '/' .. filename
+        end
+
+        local is_entry = entries[full_path]
+        local path_modified = vim.fn.getftime(full_path)
+        local path_exists = path_modified ~= -1
+
+        if is_entry and not path_exists then
+          path_modified = current_time
+        end
+
+        if path_modified ~= current_time then
+          return
+        end
+
+        if status.rename and path_exists and not is_entry then
+          local parent = entries[vim.fn.fnamemodify(full_path, ':h')]
+
+          if parent and parent:has_children() then
+            table.insert(children[parent.path], entry:new(full_path, parent))
+            table.sort(children[parent.path], function(a, b)
+              if a.is_directory and b.is_directory then
+                return string.lower(a.name) < string.lower(b.name)
+              elseif a.is_directory then
+                return true
+              elseif b.is_directory then
+                return false
+              end
+
+              return string.lower(a.name) < string.lower(b.name)
+            end)
+          end
+
+          watch_handler(full_path, 'create')
+        elseif status.rename and not path_exists and is_entry then
+          entries[full_path]:destroy()
+          watch_handler(full_path, 'destroy')
+        elseif status.change then
+          watch_handler(full_path, 'change')
+        end
+      end)
+    )
+  end
+
+  if self:has_children() then
+    for _, child in ipairs(self:children()) do
+      if child.is_directory then
+        child:watch(options)
+      end
+    end
+  end
 end
 
 function entry:children()
@@ -64,6 +155,8 @@ function entry:get_children()
 
     return string.lower(a.name) < string.lower(b.name)
   end)
+
+  self:watch()
 
   return entries
 end
