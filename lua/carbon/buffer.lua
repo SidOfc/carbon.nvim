@@ -3,12 +3,15 @@ local entry = require('carbon.entry')
 local settings = require('carbon.settings')
 local buffer = {}
 
-local current = nil
 local root = entry:new(vim.fn.getcwd())
+local current = nil
+local timer_id = -1
 local namespace = vim.api.nvim_create_namespace('carbon')
 
 entry:set_watch_handler(function(path, action)
-  buffer.draw()
+  vim.fn.timer_stop(timer_id)
+
+  timer_id = vim.fn.timer_start(16, buffer.draw)
 end)
 
 function buffer.current()
