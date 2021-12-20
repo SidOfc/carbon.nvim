@@ -96,16 +96,21 @@ function entry:watch(options)
 
               return string.lower(a.name) < string.lower(b.name)
             end)
-          else
-            print(parent, 'does not exist')
           end
 
-          watch_handler(full_path, 'create')
+          if watch_handler then
+            watch_handler(full_path, 'create')
+          end
         elseif status.rename and not path_exists and is_entry then
           entries[full_path]:destroy()
-          watch_handler(full_path, 'destroy')
+
+          if watch_handler then
+            watch_handler(full_path, 'destroy')
+          end
         elseif status.change then
-          watch_handler(full_path, 'change')
+          if watch_handler then
+            watch_handler(full_path, 'change')
+          end
         end
       end)
     )
