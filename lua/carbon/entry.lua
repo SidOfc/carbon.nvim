@@ -34,6 +34,9 @@ function entry:new(path, parent)
 end
 
 function entry:destroy()
+  watchers[self.path]:stop()
+
+  watchers[self.path] = nil
   entries[self.path] = nil
   children[self.path] = nil
 
@@ -93,6 +96,8 @@ function entry:watch(options)
 
               return string.lower(a.name) < string.lower(b.name)
             end)
+          else
+            print(parent, 'does not exist')
           end
 
           watch_handler(full_path, 'create')
