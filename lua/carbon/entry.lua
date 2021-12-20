@@ -34,7 +34,9 @@ function entry:new(path, parent)
 end
 
 function entry:destroy()
-  watchers[self.path]:stop()
+  if watchers[self.path] then
+    watchers[self.path]:stop()
+  end
 
   watchers[self.path] = nil
   entries[self.path] = nil
