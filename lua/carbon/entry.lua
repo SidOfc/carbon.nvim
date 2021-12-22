@@ -147,7 +147,7 @@ function entry:get_children()
   if type(settings.exclude) == 'table' then
     entries = vim.tbl_filter(function(entry)
       for _, pattern in ipairs(settings.exclude) do
-        if string.find(entry.path, pattern) then
+        if string.find(vim.fn.fnamemodify(entry.path, ':.'), pattern) then
           return false
         end
       end
