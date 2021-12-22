@@ -137,11 +137,14 @@ function buffer.lines(entry, lines, depth)
       hls[#hls + 1] = { group, indent_end, path_start - 1 }
     end
 
+    local file_group = 'CarbonFile'
     if tmp.is_executable then
-      hls[#hls + 1] = { 'CarbonExe', path_start, -1 }
+      file_group = 'CarbonExe'
     elseif tmp.is_symlink == 1 then
-      hls[#hls + 1] = { 'CarbonSymlink', path_start, -1 }
-    elseif tmp.is_symlink == 2 then
+      file_group = 'CarbonSymlink'
+    end
+
+    if tmp.is_symlink == 2 then
       hls[#hls + 1] = { 'CarbonBrokenSymlink', path_start, -1 }
     elseif tmp.is_directory then
       hls[#hls + 1] = { 'CarbonDir', path_start, -1 }
@@ -149,9 +152,9 @@ function buffer.lines(entry, lines, depth)
       local dir_end = path_start + #dir_path + 1
 
       hls[#hls + 1] = { 'CarbonDir', path_start, dir_end }
-      hls[#hls + 1] = { 'CarbonFile', dir_end, -1 }
+      hls[#hls + 1] = { file_group, dir_end, -1 }
     else
-      hls[#hls + 1] = { 'CarbonFile', path_start, -1 }
+      hls[#hls + 1] = { file_group, path_start, -1 }
     end
 
     lines[#lines + 1] = {
