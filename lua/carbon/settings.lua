@@ -2,7 +2,7 @@ local settings = {
   auto_open = true,
   disable_netrw = true,
   compress = true,
-  exclude = { '.git' },
+  exclude = { '%.git' },
   actions = {
     edit = '<cr>',
     split = '<c-x>',
@@ -10,6 +10,7 @@ local settings = {
     select = '<space>',
     select_up = '<s-tab>',
     select_down = '<tab>',
+    refresh = 'r',
   },
   indicators = {
     selected = '*',

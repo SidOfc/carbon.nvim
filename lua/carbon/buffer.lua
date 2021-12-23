@@ -1,32 +1,36 @@
 local util = require('carbon.util')
 local entry = require('carbon.entry')
+local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
-local buffer = {}
+local buffer = {
+  data = {
+    root = entry:new(vim.fn.getcwd()),
+    current = -1,
+    namespace = vim.api.nvim_create_namespace('carbon'),
+    status_timer = -1,
+  },
+}
 
-local root = entry:new(vim.fn.getcwd())
-local current = nil
-local timer_id = -1
-local namespace = vim.api.nvim_create_namespace('carbon')
+watcher.register(buffer.data.root.path)
+watcher.on({ 'rename', 'change' }, function()
+  vim.fn.timer_stop(buffer.data.status_timer)
 
-entry:set_watch_handler(function(path, action)
-  vim.fn.timer_stop(timer_id)
-
-  timer_id = vim.fn.timer_start(16, buffer.draw)
+  buffer.data.status_timer = vim.fn.timer_start(50, buffer.refresh)
 end)
 
 function buffer.current()
-  if current and vim.api.nvim_buf_is_loaded(current) then
-    return current
+  if vim.api.nvim_buf_is_loaded(buffer.data.current) then
+    return buffer.data.current
   end
 
-  current = vim.api.nvim_create_buf(false, true)
+  buffer.data.current = vim.api.nvim_create_buf(false, true)
 
-  vim.api.nvim_buf_set_name(current, 'carbon')
-  vim.api.nvim_buf_set_option(current, 'swapfile', false)
-  vim.api.nvim_buf_set_option(current, 'filetype', 'carbon')
-  vim.api.nvim_buf_set_option(current, 'bufhidden', 'hide')
-  vim.api.nvim_buf_set_option(current, 'buftype', 'nofile')
-  vim.api.nvim_buf_set_option(current, 'modifiable', false)
+  vim.api.nvim_buf_set_name(buffer.data.current, 'carbon')
+  vim.api.nvim_buf_set_option(buffer.data.current, 'swapfile', false)
+  vim.api.nvim_buf_set_option(buffer.data.current, 'filetype', 'carbon')
+  vim.api.nvim_buf_set_option(buffer.data.current, 'bufhidden', 'hide')
+  vim.api.nvim_buf_set_option(buffer.data.current, 'buftype', 'nofile')
+  vim.api.nvim_buf_set_option(buffer.data.current, 'modifiable', false)
 
   if type(settings.actions) == 'table' then
     for action, mapping in pairs(settings.actions) do
@@ -34,21 +38,19 @@ function buffer.current()
         util.map({
           mapping,
           util.plug_name(action),
-          buffer = current,
+          buffer = buffer.data.current,
           silent = true,
         })
       end
     end
   end
 
-  return current
+  return buffer.data.current
 end
 
 function buffer.show()
   vim.api.nvim_win_set_buf(0, buffer.current())
   buffer.draw()
-
-  return buffer
 end
 
 function buffer.draw()
@@ -67,13 +69,15 @@ function buffer.draw()
   vim.api.nvim_buf_set_option(current, 'modifiable', true)
   vim.api.nvim_buf_set_lines(current, 0, -1, 1, lines)
   vim.api.nvim_buf_set_option(current, 'modifiable', false)
-  vim.api.nvim_buf_clear_namespace(current, namespace, 0, -1)
+  vim.api.nvim_buf_clear_namespace(current, buffer.data.namespace, 0, -1)
 
   for _, highlight in ipairs(hls) do
-    vim.api.nvim_buf_add_highlight(current, namespace, unpack(highlight))
+    vim.api.nvim_buf_add_highlight(
+      current,
+      buffer.data.namespace,
+      unpack(highlight)
+    )
   end
-
-  return buffer
 end
 
 function buffer.entry()
@@ -81,7 +85,7 @@ function buffer.entry()
 end
 
 function buffer.lines(entry, lines, depth)
-  entry = entry or root
+  entry = entry or buffer.data.root
   lines = lines or {}
   depth = depth or 0
 
@@ -169,6 +173,11 @@ function buffer.lines(entry, lines, depth)
   end
 
   return lines
+end
+
+function buffer.refresh()
+  buffer.data.root:refresh()
+  buffer.draw()
 end
 
 return buffer

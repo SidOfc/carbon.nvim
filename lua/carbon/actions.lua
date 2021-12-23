@@ -66,4 +66,8 @@ function actions.select_down()
   vim.fn.cursor(vim.fn.line('.') + 1, 1)
 end
 
+function actions.refresh()
+  buffer.refresh()
+end
+
 return actions
