@@ -113,6 +113,26 @@ function entry:update_children(key, value, recursive)
   end
 end
 
+function entry:toggle_selected()
+  local parent = self.parent
+
+  self.is_partial = false
+  self.is_selected = not self.is_selected
+
+  self:update_children('is_partial', false, true)
+  self:update_children('is_selected', self.is_selected, true)
+
+  while parent do
+    parent.is_partial = parent:has_selection()
+
+    if not self.is_selected then
+      parent.is_selected = false
+    end
+
+    parent = parent.parent
+  end
+end
+
 function entry:has_selection()
   if self:has_children() then
     for _, child in ipairs(self:children()) do

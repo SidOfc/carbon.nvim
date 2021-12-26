@@ -35,24 +35,8 @@ end
 
 function actions.select()
   local entry = buffer.entry()
-  local parent = entry.parent
 
-  entry.is_partial = false
-  entry.is_selected = not entry.is_selected
-
-  entry:update_children('is_partial', false, true)
-  entry:update_children('is_selected', entry.is_selected, true)
-
-  while parent do
-    parent.is_partial = parent:has_selection()
-
-    if not entry.is_selected then
-      parent.is_selected = false
-    end
-
-    parent = parent.parent
-  end
-
+  entry:toggle_selected()
   buffer.draw()
 end
 
@@ -64,10 +48,6 @@ end
 function actions.select_down()
   actions.select()
   vim.fn.cursor(vim.fn.line('.') + 1, 1)
-end
-
-function actions.refresh()
-  buffer.refresh()
 end
 
 return actions
