@@ -2,6 +2,7 @@ local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local entry = { data = { children = {} } }
+entry.__index = entry
 
 function entry:new(path, parent)
   local resolved = vim.fn.resolve(path)
@@ -15,8 +16,6 @@ function entry:new(path, parent)
     is_directory = vim.fn.isdirectory(path) == 1,
     is_executable = vim.fn.executable(path) == 1,
   }, self)
-
-  self.__index = self
 
   if resolved ~= path then
     instance.is_symlink = vim.fn.getftime(resolved) == -1 and 2 or 1

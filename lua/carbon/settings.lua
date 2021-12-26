@@ -1,4 +1,4 @@
-local settings = {
+return {
   auto_open = true,
   disable_netrw = true,
   compress = true,
@@ -10,7 +10,6 @@ local settings = {
     select = '<space>',
     select_up = '<s-tab>',
     select_down = '<tab>',
-    refresh = 'r',
   },
   indicators = {
     selected = '*',
@@ -68,23 +67,3 @@ local settings = {
     },
   },
 }
-
-if vim.fn.has('multi_byte') == 1 then
-  settings.indicators = {
-    selected = '•',
-    expanded = '▾',
-    collapsed = '▸',
-  }
-end
-
-function settings.extend(user_settings)
-  local next = vim.tbl_deep_extend('force', settings, user_settings or {})
-
-  for setting, value in pairs(next) do
-    settings[setting] = value
-  end
-
-  return next
-end
-
-return settings
