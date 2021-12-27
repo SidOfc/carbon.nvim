@@ -143,4 +143,22 @@ function entry:has_selection()
   end
 end
 
+function entry:get_selection()
+  local selection = {}
+
+  if self:has_selection() then
+    for _, child in ipairs(self:children()) do
+      if child.is_selected then
+        selection[#selection + 1] = child
+      elseif child.is_partial and child.is_directory then
+        for _, selected in ipairs(child:get_selection()) do
+          selection[#selection + 1] = selected
+        end
+      end
+    end
+  end
+
+  return selection
+end
+
 return entry
