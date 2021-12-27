@@ -1,7 +1,8 @@
 return {
+  compress = true,
   auto_open = true,
   disable_netrw = true,
-  compress = true,
+  sync_delay = 30,
   exclude = { '%.git' },
   actions = {
     edit = '<cr>',
