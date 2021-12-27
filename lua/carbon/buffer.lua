@@ -74,12 +74,8 @@ function buffer.draw()
   vim.api.nvim_buf_set_option(current, 'modifiable', false)
   vim.api.nvim_buf_clear_namespace(current, buffer.data.namespace, 0, -1)
 
-  for _, highlight in ipairs(hls) do
-    vim.api.nvim_buf_add_highlight(
-      current,
-      buffer.data.namespace,
-      unpack(highlight)
-    )
+  for _, hl in ipairs(hls) do
+    vim.api.nvim_buf_add_highlight(current, buffer.data.namespace, unpack(hl))
   end
 end
 
