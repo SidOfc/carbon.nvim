@@ -12,10 +12,13 @@ local buffer = {
 }
 
 watcher.register(buffer.data.root.path)
-watcher.on({ 'rename', 'change' }, function()
+watcher.on('rename', function(path, filename)
   vim.fn.timer_stop(buffer.data.status_timer)
 
-  buffer.data.status_timer = vim.fn.timer_start(50, buffer.synchronize)
+  buffer.data.status_timer = vim.fn.timer_start(
+    settings.sync_delay,
+    buffer.synchronize
+  )
 end)
 
 function buffer.current()
