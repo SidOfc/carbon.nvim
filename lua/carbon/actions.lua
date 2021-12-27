@@ -7,7 +7,7 @@ function actions.edit()
   if entry.is_directory then
     entry.is_open = not entry.is_open
 
-    buffer.draw()
+    buffer.render()
   else
     vim.cmd('edit ' .. entry.path)
   end
@@ -37,7 +37,7 @@ function actions.select()
   local entry = buffer.entry()
 
   entry:toggle_selected()
-  buffer.draw()
+  buffer.render()
 end
 
 function actions.select_up()

@@ -53,10 +53,10 @@ end
 
 function buffer.show()
   vim.api.nvim_win_set_buf(0, buffer.current())
-  buffer.draw()
+  buffer.render()
 end
 
-function buffer.draw()
+function buffer.render()
   local current = buffer.current()
   local lines = {}
   local hls = {}
@@ -176,7 +176,7 @@ end
 
 function buffer.synchronize()
   buffer.data.root:synchronize()
-  buffer.draw()
+  buffer.render()
 end
 
 return buffer
