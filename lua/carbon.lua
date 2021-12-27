@@ -17,7 +17,7 @@ end
 function carbon.initialize()
   vim.cmd('command Carbon call carbon#action("explore")')
 
-  for action, _ in pairs(settings.actions) do
+  for action in pairs(actions) do
     util.map({ util.plug_name(action), util.plug_call(action) })
   end
 
