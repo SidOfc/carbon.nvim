@@ -28,7 +28,7 @@ function entry:new(path, parent)
   return instance
 end
 
-function entry:refresh()
+function entry:synchronize()
   if self.is_directory then
     local previous_children = entry.data.children[self.path] or {}
     entry.data.children[self.path] = nil
@@ -48,7 +48,7 @@ function entry:refresh()
         child.is_selected = previous.is_selected
 
         if previous:has_children() then
-          child:refresh()
+          child:synchronize()
         end
       end
     end

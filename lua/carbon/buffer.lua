@@ -15,7 +15,7 @@ watcher.register(buffer.data.root.path)
 watcher.on({ 'rename', 'change' }, function()
   vim.fn.timer_stop(buffer.data.status_timer)
 
-  buffer.data.status_timer = vim.fn.timer_start(50, buffer.refresh)
+  buffer.data.status_timer = vim.fn.timer_start(50, buffer.synchronize)
 end)
 
 function buffer.current()
@@ -175,8 +175,8 @@ function buffer.lines(entry, lines, depth)
   return lines
 end
 
-function buffer.refresh()
-  buffer.data.root:refresh()
+function buffer.synchronize()
+  buffer.data.root:synchronize()
   buffer.draw()
 end
 
