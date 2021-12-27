@@ -52,6 +52,8 @@ function entry:refresh()
         end
       end
     end
+
+    self.is_partial = self:has_selection()
   end
 end
 
