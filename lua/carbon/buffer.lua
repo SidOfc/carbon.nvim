@@ -179,4 +179,49 @@ function buffer.synchronize()
   buffer.render()
 end
 
+function buffer.up()
+  local parent = entry:new(vim.fn.fnamemodify(buffer.data.root.path, ':h'))
+  local children = vim.tbl_map(function(entry)
+    if entry.path == buffer.data.root.path then
+      return buffer.data.root
+    end
+
+    return entry
+  end, parent:get_children())
+
+  entry.data.children[parent.path] = children
+  buffer.data.root.parent = parent
+  buffer.data.root.is_open = true
+  buffer.data.root.is_partial = buffer.data.root:has_selection()
+  buffer.data.root = parent
+end
+
+function buffer.down()
+  local entry = buffer.entry()
+
+  if not entry.is_directory then
+    entry = entry.parent
+  end
+
+  if entry.path ~= buffer.data.root.path then
+    buffer.data.root = entry
+    buffer.data.root.is_partial = buffer.data.root:has_selection()
+    buffer.data.root.is_selected = false
+
+    for path in pairs(entry.data.children) do
+      if not vim.startswith(path, buffer.data.root.path) then
+        watcher.release(path)
+
+        for _, child in ipairs(entry.data.children[path]) do
+          watcher.release(child.path)
+        end
+
+        entry.data.children[path] = nil
+      end
+    end
+
+    watcher.register(entry.path)
+  end
+end
+
 return buffer

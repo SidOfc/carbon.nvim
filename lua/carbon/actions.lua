@@ -1,3 +1,4 @@
+local util = require('carbon.util')
 local buffer = require('carbon.buffer')
 local actions = {}
 
@@ -48,6 +49,18 @@ end
 function actions.select_down()
   actions.select()
   vim.fn.cursor(vim.fn.line('.') + 1, 1)
+end
+
+function actions.up()
+  util.count_times(buffer.up)
+  vim.fn.cursor(1, 1)
+  buffer.render()
+end
+
+function actions.down()
+  util.count_times(buffer.down)
+  vim.fn.cursor(1, 1)
+  buffer.render()
 end
 
 return actions

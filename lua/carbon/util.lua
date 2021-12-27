@@ -35,7 +35,7 @@ function util.plug_name(action)
 end
 
 function util.plug_call(action)
-  return ':call carbon#action("' .. action .. '")<cr>'
+  return ':<C-U>call carbon#action("' .. action .. '")<cr>'
 end
 
 function util.highlight(group, properties)
@@ -48,6 +48,18 @@ function util.highlight(group, properties)
 
     vim.cmd(command)
   end
+end
+
+function util.count_times(callback)
+  local count = vim.v.count1
+
+  while count > 0 do
+    count = count - 1
+
+    callback()
+  end
+
+  return count
 end
 
 return util

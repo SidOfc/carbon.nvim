@@ -5,6 +5,8 @@ return {
   sync_delay = 30,
   exclude = { '%.git' },
   actions = {
+    up = '-',
+    down = '=',
     edit = '<cr>',
     split = '<c-x>',
     vsplit = '<c-v>',
