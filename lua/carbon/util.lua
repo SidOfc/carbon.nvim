@@ -50,16 +50,4 @@ function util.highlight(group, properties)
   end
 end
 
-function util.count_times(callback)
-  local count = vim.v.count1
-
-  while count > 0 do
-    count = count - 1
-
-    callback()
-  end
-
-  return count
-end
-
 return util

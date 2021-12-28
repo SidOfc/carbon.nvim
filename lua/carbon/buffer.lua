@@ -99,7 +99,7 @@ function buffer.lines(entry, lines, depth)
 
     if settings.compress then
       while tmp.is_directory and #tmp:children() == 1 do
-        path[#path + 1] = tmp.name
+        path[#path + 1] = tmp
         tmp = tmp:children()[1]
       end
     end
@@ -119,7 +119,13 @@ function buffer.lines(entry, lines, depth)
       end
     end
 
-    local dir_path = table.concat(path, '/')
+    local dir_path = table.concat(
+      vim.tbl_map(function(entry)
+        return entry.name
+      end, path),
+      '/'
+    )
+
     local full_path = tmp.name .. path_suffix
     local indent_end = #indent
     local path_start = indent_end + #indicator + 1
@@ -164,6 +170,7 @@ function buffer.lines(entry, lines, depth)
       entry = tmp,
       line = indent .. indicator .. ' ' .. full_path,
       highlights = hls,
+      path = path,
     }
 
     if tmp.is_directory and tmp.is_open then
@@ -180,24 +187,33 @@ function buffer.synchronize()
 end
 
 function buffer.up()
-  local parent = entry:new(vim.fn.fnamemodify(buffer.data.root.path, ':h'))
-  local children = vim.tbl_map(function(entry)
-    if entry.path == buffer.data.root.path then
-      return buffer.data.root
-    end
+  local parent = entry:new(
+    vim.fn.fnamemodify(buffer.data.root.path, string.rep(':h', vim.v.count1))
+  )
 
-    return entry
-  end, parent:get_children())
+  if parent.path ~= buffer.data.root.path then
+    local children = vim.tbl_map(function(entry)
+      if entry.path == buffer.data.root.path then
+        return buffer.data.root
+      end
 
-  entry.data.children[parent.path] = children
-  buffer.data.root.parent = parent
-  buffer.data.root.is_open = true
-  buffer.data.root.is_partial = buffer.data.root:has_selection()
-  buffer.data.root = parent
+      return entry
+    end, parent:get_children())
+
+    entry.data.children[parent.path] = children
+    buffer.data.root.parent = parent
+    buffer.data.root.is_open = true
+    buffer.data.root.is_partial = buffer.data.root:has_selection()
+    buffer.data.root = parent
+
+    return true
+  end
 end
 
 function buffer.down()
-  local entry = buffer.entry()
+  local lnum = vim.fn.line('.')
+  local data = buffer.lines()[lnum]
+  local entry = data.path[vim.v.count1] or data.entry
 
   if not entry.is_directory then
     entry = entry.parent
@@ -221,6 +237,8 @@ function buffer.down()
     end
 
     watcher.register(entry.path)
+
+    return true
   end
 end
 

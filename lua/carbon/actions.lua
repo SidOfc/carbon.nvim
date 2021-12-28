@@ -52,15 +52,17 @@ function actions.select_down()
 end
 
 function actions.up()
-  util.count_times(buffer.up)
-  vim.fn.cursor(1, 1)
-  buffer.render()
+  if buffer.up() then
+    vim.fn.cursor(1, 1)
+    buffer.render()
+  end
 end
 
 function actions.down()
-  util.count_times(buffer.down)
-  vim.fn.cursor(1, 1)
-  buffer.render()
+  if buffer.down() then
+    vim.fn.cursor(1, 1)
+    buffer.render()
+  end
 end
 
 return actions
