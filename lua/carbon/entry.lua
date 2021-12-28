@@ -1,7 +1,8 @@
 local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
-local entry = { data = { children = {} } }
+local entry = {}
+local data = { children = {} }
 
 entry.__index = entry
 entry.__lt = function(a, b)
@@ -17,15 +18,15 @@ entry.__lt = function(a, b)
 end
 
 function entry:clean(path)
-  for child_path in pairs(entry.data.children) do
+  for child_path in pairs(data.children) do
     if not vim.startswith(child_path, path) then
       watcher.release(child_path)
 
-      for _, child in ipairs(entry.data.children[child_path]) do
+      for _, child in ipairs(data.children[child_path]) do
         watcher.release(child.path)
       end
 
-      entry.data.children[child_path] = nil
+      data.children[child_path] = nil
     end
   end
 
@@ -72,8 +73,8 @@ end
 
 function entry:synchronize()
   if self.is_directory then
-    local previous_children = entry.data.children[self.path] or {}
-    entry.data.children[self.path] = nil
+    local previous_children = data.children[self.path] or {}
+    data.children[self.path] = nil
 
     for _, previous in ipairs(previous_children) do
       watcher.release(previous.path)
@@ -97,14 +98,18 @@ end
 
 function entry:children()
   if self.is_directory and not self:has_children() then
-    entry.data.children[self.path] = self:get_children()
+    data.children[self.path] = self:get_children()
   end
 
-  return entry.data.children[self.path] or {}
+  return data.children[self.path] or {}
 end
 
 function entry:has_children()
-  return entry.data.children[self.path] and true or false
+  return data.children[self.path] and true or false
+end
+
+function entry:set_children(children)
+  data.children[self.path] = children
 end
 
 function entry:get_children()

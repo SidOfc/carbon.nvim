@@ -1,25 +1,26 @@
-local watcher = { data = { listeners = {} }, events = {} }
+local watcher = {}
+local data = { listeners = {}, events = {} }
 
 function watcher.clear()
-  for path in pairs(watcher.data.listeners) do
+  for path in pairs(data.listeners) do
     watcher.release(path)
   end
 end
 
 function watcher.release(path)
-  if watcher.data.listeners[path] then
-    watcher.data.listeners[path]:stop()
+  if data.listeners[path] then
+    data.listeners[path]:stop()
 
-    watcher.data.listeners[path] = nil
+    data.listeners[path] = nil
   end
 end
 
 function watcher.register(path)
   watcher.release(path)
 
-  watcher.data.listeners[path] = vim.loop.new_fs_event()
+  data.listeners[path] = vim.loop.new_fs_event()
 
-  watcher.data.listeners[path]:start(
+  data.listeners[path]:start(
     path,
     {},
     vim.schedule_wrap(function(error, filename, status)
@@ -33,23 +34,23 @@ function watcher.register(path)
 end
 
 function watcher.emit(event, ...)
-  if type(watcher.events[event]) == 'function' then
-    watcher.events[event](event, ...)
+  if type(data.events[event]) == 'function' then
+    data.events[event](event, ...)
   end
 end
 
 function watcher.on(event, callback)
   if type(event) == 'table' then
     for _, event in ipairs(event) do
-      watcher.events[event] = callback
+      data.events[event] = callback
     end
   else
-    watcher.events[event] = callback
+    data.events[event] = callback
   end
 end
 
 function watcher.off(event)
-  watcher.events[event] = nil
+  data.events[event] = nil
 end
 
 return watcher

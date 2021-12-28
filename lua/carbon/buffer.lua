@@ -2,39 +2,39 @@ local util = require('carbon.util')
 local entry = require('carbon.entry')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
+local buffer = {}
 local open_cwd = vim.fn.getcwd()
-local buffer = {
-  data = {
-    root = entry:new(open_cwd),
-    current = -1,
-    namespace = vim.api.nvim_create_namespace('carbon'),
-    status_timer = -1,
-  },
+local data = {
+  root = entry:new(open_cwd),
+  current = -1,
+  open_cwd = open_cwd,
+  namespace = vim.api.nvim_create_namespace('carbon'),
+  status_timer = -1,
 }
 
-watcher.register(buffer.data.root.path)
+watcher.register(data.root.path)
 watcher.on('rename', function(path, filename)
-  vim.fn.timer_stop(buffer.data.status_timer)
+  vim.fn.timer_stop(data.status_timer)
 
-  buffer.data.status_timer = vim.fn.timer_start(
+  data.status_timer = vim.fn.timer_start(
     settings.sync_delay,
     buffer.synchronize
   )
 end)
 
 function buffer.current()
-  if vim.api.nvim_buf_is_loaded(buffer.data.current) then
-    return buffer.data.current
+  if vim.api.nvim_buf_is_loaded(data.current) then
+    return data.current
   end
 
-  buffer.data.current = vim.api.nvim_create_buf(false, true)
+  data.current = vim.api.nvim_create_buf(false, true)
 
-  vim.api.nvim_buf_set_name(buffer.data.current, 'carbon')
-  vim.api.nvim_buf_set_option(buffer.data.current, 'swapfile', false)
-  vim.api.nvim_buf_set_option(buffer.data.current, 'filetype', 'carbon')
-  vim.api.nvim_buf_set_option(buffer.data.current, 'bufhidden', 'hide')
-  vim.api.nvim_buf_set_option(buffer.data.current, 'buftype', 'nofile')
-  vim.api.nvim_buf_set_option(buffer.data.current, 'modifiable', false)
+  vim.api.nvim_buf_set_name(data.current, 'carbon')
+  vim.api.nvim_buf_set_option(data.current, 'swapfile', false)
+  vim.api.nvim_buf_set_option(data.current, 'filetype', 'carbon')
+  vim.api.nvim_buf_set_option(data.current, 'bufhidden', 'hide')
+  vim.api.nvim_buf_set_option(data.current, 'buftype', 'nofile')
+  vim.api.nvim_buf_set_option(data.current, 'modifiable', false)
 
   if type(settings.actions) == 'table' then
     for action, mapping in pairs(settings.actions) do
@@ -42,14 +42,14 @@ function buffer.current()
         util.map({
           mapping,
           util.plug_name(action),
-          buffer = buffer.data.current,
+          buffer = data.current,
           silent = true,
         })
       end
     end
   end
 
-  return buffer.data.current
+  return data.current
 end
 
 function buffer.show()
@@ -73,10 +73,10 @@ function buffer.render()
   vim.api.nvim_buf_set_option(current, 'modifiable', true)
   vim.api.nvim_buf_set_lines(current, 0, -1, 1, lines)
   vim.api.nvim_buf_set_option(current, 'modifiable', false)
-  vim.api.nvim_buf_clear_namespace(current, buffer.data.namespace, 0, -1)
+  vim.api.nvim_buf_clear_namespace(current, data.namespace, 0, -1)
 
   for _, hl in ipairs(hls) do
-    vim.api.nvim_buf_add_highlight(current, buffer.data.namespace, unpack(hl))
+    vim.api.nvim_buf_add_highlight(current, data.namespace, unpack(hl))
   end
 end
 
@@ -85,7 +85,7 @@ function buffer.entry()
 end
 
 function buffer.lines(entry, lines, depth)
-  entry = entry or buffer.data.root
+  entry = entry or data.root
   lines = lines or {}
   depth = depth or 0
 
@@ -170,49 +170,46 @@ function buffer.lines(entry, lines, depth)
 end
 
 function buffer.synchronize()
-  buffer.data.root:synchronize()
+  data.root:synchronize()
   buffer.render()
 end
 
 function buffer.up(count)
-  local parent = entry:new(
-    vim.fn.fnamemodify(
-      buffer.data.root.path,
-      string.rep(':h', count or vim.v.count1)
-    )
+  local new_root = entry:new(
+    vim.fn.fnamemodify(data.root.path, string.rep(':h', count or vim.v.count1))
   )
 
-  if parent.path ~= buffer.data.root.path then
-    local children = vim.tbl_map(function(entry)
-      if entry.path == buffer.data.root.path then
-        return buffer.data.root
+  if new_root.path ~= data.root.path then
+    new_root:set_children(vim.tbl_map(function(entry)
+      if entry.path == data.root.path then
+        data.root.is_open = true
+        data.root.parent = new_root
+
+        return data.root
       end
 
       return entry
-    end, parent:get_children())
+    end, new_root:get_children()))
 
-    entry.data.children[parent.path] = children
-    buffer.data.root.parent = parent
-    buffer.data.root.is_open = true
-    buffer.data.root = parent
+    data.root = new_root
 
     return true
   end
 end
 
 function buffer.down(count)
-  local lnum = vim.fn.line('.')
-  local data = buffer.lines()[lnum]
-  local entry = data.path[count or vim.v.count1] or data.entry
+  local line = buffer.lines()[vim.fn.line('.')]
+  local new_root = line.path[count or vim.v.count1] or line.entry
 
-  if not entry.is_directory then
-    entry = entry.parent
+  if not new_root.is_directory then
+    new_root = new_root.parent
   end
 
-  if entry.path ~= buffer.data.root.path then
-    buffer.data.root = entry
+  if new_root.path ~= data.root.path then
+    data.root.is_open = true
+    data.root = new_root
 
-    entry:clean(buffer.data.root.path)
+    entry:clean(data.root.path)
 
     return true
   end
@@ -225,11 +222,11 @@ end
 function buffer.cd(path)
   local new_root = entry:new(path)
 
-  if new_root.path == buffer.data.root.path then
+  if new_root.path == data.root.path then
     return false
-  elseif util.is_parent_of(new_root.path, buffer.data.root.path) then
+  elseif util.is_parent_of(new_root.path, data.root.path) then
     local new_depth = util.path_depth(new_root.path)
-    local current_depth = util.path_depth(buffer.data.root.path)
+    local current_depth = util.path_depth(data.root.path)
 
     if current_depth - new_depth > 0 then
       buffer.up(current_depth - new_depth)
@@ -237,9 +234,9 @@ function buffer.cd(path)
       return true
     end
   else
-    buffer.data.root = buffer.data.root:find_child(new_root.path) or new_root
+    data.root = data.root:find_child(new_root.path) or new_root
 
-    entry:clean(buffer.data.root.path)
+    entry:clean(data.root.path)
 
     return true
   end
