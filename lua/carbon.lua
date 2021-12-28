@@ -16,6 +16,7 @@ end
 
 function carbon.initialize()
   vim.cmd('command Carbon call carbon#action("explore")')
+  vim.cmd('autocmd! DirChanged global call carbon#action("cd")')
 
   for action in pairs(actions) do
     util.map({ util.plug_name(action), util.plug_call(action) })

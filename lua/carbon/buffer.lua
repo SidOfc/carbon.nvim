@@ -186,9 +186,12 @@ function buffer.synchronize()
   buffer.render()
 end
 
-function buffer.up()
+function buffer.up(count)
   local parent = entry:new(
-    vim.fn.fnamemodify(buffer.data.root.path, string.rep(':h', vim.v.count1))
+    vim.fn.fnamemodify(
+      buffer.data.root.path,
+      string.rep(':h', count or vim.v.count1)
+    )
   )
 
   if parent.path ~= buffer.data.root.path then
@@ -210,10 +213,10 @@ function buffer.up()
   end
 end
 
-function buffer.down()
+function buffer.down(count)
   local lnum = vim.fn.line('.')
   local data = buffer.lines()[lnum]
-  local entry = data.path[vim.v.count1] or data.entry
+  local entry = data.path[count or vim.v.count1] or data.entry
 
   if not entry.is_directory then
     entry = entry.parent
@@ -224,19 +227,28 @@ function buffer.down()
     buffer.data.root.is_partial = buffer.data.root:has_selection()
     buffer.data.root.is_selected = false
 
-    for path in pairs(entry.data.children) do
-      if not vim.startswith(path, buffer.data.root.path) then
-        watcher.release(path)
+    entry:clean(buffer.data.root.path)
 
-        for _, child in ipairs(entry.data.children[path]) do
-          watcher.release(child.path)
-        end
+    return true
+  end
+end
 
-        entry.data.children[path] = nil
-      end
-    end
+function buffer.cd()
+  local new_root = entry:new(vim.v.event.cwd)
 
-    watcher.register(entry.path)
+  if util.is_parent_of(new_root.path, buffer.data.root.path) then
+    local new_depth = util.path_depth(new_root.path)
+    local current_depth = util.path_depth(buffer.data.root.path)
+
+    buffer.up(current_depth - new_depth)
+
+    return true
+  else
+    buffer.data.root = buffer.data.root:find_child(new_root.path) or new_root
+    buffer.data.root.is_partial = buffer.data.root:has_selection()
+    buffer.data.root.is_selected = false
+
+    entry:clean(buffer.data.root.path)
 
     return true
   end

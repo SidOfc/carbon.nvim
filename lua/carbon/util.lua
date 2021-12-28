@@ -50,4 +50,16 @@ function util.highlight(group, properties)
   end
 end
 
+function util.path_depth(path)
+  return select(2, string.gsub(path, '/', ''))
+end
+
+function util.is_parent_of(parent, child)
+  return vim.startswith(child, parent)
+end
+
+function util.is_child_of(parent, child)
+  return vim.startswith(parent, child)
+end
+
 return util

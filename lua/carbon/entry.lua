@@ -4,6 +4,22 @@ local settings = require('carbon.settings')
 local entry = { data = { children = {} } }
 entry.__index = entry
 
+function entry:clean(path)
+  for child_path in pairs(entry.data.children) do
+    if not vim.startswith(child_path, path) then
+      watcher.release(child_path)
+
+      for _, child in ipairs(entry.data.children[child_path]) do
+        watcher.release(child.path)
+      end
+
+      entry.data.children[child_path] = nil
+    end
+  end
+
+  watcher.register(path)
+end
+
 function entry:new(path, parent)
   local resolved = vim.fn.resolve(path)
   local instance = setmetatable({
@@ -26,6 +42,22 @@ function entry:new(path, parent)
   end
 
   return instance
+end
+
+function entry:find_child(path)
+  if self:has_children() then
+    for _, child in ipairs(self:children()) do
+      if child.path == path then
+        return child
+      end
+
+      local child_result = child:find_child(path)
+
+      if child_result then
+        return child_result
+      end
+    end
+  end
 end
 
 function entry:synchronize()

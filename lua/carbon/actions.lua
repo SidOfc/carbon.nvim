@@ -65,4 +65,11 @@ function actions.down()
   end
 end
 
+function actions.cd()
+  if buffer.cd() then
+    vim.fn.cursor(1, 1)
+    buffer.render()
+  end
+end
+
 return actions
