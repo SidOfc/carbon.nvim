@@ -1,9 +1,10 @@
 return {
   compress = true,
   auto_open = true,
-  disable_netrw = true,
+  keep_netrw = false,
+  sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 30,
-  exclude = { '%.git' },
+  exclude = { '%.git$' },
   actions = {
     up = '-',
     down = '=',

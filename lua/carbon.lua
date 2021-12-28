@@ -16,7 +16,14 @@ end
 
 function carbon.initialize()
   vim.cmd('command Carbon call carbon#action("explore")')
-  vim.cmd('autocmd! DirChanged global call carbon#action("cd")')
+
+  if settings.sync_on_cd then
+    vim.cmd([[
+      augroup CarbonDirChanged
+        autocmd! DirChanged global call carbon#action("cd")
+      augroup END
+    ]])
+  end
 
   for action in pairs(actions) do
     util.map({ util.plug_name(action), util.plug_call(action) })
@@ -29,7 +36,7 @@ function carbon.initialize()
   end
 
   if vim.fn.has('vim_starting') == 1 then
-    if settings.disable_netrw then
+    if not settings.keep_netrw then
       vim.g.loaded_netrw = 1
       vim.g.loaded_netrwPlugin = 1
     end
