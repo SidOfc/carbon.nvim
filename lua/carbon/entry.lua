@@ -39,8 +39,6 @@ function entry:new(path, parent)
     name = vim.fn.fnamemodify(path, ':t'),
     parent = parent,
     is_symlink = false,
-    is_partial = false,
-    is_selected = parent and parent.is_selected,
     is_directory = vim.fn.isdirectory(path) == 1,
     is_executable = vim.fn.executable(path) == 1,
   }, self)
@@ -88,16 +86,12 @@ function entry:synchronize()
 
       if previous then
         child.is_open = previous.is_open
-        child.is_partial = previous.is_partial
-        child.is_selected = previous.is_selected
 
         if previous:has_children() then
           child:synchronize()
         end
       end
     end
-
-    self.is_partial = self:has_selection()
   end
 end
 
@@ -147,54 +141,6 @@ function entry:update_children(key, value, recursive)
       end
     end
   end
-end
-
-function entry:toggle_selected()
-  local parent = self.parent
-
-  self.is_partial = false
-  self.is_selected = not self.is_selected
-
-  self:update_children('is_partial', false, true)
-  self:update_children('is_selected', self.is_selected, true)
-
-  while parent do
-    parent.is_partial = parent:has_selection()
-
-    if not self.is_selected then
-      parent.is_selected = false
-    end
-
-    parent = parent.parent
-  end
-end
-
-function entry:has_selection()
-  if self:has_children() then
-    for _, child in ipairs(self:children()) do
-      if child.is_selected or child.is_partial or child:has_selection() then
-        return true
-      end
-    end
-  end
-end
-
-function entry:get_selection()
-  local selection = {}
-
-  if self:has_selection() then
-    for _, child in ipairs(self:children()) do
-      if child.is_selected then
-        selection[#selection + 1] = child
-      elseif child.is_partial and child.is_directory then
-        for _, selected in ipairs(child:get_selection()) do
-          selection[#selection + 1] = selected
-        end
-      end
-    end
-  end
-
-  return selection
 end
 
 return entry

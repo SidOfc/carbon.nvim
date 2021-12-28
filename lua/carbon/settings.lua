@@ -4,6 +4,17 @@ return {
   keep_netrw = false,
   sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 30,
+  indicators = {
+    expand = '+',
+    collapse = '-',
+  },
+  actions = {
+    up = '-',
+    down = '=',
+    edit = '<cr>',
+    split = '<c-x>',
+    vsplit = '<c-v>',
+  },
   exclude = {
     '~$',
     '#$',
@@ -18,21 +29,6 @@ return {
     'Thumbs%.db$',
     '__pycache__',
     'node_modules',
-  },
-  actions = {
-    up = '-',
-    down = '=',
-    edit = '<cr>',
-    split = '<c-x>',
-    vsplit = '<c-v>',
-    select = '<space>',
-    select_up = '<s-tab>',
-    select_down = '<tab>',
-  },
-  indicators = {
-    selected = '*',
-    expanded = '-',
-    collapsed = '+',
   },
   highlights = {
     CarbonDir = {
@@ -68,18 +64,6 @@ return {
     CarbonIndicator = {
       ctermfg = 'DarkGray',
       guifg = 'Gray',
-      cterm = 'bold',
-      gui = 'bold',
-    },
-    CarbonIndicatorSelected = {
-      ctermfg = 'Red',
-      guifg = 'Red',
-      cterm = 'bold',
-      gui = 'bold',
-    },
-    CarbonIndicatorPartial = {
-      ctermfg = 'Yellow',
-      guifg = 'Yellow',
       cterm = 'bold',
       gui = 'bold',
     },

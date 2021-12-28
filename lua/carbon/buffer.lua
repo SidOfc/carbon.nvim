@@ -104,21 +104,21 @@ function buffer.lines(entry, lines, depth)
       end
     end
 
-    if tmp.is_selected or tmp.is_partial then
-      indicator = settings.indicators.selected
-    end
-
     if tmp.is_directory then
       is_empty = #tmp:children() == 0
       path_suffix = '/'
 
       if not is_empty and tmp.is_open then
-        indicator = settings.indicators.expanded
+        indicator = settings.indicators.collapse
       elseif not is_empty then
-        indicator = settings.indicators.collapsed
+        indicator = settings.indicators.expand
       end
     end
 
+    local full_path = tmp.name .. path_suffix
+    local indent_end = #indent
+    local path_start = indent_end + #indicator + 1
+    local file_group = 'CarbonFile'
     local dir_path = table.concat(
       vim.tbl_map(function(entry)
         return entry.name
@@ -126,31 +126,18 @@ function buffer.lines(entry, lines, depth)
       '/'
     )
 
-    local full_path = tmp.name .. path_suffix
-    local indent_end = #indent
-    local path_start = indent_end + #indicator + 1
-
     if path[1] then
       full_path = dir_path .. '/' .. full_path
     end
 
-    if not is_empty or tmp.is_selected or tmp.is_partial then
-      local group = 'CarbonIndicator'
-
-      if tmp.is_selected then
-        group = 'CarbonIndicatorSelected'
-      elseif tmp.is_partial then
-        group = 'CarbonIndicatorPartial'
-      end
-
-      hls[#hls + 1] = { group, indent_end, path_start - 1 }
-    end
-
-    local file_group = 'CarbonFile'
     if tmp.is_executable then
       file_group = 'CarbonExe'
     elseif tmp.is_symlink == 1 then
       file_group = 'CarbonSymlink'
+    end
+
+    if not is_empty then
+      hls[#hls + 1] = { 'CarbonIndicator', indent_end, path_start - 1 }
     end
 
     if tmp.is_symlink == 2 then
@@ -206,7 +193,6 @@ function buffer.up(count)
     entry.data.children[parent.path] = children
     buffer.data.root.parent = parent
     buffer.data.root.is_open = true
-    buffer.data.root.is_partial = buffer.data.root:has_selection()
     buffer.data.root = parent
 
     return true
@@ -224,8 +210,6 @@ function buffer.down(count)
 
   if entry.path ~= buffer.data.root.path then
     buffer.data.root = entry
-    buffer.data.root.is_partial = buffer.data.root:has_selection()
-    buffer.data.root.is_selected = false
 
     entry:clean(buffer.data.root.path)
 
@@ -245,8 +229,6 @@ function buffer.cd()
     return true
   else
     buffer.data.root = buffer.data.root:find_child(new_root.path) or new_root
-    buffer.data.root.is_partial = buffer.data.root:has_selection()
-    buffer.data.root.is_selected = false
 
     entry:clean(buffer.data.root.path)
 

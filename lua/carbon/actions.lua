@@ -34,23 +34,6 @@ function actions.explore()
   buffer.show()
 end
 
-function actions.select()
-  local entry = buffer.entry()
-
-  entry:toggle_selected()
-  buffer.render()
-end
-
-function actions.select_up()
-  actions.select()
-  vim.fn.cursor(vim.fn.line('.') - 1, 1)
-end
-
-function actions.select_down()
-  actions.select()
-  vim.fn.cursor(vim.fn.line('.') + 1, 1)
-end
-
 function actions.up()
   if buffer.up() then
     vim.fn.cursor(1, 1)
