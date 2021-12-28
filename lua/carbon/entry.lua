@@ -17,7 +17,7 @@ entry.__lt = function(a, b)
   return string.lower(a.name) < string.lower(b.name)
 end
 
-function entry:clean(path)
+function entry.clean(path)
   for child_path in pairs(data.children) do
     if not vim.startswith(child_path, path) then
       watcher.release(child_path)
@@ -33,7 +33,7 @@ function entry:clean(path)
   watcher.register(path)
 end
 
-function entry:new(path, parent)
+function entry.new(path, parent)
   local resolved = vim.fn.resolve(path)
   local instance = setmetatable({
     path = path,
@@ -42,7 +42,7 @@ function entry:new(path, parent)
     is_symlink = false,
     is_directory = vim.fn.isdirectory(path) == 1,
     is_executable = vim.fn.executable(path) == 1,
-  }, self)
+  }, entry)
 
   if resolved ~= path then
     instance.is_symlink = vim.fn.getftime(resolved) == -1 and 2 or 1
@@ -114,7 +114,7 @@ end
 
 function entry:get_children()
   local entries = vim.tbl_map(function(name)
-    return entry:new(self.path .. '/' .. name, self)
+    return entry.new(self.path .. '/' .. name, self)
   end, vim.fn.readdir(self.path))
 
   if type(settings.exclude) == 'table' then

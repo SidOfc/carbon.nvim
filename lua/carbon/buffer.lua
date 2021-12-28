@@ -5,7 +5,7 @@ local settings = require('carbon.settings')
 local buffer = {}
 local open_cwd = vim.fn.getcwd()
 local data = {
-  root = entry:new(open_cwd),
+  root = entry.new(open_cwd),
   current = -1,
   open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
@@ -175,7 +175,7 @@ function buffer.synchronize()
 end
 
 function buffer.up(count)
-  local new_root = entry:new(
+  local new_root = entry.new(
     vim.fn.fnamemodify(data.root.path, string.rep(':h', count or vim.v.count1))
   )
 
@@ -209,7 +209,7 @@ function buffer.down(count)
     data.root.is_open = true
     data.root = new_root
 
-    entry:clean(data.root.path)
+    entry.clean(data.root.path)
 
     return true
   end
@@ -220,7 +220,7 @@ function buffer.reset()
 end
 
 function buffer.cd(path)
-  local new_root = entry:new(path)
+  local new_root = entry.new(path)
 
   if new_root.path == data.root.path then
     return false
@@ -236,7 +236,7 @@ function buffer.cd(path)
   else
     data.root = data.root:find_child(new_root.path) or new_root
 
-    entry:clean(data.root.path)
+    entry.clean(data.root.path)
 
     return true
   end
