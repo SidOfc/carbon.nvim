@@ -135,15 +135,15 @@ function buffer.lines(entry, lines, depth)
       file_group = 'CarbonExe'
     elseif tmp.is_symlink == 1 then
       file_group = 'CarbonSymlink'
+    elseif tmp.is_symlink == 2 then
+      file_group = 'CarbonBrokenSymlink'
     end
 
     if not is_empty then
       hls[#hls + 1] = { 'CarbonIndicator', indent_end, path_start - 1 }
     end
 
-    if tmp.is_symlink == 2 then
-      hls[#hls + 1] = { 'CarbonBrokenSymlink', path_start, -1 }
-    elseif tmp.is_directory then
+    if tmp.is_directory then
       hls[#hls + 1] = { 'CarbonDir', path_start, -1 }
     elseif path[1] then
       local dir_end = path_start + #dir_path + 1
