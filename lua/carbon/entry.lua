@@ -2,7 +2,19 @@ local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local entry = { data = { children = {} } }
+
 entry.__index = entry
+entry.__lt = function(a, b)
+  if a.is_directory and b.is_directory then
+    return string.lower(a.name) < string.lower(b.name)
+  elseif a.is_directory then
+    return true
+  elseif b.is_directory then
+    return false
+  end
+
+  return string.lower(a.name) < string.lower(b.name)
+end
 
 function entry:clean(path)
   for child_path in pairs(entry.data.children) do
@@ -120,17 +132,7 @@ function entry:get_children()
     end, entries)
   end
 
-  table.sort(entries, function(a, b)
-    if a.is_directory and b.is_directory then
-      return string.lower(a.name) < string.lower(b.name)
-    elseif a.is_directory then
-      return true
-    elseif b.is_directory then
-      return false
-    end
-
-    return string.lower(a.name) < string.lower(b.name)
-  end)
+  table.sort(entries)
 
   return entries
 end
