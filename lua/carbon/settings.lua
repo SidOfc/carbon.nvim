@@ -12,6 +12,7 @@ return {
     up = '-',
     down = '=',
     edit = '<cr>',
+    reset = '0',
     split = '<c-x>',
     vsplit = '<c-v>',
   },

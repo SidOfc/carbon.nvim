@@ -2,9 +2,10 @@ local util = require('carbon.util')
 local entry = require('carbon.entry')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
+local open_cwd = vim.fn.getcwd()
 local buffer = {
   data = {
-    root = entry:new(vim.fn.getcwd()),
+    root = entry:new(open_cwd),
     current = -1,
     namespace = vim.api.nvim_create_namespace('carbon'),
     status_timer = -1,
@@ -217,16 +218,24 @@ function buffer.down(count)
   end
 end
 
-function buffer.cd()
-  local new_root = entry:new(vim.v.event.cwd)
+function buffer.reset()
+  return buffer.cd(open_cwd)
+end
 
-  if util.is_parent_of(new_root.path, buffer.data.root.path) then
+function buffer.cd(path)
+  local new_root = entry:new(path)
+
+  if new_root.path == buffer.data.root.path then
+    return false
+  elseif util.is_parent_of(new_root.path, buffer.data.root.path) then
     local new_depth = util.path_depth(new_root.path)
     local current_depth = util.path_depth(buffer.data.root.path)
 
-    buffer.up(current_depth - new_depth)
+    if current_depth - new_depth > 0 then
+      buffer.up(current_depth - new_depth)
 
-    return true
+      return true
+    end
   else
     buffer.data.root = buffer.data.root:find_child(new_root.path) or new_root
 

@@ -41,6 +41,13 @@ function actions.up()
   end
 end
 
+function actions.reset()
+  if buffer.reset() then
+    vim.fn.cursor(1, 1)
+    buffer.render()
+  end
+end
+
 function actions.down()
   if buffer.down() then
     vim.fn.cursor(1, 1)
@@ -49,7 +56,7 @@ function actions.down()
 end
 
 function actions.cd()
-  if buffer.cd() then
+  if buffer.cd(vim.v.event.cwd) then
     vim.fn.cursor(1, 1)
     buffer.render()
   end
