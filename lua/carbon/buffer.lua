@@ -79,14 +79,23 @@ function buffer.render()
   end
 end
 
-function buffer.entry()
-  return buffer.lines()[vim.fn.line('.')].entry
+function buffer.cursor()
+  return buffer.lines()[vim.fn.line('.')]
 end
 
 function buffer.lines(entry, lines, depth)
   entry = entry or data.root
   lines = lines or {}
   depth = depth or 0
+
+  if #lines == 0 then
+    lines[#lines + 1] = {
+      entry = data.root,
+      line = data.root.name .. '/',
+      highlights = { { 'CarbonDir', 0, -1 } },
+      path = {},
+    }
+  end
 
   for _, child in ipairs(entry:children()) do
     local tmp = child
@@ -197,8 +206,8 @@ function buffer.up(count)
 end
 
 function buffer.down(count)
-  local line = buffer.lines()[vim.fn.line('.')]
-  local new_root = line.path[count or vim.v.count1] or line.entry
+  local cursor = buffer.cursor()
+  local new_root = cursor.path[count or vim.v.count1] or cursor.entry
 
   if not new_root.is_directory then
     new_root = new_root.parent

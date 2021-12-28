@@ -3,7 +3,7 @@ local buffer = require('carbon.buffer')
 local actions = {}
 
 function actions.edit()
-  local entry = buffer.entry()
+  local entry = buffer.cursor().entry
 
   if entry.is_directory then
     entry.is_open = not entry.is_open
@@ -15,7 +15,7 @@ function actions.edit()
 end
 
 function actions.split()
-  local entry = buffer.entry()
+  local entry = buffer.cursor().entry
 
   if not entry.is_directory then
     vim.cmd('split ' .. entry.path)
@@ -23,7 +23,7 @@ function actions.split()
 end
 
 function actions.vsplit()
-  local entry = buffer.entry()
+  local entry = buffer.cursor().entry
 
   if not entry.is_directory then
     vim.cmd('vsplit ' .. entry.path)
