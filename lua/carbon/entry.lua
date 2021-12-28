@@ -136,16 +136,4 @@ function entry:get_children()
   return entries
 end
 
-function entry:update_children(key, value, recursive)
-  if self:has_children() then
-    for _, child in ipairs(self:children()) do
-      child[key] = value
-
-      if recursive then
-        child:update_children(key, value, recursive)
-      end
-    end
-  end
-end
-
 return entry
