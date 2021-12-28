@@ -12,7 +12,6 @@ local data = {
   status_timer = -1,
 }
 
-watcher.register(data.root.path)
 watcher.on('rename', function(path, filename)
   vim.fn.timer_stop(data.status_timer)
 
