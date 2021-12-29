@@ -19,7 +19,7 @@ function carbon.initialize()
   if settings.sync_on_cd then
     vim.cmd([[
       augroup CarbonDirChanged
-        autocmd! DirChanged global call carbon#action("cd")
+        autocmd! DirChanged global lua require("carbon").cd()
       augroup END
     ]])
   end
