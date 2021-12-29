@@ -1,6 +1,5 @@
 local util = require('carbon.util')
 local buffer = require('carbon.buffer')
-local actions = require('carbon.actions')
 local settings = require('carbon.settings')
 local carbon = {}
 
@@ -23,10 +22,6 @@ function carbon.initialize()
         autocmd! DirChanged global call carbon#action("cd")
       augroup END
     ]])
-  end
-
-  for action in pairs(actions) do
-    util.map({ util.plug_name(action), util.plug_call(action) })
   end
 
   if type(settings.highlights) == 'table' then
@@ -55,6 +50,66 @@ end
 function carbon.action(name)
   if type(actions[name]) == 'function' then
     actions[name]()
+  end
+end
+
+function carbon.edit()
+  local entry = buffer.cursor().entry
+
+  if entry.is_directory then
+    entry.is_open = not entry.is_open
+
+    buffer.render()
+  else
+    vim.cmd('edit ' .. entry.path)
+  end
+end
+
+function carbon.split()
+  local entry = buffer.cursor().entry
+
+  if not entry.is_directory then
+    vim.cmd('split ' .. entry.path)
+  end
+end
+
+function carbon.vsplit()
+  local entry = buffer.cursor().entry
+
+  if not entry.is_directory then
+    vim.cmd('vsplit ' .. entry.path)
+  end
+end
+
+function carbon.explore()
+  buffer.show()
+end
+
+function carbon.up()
+  if buffer.up() then
+    vim.fn.cursor(1, 1)
+    buffer.render()
+  end
+end
+
+function carbon.reset()
+  if buffer.reset() then
+    vim.fn.cursor(1, 1)
+    buffer.render()
+  end
+end
+
+function carbon.down()
+  if buffer.down() then
+    vim.fn.cursor(1, 1)
+    buffer.render()
+  end
+end
+
+function carbon.cd()
+  if buffer.cd(vim.v.event.cwd) then
+    vim.fn.cursor(1, 1)
+    buffer.render()
   end
 end
 

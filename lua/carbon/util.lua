@@ -30,14 +30,6 @@ function util.tbl_find(tbl, callback)
   end
 end
 
-function util.plug_name(action)
-  return '<plug>(carbon_' .. action .. ')'
-end
-
-function util.plug_call(action)
-  return ':<C-U>call carbon#action("' .. action .. '")<cr>'
-end
-
 function util.highlight(group, properties)
   if type(properties) == 'table' then
     local command = 'highlight ' .. group
@@ -48,18 +40,6 @@ function util.highlight(group, properties)
 
     vim.cmd(command)
   end
-end
-
-function util.path_depth(path)
-  return select(2, string.gsub(path, '/', ''))
-end
-
-function util.is_parent_of(parent, child)
-  return vim.startswith(child, parent)
-end
-
-function util.is_child_of(parent, child)
-  return vim.startswith(parent, child)
 end
 
 return util

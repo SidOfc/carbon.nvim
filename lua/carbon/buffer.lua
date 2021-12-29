@@ -40,7 +40,7 @@ function buffer.current()
       if mapping then
         util.map({
           mapping,
-          util.plug_name(action),
+          ':<C-U>lua require("carbon").' .. action .. '()<cr>',
           buffer = data.current,
           silent = true,
         })
@@ -232,9 +232,9 @@ function buffer.cd(path)
 
   if new_root.path == data.root.path then
     return false
-  elseif util.is_parent_of(new_root.path, data.root.path) then
-    local new_depth = util.path_depth(new_root.path)
-    local current_depth = util.path_depth(data.root.path)
+  elseif vim.startswith(data.root.path, new_root.path) then
+    local new_depth = select(2, string.gsub(new_root.path, '/', ''))
+    local current_depth = select(2, string.gsub(data.root.path, '/', ''))
 
     if current_depth - new_depth > 0 then
       buffer.up(current_depth - new_depth)
@@ -242,7 +242,7 @@ function buffer.cd(path)
       return true
     end
   else
-    data.root = data.root:find_child(new_root.path) or new_root
+    data.root = entry.find(new_root.path) or new_root
 
     entry.clean(data.root.path)
 

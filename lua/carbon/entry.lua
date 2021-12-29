@@ -17,55 +17,47 @@ entry.__lt = function(a, b)
   return string.lower(a.name) < string.lower(b.name)
 end
 
-function entry.clean(path)
-  for child_path in pairs(data.children) do
-    if not vim.startswith(child_path, path) then
-      watcher.release(child_path)
+function entry.new(path, parent)
+  local is_directory = vim.fn.isdirectory(path) == 1
+  local resolved = vim.fn.resolve(path)
 
-      for _, child in ipairs(data.children[child_path]) do
+  if is_directory then
+    watcher.register(path)
+  end
+
+  return setmetatable({
+    path = resolved,
+    name = vim.fn.fnamemodify(path, ':t'),
+    parent = parent,
+    is_directory = is_directory,
+    is_executable = not is_directory and vim.fn.executable(path) == 1,
+    is_symlink = resolved ~= path and vim.fn.getftime(resolved) == -1 and 2
+      or resolved ~= path and 1
+      or nil,
+  }, entry)
+end
+
+function entry.clean(path)
+  for parent_path, children in pairs(data.children) do
+    if not vim.startswith(parent_path, path) then
+      watcher.release(parent_path)
+
+      for _, child in ipairs(children) do
         watcher.release(child.path)
       end
 
-      data.children[child_path] = nil
+      data.children[parent_path] = nil
     end
   end
 
   watcher.register(path)
 end
 
-function entry.new(path, parent)
-  local resolved = vim.fn.resolve(path)
-  local instance = setmetatable({
-    path = path,
-    name = vim.fn.fnamemodify(path, ':t'),
-    parent = parent,
-    is_symlink = false,
-    is_directory = vim.fn.isdirectory(path) == 1,
-    is_executable = vim.fn.executable(path) == 1,
-  }, entry)
-
-  if resolved ~= path then
-    instance.is_symlink = vim.fn.getftime(resolved) == -1 and 2 or 1
-  end
-
-  if instance.is_directory then
-    watcher.register(path)
-  end
-
-  return instance
-end
-
-function entry:find_child(path)
-  if self:has_children() then
-    for _, child in ipairs(self:children()) do
+function entry.find(path)
+  for parent_path, children in pairs(data.children) do
+    for _, child in ipairs(children) do
       if child.path == path then
         return child
-      end
-
-      local child_result = child:find_child(path)
-
-      if child_result then
-        return child_result
       end
     end
   end
