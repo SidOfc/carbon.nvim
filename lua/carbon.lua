@@ -14,7 +14,7 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
-  vim.cmd('command Carbon call carbon#action("explore")')
+  vim.cmd('command Carbon lua require("carbon").explore()')
 
   if settings.sync_on_cd then
     vim.cmd([[
