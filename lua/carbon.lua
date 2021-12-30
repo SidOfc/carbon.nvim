@@ -63,12 +63,6 @@ function carbon.initialize()
   return carbon
 end
 
-function carbon.action(name)
-  if type(actions[name]) == 'function' then
-    actions[name]()
-  end
-end
-
 function carbon.edit()
   local entry = buffer.cursor().entry
 
