@@ -4,6 +4,7 @@ return {
   keep_netrw = false,
   sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 30,
+  sidebar_width = 30,
   indicators = {
     expand = '+',
     collapse = '-',

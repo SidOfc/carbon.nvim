@@ -14,7 +14,10 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
-  vim.cmd('command Carbon lua require("carbon").explore()')
+  vim.cmd([[
+    command! Carbon lua require("carbon").explore()
+    command! Lcarbon lua require("carbon").explore_left()
+  ]])
 
   if settings.sync_on_cd then
     vim.cmd([[
@@ -24,24 +27,37 @@ function carbon.initialize()
     ]])
   end
 
+  vim.cmd([[
+    augroup CarbonBufEnter
+      autocmd! BufEnter carbon
+          \ setlocal nowrap& nowrap |
+          \ autocmd BufHidden <buffer>
+              \ setlocal nowrap& |
+              \ let w:carbon_lexplore_window = v:false
+    augroup END
+  ]])
+
   if type(settings.highlights) == 'table' then
     for group, properties in pairs(settings.highlights) do
       util.highlight(group, properties)
     end
   end
 
-  if vim.fn.has('vim_starting') == 1 then
-    if not settings.keep_netrw then
-      vim.g.loaded_netrw = 1
-      vim.g.loaded_netrwPlugin = 1
-    end
+  if not settings.keep_netrw then
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
 
-    if settings.auto_open and vim.fn.isdirectory(vim.fn.expand('%:p')) == 1 then
-      local current_buffer = vim.api.nvim_win_get_buf(0)
+    vim.cmd([[
+      command! Explore Carbon
+      command! Lexplore Lcarbon
+    ]])
+  end
 
-      buffer.show()
-      vim.api.nvim_buf_delete(current_buffer, { force = true })
-    end
+  if settings.auto_open and vim.fn.isdirectory(vim.fn.expand('%:p')) == 1 then
+    local current_buffer = vim.api.nvim_win_get_buf(0)
+
+    buffer.show()
+    vim.api.nvim_buf_delete(current_buffer, { force = true })
   end
 
   return carbon
@@ -60,6 +76,17 @@ function carbon.edit()
     entry.is_open = not entry.is_open
 
     buffer.render()
+  elseif vim.w.carbon_lexplore_window then
+    vim.cmd('wincmd l')
+
+    if vim.w.carbon_lexplore_window == vim.api.nvim_get_current_win() then
+      vim.cmd('vertical belowright split ' .. entry.path)
+      vim.cmd('wincmd p')
+      vim.cmd('vertical resize ' .. tostring(settings.sidebar_width))
+      vim.cmd('wincmd p')
+    else
+      vim.cmd('edit ' .. entry.path)
+    end
   else
     vim.cmd('edit ' .. entry.path)
   end
@@ -83,6 +110,14 @@ end
 
 function carbon.explore()
   buffer.show()
+end
+
+function carbon.explore_left()
+  vim.cmd('vertical leftabove split')
+  vim.cmd('vertical resize ' .. tostring(settings.sidebar_width))
+  buffer.show()
+
+  vim.w.carbon_lexplore_window = vim.api.nvim_get_current_win()
 end
 
 function carbon.up()
