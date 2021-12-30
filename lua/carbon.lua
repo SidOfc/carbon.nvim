@@ -31,8 +31,9 @@ function carbon.initialize()
     augroup CarbonBufEnter
       autocmd! BufEnter carbon
           \ setlocal nowrap& nowrap |
+          \ setlocal fillchars& fillchars=eob:\ |
           \ autocmd BufHidden <buffer>
-              \ setlocal nowrap& |
+              \ setlocal nowrap& fillchars& |
               \ let w:carbon_lexplore_window = v:false
     augroup END
   ]])
