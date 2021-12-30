@@ -1,1 +1,1 @@
-call carbon#initialize()
+lua require('carbon').initialize()
