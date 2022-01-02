@@ -19,7 +19,9 @@ end
 
 function entry.new(path, parent)
   local is_directory = vim.fn.isdirectory(path) == 1
-  local resolved = vim.fn.resolve(path)
+  local resolved = select(2, pcall(function()
+    return vim.fn.resolve(path)
+  end))
 
   if is_directory then
     watcher.register(path)
