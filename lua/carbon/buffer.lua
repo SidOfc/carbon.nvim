@@ -6,7 +6,7 @@ local buffer = {}
 local open_cwd = vim.fn.getcwd()
 local data = {
   root = entry.new(open_cwd),
-  current = -1,
+  handle = -1,
   open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
   status_timer = -1,
@@ -21,19 +21,19 @@ watcher.on({ 'change', 'rename' }, function(path, filename)
   )
 end)
 
-function buffer.current()
-  if vim.api.nvim_buf_is_loaded(data.current) then
-    return data.current
+function buffer.handle()
+  if vim.api.nvim_buf_is_loaded(data.handle) then
+    return data.handle
   end
 
-  data.current = vim.api.nvim_create_buf(false, true)
+  data.handle = vim.api.nvim_create_buf(false, true)
 
-  vim.api.nvim_buf_set_name(data.current, 'carbon')
-  vim.api.nvim_buf_set_option(data.current, 'swapfile', false)
-  vim.api.nvim_buf_set_option(data.current, 'filetype', 'carbon')
-  vim.api.nvim_buf_set_option(data.current, 'bufhidden', 'hide')
-  vim.api.nvim_buf_set_option(data.current, 'buftype', 'nofile')
-  vim.api.nvim_buf_set_option(data.current, 'modifiable', false)
+  vim.api.nvim_buf_set_name(data.handle, 'carbon')
+  vim.api.nvim_buf_set_option(data.handle, 'swapfile', false)
+  vim.api.nvim_buf_set_option(data.handle, 'filetype', 'carbon')
+  vim.api.nvim_buf_set_option(data.handle, 'bufhidden', 'hide')
+  vim.api.nvim_buf_set_option(data.handle, 'buftype', 'nofile')
+  vim.api.nvim_buf_set_option(data.handle, 'modifiable', false)
 
   if type(settings.actions) == 'table' then
     for action, mapping in pairs(settings.actions) do
@@ -41,23 +41,23 @@ function buffer.current()
         util.map({
           mapping,
           ':<C-U>lua require("carbon").' .. action .. '()<cr>',
-          buffer = data.current,
+          buffer = data.handle,
           silent = true,
         })
       end
     end
   end
 
-  return data.current
+  return data.handle
 end
 
 function buffer.show()
-  vim.api.nvim_win_set_buf(0, buffer.current())
+  vim.api.nvim_win_set_buf(0, buffer.handle())
   buffer.render()
 end
 
 function buffer.render()
-  local current = buffer.current()
+  local handle = buffer.handle()
   local lines = {}
   local hls = {}
 
@@ -69,13 +69,13 @@ function buffer.render()
     end
   end
 
-  vim.api.nvim_buf_set_option(current, 'modifiable', true)
-  vim.api.nvim_buf_set_lines(current, 0, -1, 1, lines)
-  vim.api.nvim_buf_set_option(current, 'modifiable', false)
-  vim.api.nvim_buf_clear_namespace(current, data.namespace, 0, -1)
+  vim.api.nvim_buf_set_option(handle, 'modifiable', true)
+  vim.api.nvim_buf_set_lines(handle, 0, -1, 1, lines)
+  vim.api.nvim_buf_set_option(handle, 'modifiable', false)
+  vim.api.nvim_buf_clear_namespace(handle, data.namespace, 0, -1)
 
   for _, hl in ipairs(hls) do
-    vim.api.nvim_buf_add_highlight(current, data.namespace, unpack(hl))
+    vim.api.nvim_buf_add_highlight(handle, data.namespace, unpack(hl))
   end
 end
 
