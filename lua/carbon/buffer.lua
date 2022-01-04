@@ -184,26 +184,31 @@ function buffer.synchronize()
 end
 
 function buffer.up(count)
-  local new_root = entry.new(
-    vim.fn.fnamemodify(data.root.path, string.rep(':h', count or vim.v.count1))
-  )
+  local rerender = false
+  local remaining = count or vim.v.count1
 
-  if new_root.path ~= data.root.path then
-    new_root:set_children(vim.tbl_map(function(entry)
-      if entry.path == data.root.path then
-        data.root.is_open = true
-        data.root.parent = new_root
+  while remaining > 0 do
+    remaining = remaining - 1
+    local new_root = entry.new(vim.fn.fnamemodify(data.root.path, ':h'))
 
-        return data.root
-      end
+    if new_root.path ~= data.root.path then
+      new_root:set_children(vim.tbl_map(function(entry)
+        if entry.path == data.root.path then
+          data.root.is_open = true
+          data.root.parent = new_root
 
-      return entry
-    end, new_root:get_children()))
+          return data.root
+        end
 
-    data.root = new_root
+        return entry
+      end, new_root:get_children()))
 
-    return true
+      rerender = true
+      data.root = new_root
+    end
   end
+
+  return rerender
 end
 
 function buffer.down(count)
