@@ -10,10 +10,10 @@ return {
     collapse = '-',
   },
   actions = {
-    up = '-',
-    down = '=',
+    up = '[',
+    down = ']',
     edit = '<cr>',
-    reset = '0',
+    reset = '.',
     split = '<c-x>',
     vsplit = '<c-v>',
   },

@@ -42,6 +42,7 @@ function buffer.handle()
           mapping,
           ':<C-U>lua require("carbon").' .. action .. '()<cr>',
           buffer = data.handle,
+          nowait = true,
           silent = true,
         })
       end
