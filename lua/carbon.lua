@@ -14,15 +14,15 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
-  util.command({ 'Carbon', carbon.explore })
-  util.command({ 'Lcarbon', carbon.explore_left })
+  util.command('Carbon', carbon.explore)
+  util.command('Lcarbon', carbon.explore_left)
 
-  util.map({ util.plug('up'), ':<c-u>lua require("carbon").up()<cr>' })
-  util.map({ util.plug('down'), ':<c-u>lua require("carbon").down()<cr>' })
-  util.map({ util.plug('edit'), ':<c-u>lua require("carbon").edit()<cr>' })
-  util.map({ util.plug('reset'), ':<c-u>lua require("carbon").reset()<cr>' })
-  util.map({ util.plug('split'), ':<c-u>lua require("carbon").split()<cr>' })
-  util.map({ util.plug('vsplit'), ':<c-u>lua require("carbon").vsplit()<cr>' })
+  util.map(util.plug('up'), ':<c-u>lua require("carbon").up()<cr>')
+  util.map(util.plug('down'), ':<c-u>lua require("carbon").down()<cr>')
+  util.map(util.plug('edit'), ':<c-u>lua require("carbon").edit()<cr>')
+  util.map(util.plug('reset'), ':<c-u>lua require("carbon").reset()<cr>')
+  util.map(util.plug('split'), ':<c-u>lua require("carbon").split()<cr>')
+  util.map(util.plug('vsplit'), ':<c-u>lua require("carbon").vsplit()<cr>')
 
   vim.cmd([[
     augroup CarbonBufEnter
@@ -53,8 +53,8 @@ function carbon.initialize()
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
-    util.command({ 'Explore', 'Carbon' })
-    util.command({ 'Lexplore', 'Lcarbon' })
+    util.command('Explore', 'Carbon')
+    util.command('Lexplore', 'Lcarbon')
   end
 
   if settings.auto_open and vim.fn.isdirectory(vim.fn.expand('%:p')) == 1 then

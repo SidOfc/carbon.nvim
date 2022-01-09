@@ -38,13 +38,11 @@ function buffer.handle()
   if type(settings.actions) == 'table' then
     for action, mapping in pairs(settings.actions) do
       if mapping then
-        util.map({
+        util.map(
           mapping,
           util.plug(action),
-          buffer = data.handle,
-          nowait = true,
-          silent = true,
-        })
+          { buffer = data.handle, nowait = true, silent = true }
+        )
       end
     end
   end
