@@ -1,5 +1,9 @@
 local util = {}
 
+function util.action_plug(action)
+  return '<plug>(carbon-' .. action .. ')'
+end
+
 function util.map(settings)
   local args = {
     settings.mode or 'n',

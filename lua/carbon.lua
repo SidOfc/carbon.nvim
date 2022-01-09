@@ -2,6 +2,16 @@ local util = require('carbon.util')
 local buffer = require('carbon.buffer')
 local settings = require('carbon.settings')
 local carbon = {}
+local data = {
+  action_plugs = {
+    up = ':<c-u>lua require("carbon").up()<cr>',
+    down = ':<c-u>lua require("carbon").down()<cr>',
+    edit = ':<c-u>lua require("carbon").edit()<cr>',
+    reset = ':<c-u>lua require("carbon").reset()<cr>',
+    split = ':<c-u>lua require("carbon").split()<cr>',
+    vsplit = ':<c-u>lua require("carbon").vsplit()<cr>',
+  },
+}
 
 function carbon.setup(user_settings)
   local next = vim.tbl_deep_extend('force', settings, user_settings)
@@ -14,17 +24,11 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
-  vim.cmd([[
-    command! Carbon lua require("carbon").explore()
-    command! Lcarbon lua require("carbon").explore_left()
-  ]])
+  vim.api.nvim_add_user_command('Carbon', carbon.explore, {})
+  vim.api.nvim_add_user_command('Lcarbon', carbon.explore_left, {})
 
-  if settings.sync_on_cd then
-    vim.cmd([[
-      augroup CarbonDirChanged
-        autocmd! DirChanged global lua require("carbon").cd()
-      augroup END
-    ]])
+  for action, implementation in pairs(data.action_plugs) do
+    util.map({ util.action_plug(action), implementation })
   end
 
   vim.cmd([[
@@ -38,6 +42,14 @@ function carbon.initialize()
     augroup END
   ]])
 
+  if settings.sync_on_cd then
+    vim.cmd([[
+      augroup CarbonDirChanged
+        autocmd! DirChanged global lua require("carbon").cd()
+      augroup END
+    ]])
+  end
+
   if type(settings.highlights) == 'table' then
     for group, properties in pairs(settings.highlights) do
       util.highlight(group, properties)
@@ -48,10 +60,8 @@ function carbon.initialize()
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
-    vim.cmd([[
-      command! Explore Carbon
-      command! Lexplore Lcarbon
-    ]])
+    vim.api.nvim_add_user_command('Explore', 'Carbon', {})
+    vim.api.nvim_add_user_command('Lexplore', 'Lcarbon', {})
   end
 
   if settings.auto_open and vim.fn.isdirectory(vim.fn.expand('%:p')) == 1 then
