@@ -40,7 +40,7 @@ function buffer.handle()
 
     for action, mapping in pairs(settings.actions) do
       if mapping then
-        util.map({ mapping, util.action_plug(action), unpack(options) })
+        util.map({ mapping, util.plug(action), unpack(options) })
       end
     end
   end

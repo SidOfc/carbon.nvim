@@ -2,16 +2,6 @@ local util = require('carbon.util')
 local buffer = require('carbon.buffer')
 local settings = require('carbon.settings')
 local carbon = {}
-local data = {
-  action_plugs = {
-    up = ':<c-u>lua require("carbon").up()<cr>',
-    down = ':<c-u>lua require("carbon").down()<cr>',
-    edit = ':<c-u>lua require("carbon").edit()<cr>',
-    reset = ':<c-u>lua require("carbon").reset()<cr>',
-    split = ':<c-u>lua require("carbon").split()<cr>',
-    vsplit = ':<c-u>lua require("carbon").vsplit()<cr>',
-  },
-}
 
 function carbon.setup(user_settings)
   local next = vim.tbl_deep_extend('force', settings, user_settings)
@@ -27,9 +17,12 @@ function carbon.initialize()
   vim.api.nvim_add_user_command('Carbon', carbon.explore, {})
   vim.api.nvim_add_user_command('Lcarbon', carbon.explore_left, {})
 
-  for action, implementation in pairs(data.action_plugs) do
-    util.map({ util.action_plug(action), implementation })
-  end
+  util.map({ util.plug('up'), ':<c-u>lua require("carbon").up()<cr>' })
+  util.map({ util.plug('down'), ':<c-u>lua require("carbon").down()<cr>' })
+  util.map({ util.plug('edit'), ':<c-u>lua require("carbon").edit()<cr>' })
+  util.map({ util.plug('reset'), ':<c-u>lua require("carbon").reset()<cr>' })
+  util.map({ util.plug('split'), ':<c-u>lua require("carbon").split()<cr>' })
+  util.map({ util.plug('vsplit'), ':<c-u>lua require("carbon").vsplit()<cr>' })
 
   vim.cmd([[
     augroup CarbonBufEnter

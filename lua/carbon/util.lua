@@ -1,7 +1,7 @@
 local util = {}
 
-function util.action_plug(action)
-  return '<plug>(carbon-' .. action .. ')'
+function util.plug(name)
+  return '<plug>(carbon-' .. name .. ')'
 end
 
 function util.map(settings)
