@@ -36,11 +36,15 @@ function buffer.handle()
   vim.api.nvim_buf_set_option(data.handle, 'modifiable', false)
 
   if type(settings.actions) == 'table' then
-    local options = { buffer = data.handle, nowait = true, silent = true }
-
     for action, mapping in pairs(settings.actions) do
       if mapping then
-        util.map({ mapping, util.plug(action), unpack(options) })
+        util.map({
+          mapping,
+          util.plug(action),
+          buffer = data.handle,
+          nowait = true,
+          silent = true,
+        })
       end
     end
   end
