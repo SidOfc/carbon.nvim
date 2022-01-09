@@ -14,8 +14,8 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
-  vim.api.nvim_add_user_command('Carbon', carbon.explore, {})
-  vim.api.nvim_add_user_command('Lcarbon', carbon.explore_left, {})
+  util.command({ 'Carbon', carbon.explore })
+  util.command({ 'Lcarbon', carbon.explore_left })
 
   util.map({ util.plug('up'), ':<c-u>lua require("carbon").up()<cr>' })
   util.map({ util.plug('down'), ':<c-u>lua require("carbon").down()<cr>' })
@@ -53,8 +53,8 @@ function carbon.initialize()
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
-    vim.api.nvim_add_user_command('Explore', 'Carbon', {})
-    vim.api.nvim_add_user_command('Lexplore', 'Lcarbon', {})
+    util.command({ 'Explore', 'Carbon' })
+    util.command({ 'Lexplore', 'Lcarbon' })
   end
 
   if settings.auto_open and vim.fn.isdirectory(vim.fn.expand('%:p')) == 1 then
