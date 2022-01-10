@@ -4,13 +4,17 @@ local settings = require('carbon.settings')
 local carbon = {}
 
 function carbon.setup(user_settings)
-  local next = vim.tbl_deep_extend('force', settings, user_settings)
+  if type(user_settings) == 'function' then
+    user_settings(settings)
+  else
+    local next = vim.tbl_deep_extend('force', settings, user_settings)
 
-  for setting, value in pairs(next) do
-    settings[setting] = value
+    for setting, value in pairs(next) do
+      settings[setting] = value
+    end
   end
 
-  return carbon
+  return settings
 end
 
 function carbon.initialize()

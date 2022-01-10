@@ -126,23 +126,98 @@ SETUP                                                               *carbon-setu
   `  })`
   `EOF`
 
-  The default settings are described in |carbon-settings|. Any settings
-  supplied to the `setup` function will be deep merged with the defaults.
+  If setting options directly is preferred, passing a function
+  is also possible:
+
+  init.lua:
+  `require('carbon').setup(function(settings)`
+  `  settings.setting = 'value',`
+  `end)`
+
+  init.vim:
+  `lua << EOF`
+  `  require('carbon').setup(function(settings)`
+  `    settings.setting = 'value',`
+  `  end)`
+  `EOF`
+
+  The default settings are documented in |carbon-settings|. Any settings
+  supplied to `setup` when called with a table will be deep merged with
+  the defaults. When `setup` is called with a function argument, settings
+  are directly modified and no merging of any kind will occur.
 
 ================================================================================
 UTIL                                                                 *carbon-util*
 
   plug `........................................................` *carbon-util-plug*
 
+  `require('carbon.util').plug(`{name}`)`
+
+  Converts {name} to a |<Plug>| map string. For example calling
+  `require('carbon.util').plug('up')` will return the string `'<plug>(carbon-up)'`.
+
+  This function fails when {name} is not a string.
+
   tbl_find `................................................` *carbon-util-tbl-find*
+
+  `require('carbon.util').tbl_find(`{tbl}, {callback}`)`
+
+  Execute `callback(`{value}, {key}`)` for each value in {tbl} until {callback}
+  returns a truthy value. When {callback} returns true, return {value} and
+  {key}. When no item is found, return `nil`.
+
+  This function fails when {tbl} is not a table or when
+  {callback} is not callable.
 
   tbl_except `............................................` *carbon-util-tbl-except*
 
+  `require('carbon.util').tbl_except(`{tbl}, {keys}`)`
+
+  Return a new table with all keys from {tbl} except
+  those specified in {keys}.
+
+  This function fails when either {tbl} or {keys} is not a table.
+
   map `..........................................................` *carbon-util-map*
+
+  `require('carbon.util').map(`{lhs}, {rhs}[, {options}]`)`
+
+  Wraps |nvim_set_keymap| and |nvim_buf_set_keymap|. Maps {lhs} to
+  {rhs}. An optional {options} table can supplied. It accepts the same
+  options as |nvim_set_keymap| does and also supports two extra options:
+  `mode` which defaults to `'n'` and `buffer` which defaults to `nil`.
+
+  To create a |Visual| mapping pass `mode = 'v'`, to create a buffer-local
+  mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
+
+  The `mode` and `buffer` options are not passed to |nvim_set_keymap|
+  functions because they are explicitly filtered out for internal use by the
+  map utility function. All other {options} keys will be passed through.
+
+  This function fails when {lhs} or {rhs} are not strings or if {options} is
+  provided but not a table.
 
   command `..................................................` *carbon-util-command*
 
+  `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
+
+  Wraps |nvim_add_user_command|. The only difference between this
+  function and |nvim_add_user_command| is that the {options} argument is
+  optional, when not passed it will default to an empty table.
+
+  This function fails when {lhs} or {rhs} are not strings or if {options} is
+  provided but not a table.
+
   highlight `..............................................` *carbon-util-highlight*
+
+  `require('carbon.util').highlight(`{group}, {properties}`)`
+
+  Builds a |highlight| command for {group} using provided {properties} and
+  executes that command. {group} will be the highlight group name. {properties}
+  is a table accepting any properties that can be passed to |highlight|.
+
+  This function fails when {group} is not a string or when {properties}
+  is not a table.
 
 ================================================================================
 ENTRY                                                               *carbon-entry*
