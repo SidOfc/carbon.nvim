@@ -31,9 +31,9 @@ USAGE                                                               *carbon-usag
   |Lexplore| commands to Carbon's |Carbon| and |Lcarbon| commands respectively.
 
   For more specific usage and configuration information, see:
-  `-` |carbon-commands| for command details.
-  `-` |carbon-plugs| for mapping details.
-  `-` |carbon-setup| for configuration details.
+  - |carbon-commands| for command details.
+  - |carbon-plugs| for mapping details.
+  - |carbon-setup| for configuration details.
 
 ================================================================================
 COMMANDS                                                         *carbon-commands*
@@ -224,19 +224,135 @@ ENTRY                                                               *carbon-entr
 
   new `.........................................................` *carbon-entry-new*
 
+  `require('carbon.entry').new(`{path}[, {parent}]`)`
+
+  Returns a new entry object for provided absolute {path}. The {path}
+  parameter must be a string. {path} may point to files as well as
+  directories. When {parent} is supplied, it is set as the entry object's
+  `parent` property. {parent} must be another entry object if provided.
+
+  The returned entry object has the following shape:
+
+  `{`
+  `  path = '/absolute/path/to/file-or-dir',`
+  `  name = 'file-or-dir',`
+  `  is_directory = false,`
+  `  is_executable = false,`
+  `  is_symlink = nil,`
+  `}`
+
+  - `path` is the absolute {path}.
+  - `name` is the tail of given {path} as returned by |fnamemodify| `:t`.
+  - `is_directory` is `true` when |isdirectory| equals `1`.
+  - `is_executable` is `true` when |isdirectory| equals `0` and |executable| equals `1`.
+  - `is_symlink` is:
+    - `2` when {path} does not equal |resolve| of {path} and |getftime| equals `-1`.
+    - `1` when {path} does not equal |resolve| of {path} and |getftime| is not `-1`.
+    - `nil` otherwise.
+
+  For `is_symlink`, a value of `2` indicates a broken symlink, a value of `1`
+  indicates a valid symlink, and `nil` is used when {path} is not a symlink.
+
+  The following methods can be called on entries:
+  - |carbon-entry-synchronize|
+  - |carbon-entry-children|
+  - |carbon-entry-has-children|
+  - |carbon-entry-get-children|
+  - |carbon-entry-set-children|
+
+  This function will fail if {path} is not a path to an existing file or
+  directory and passing a {parent} that is not an entry object created via
+  `require('carbon.entry').new()` will lead to fatal rendering errors.
+
   find `.......................................................` *carbon-entry-find*
+
+  `require('carbon.entry').find(`{path}`)`
+
+  Used to find the entry object associated with {path}. The {path} entry must
+  already be loaded by Carbon for this to work. That is, it only finds
+  children that have already been loaded by Carbon.
+
+  When an entry object matches {path} it is returned, otherwise the return
+  value will be `nil`. This function will not fail if {path} is not a string!
+
+  For more information about entry objects, see: |carbon-entry-new|.
 
   clean `.....................................................` *carbon-entry-clean*
 
+  `require('carbon.entry').clean(`{path}`)`
+
+  Removes all parent and sibling files and directories from the internal
+  children cache used by Carbon. Also removes watchers from all removed
+  children.
+
+  It is not recommended to call this function manually because it
+  has a high likelyhood of breaking Carbon if not used with caution. It is
+  only documented for completeness.
+
   synchronize `.........................................` *carbon-entry-synchronize*
+
+  `entry:synchronize()`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| function.
+
+  When `entry.is_directory` is `true`, synchronizes all its children with the
+  current state of the file system recursively. Files and folders that were
+  added, removed, renamed, or had their permissions changed within `entry.path`
+  will be refreshed.
+
+  When `entry.is_directory` is `false`, nothing happens because Carbon only
+  listens to changes on and within directories.
 
   children `...............................................` *carbon-entry-children*
 
+  `entry:children()`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| function.
+
+  When `entry.is_directory` is true, fetches children using
+  |carbon-entry-get-children| and caches them. Always returns a table with
+  child entry objects or an empty table if it has no children such as regular
+  files and empty directories.
+
   has_children `.......................................` *carbon-entry-has-children*
+
+  `entry:has_children()`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| function.
+
+  Returns `true` when children of `entry.path` have already been cached.
+  Returns `false` otherwise.
 
   set_children `.......................................` *carbon-entry-set-children*
 
+  `entry:set_children(`{children}`)`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| function.
+
+  Set the cached children of `entry.path` to {children}. The {children} must
+  be a table with entry object elements or `nil`.
+
+  When {children} is `nil` the next call to |carbon-entry-children| will
+  result in a fresh listing directly from the file system.
+
   get_children `.......................................` *carbon-entry-get-children*
+
+  `entry:get_children()`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| function.
+
+  Returns a table of entry object elements by calling |readdir| on `entry.path`.
+  The entry objects will be direct children of `entry.path`. The table will be
+  sorted in case-insensitive alphabetical order and all directories will come
+  before any files.
+
+  Paths matching any of the patterns defined in |carbon-settings-exclude| will
+  be excluded from the returned table.
 
 ================================================================================
 BUFFER                                                             *carbon-buffer*
