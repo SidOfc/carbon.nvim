@@ -5,18 +5,6 @@ return {
   sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 30,
   sidebar_width = 30,
-  indicators = {
-    expand = '+',
-    collapse = '-',
-  },
-  actions = {
-    up = '[',
-    down = ']',
-    edit = '<cr>',
-    reset = '.',
-    split = '<c-x>',
-    vsplit = '<c-v>',
-  },
   exclude = {
     '~$',
     '#$',
@@ -31,6 +19,18 @@ return {
     'Thumbs%.db$',
     '__pycache__',
     'node_modules',
+  },
+  indicators = {
+    expand = '+',
+    collapse = '-',
+  },
+  actions = {
+    up = '[',
+    down = ']',
+    edit = '<cr>',
+    reset = '.',
+    split = '<c-x>',
+    vsplit = '<c-v>',
   },
   highlights = {
     CarbonDir = {
