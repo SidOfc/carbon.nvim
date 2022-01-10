@@ -111,6 +111,24 @@ PLUGS                                                               *carbon-plug
 ================================================================================
 SETUP                                                               *carbon-setup*
 
+  The behavior of this plugin can be customized by calling
+  `require('carbon').setup` in your |$MYVIMRC| like this:
+
+  init.lua:
+  `require('carbon').setup({`
+  `  setting = 'value',`
+  `})`
+
+  init.vim:
+  `lua << EOF`
+  `  require('carbon').setup({`
+  `    setting = 'value',`
+  `  })`
+  `EOF`
+
+  The default settings are described in |carbon-settings|. Any settings
+  supplied to the `setup` function will be deep merged with the defaults.
+
 ================================================================================
 UTIL                                                                 *carbon-util*
 
