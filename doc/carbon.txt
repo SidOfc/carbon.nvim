@@ -1,0 +1,207 @@
+*carbon* *carbon.txt* *carbon.nvim.txt*
+
+  `Version: 0.1.0`
+  `Licence: MIT`
+  `Source:  https://github.com/SidOfc/carbon.nvim`
+  `Author:  Sidney Liebrand <sidneyliebrand@gmail.com>`
+
+  Carbon is a simple directory tree viewer for Neovim written in Lua.
+
+================================================================================
+TABLE OF CONTENTS                                     *carbon-contents* *carbon-toc*
+
+  To quickly jump to this table of contents, use |gg| or |go|.
+  To navigate to the helptag below the cursor, use CTRL-].
+
+  TABLE OF CONTENTS `.........` |carbon-contents|
+  USAGE `.....................` |carbon-usage|
+  COMMANDS `..................` |carbon-commands|
+  PLUGS `.....................` |carbon-plugs|
+  SETUP `.....................` |carbon-setup|
+  UTIL `......................` |carbon-util|
+  ENTRY `.....................` |carbon-entry|
+  BUFFER `....................` |carbon-buffer|
+  WATCHER `...................` |carbon-watcher|
+  SETTINGS `..................` |carbon-settings|
+
+================================================================================
+USAGE                                                               *carbon-usage*
+
+  Carbon automatically replaces |netrw| and remaps NetRW's |Explore| and
+  |Lexplore| commands to Carbon's |Carbon| and |Lcarbon| commands respectively.
+
+  For more specific usage and configuration information, see:
+  `-` |carbon-commands| for command details.
+  `-` |carbon-plugs| for mapping details.
+  `-` |carbon-setup| for configuration details.
+
+================================================================================
+COMMANDS                                                         *carbon-commands*
+
+  Carbon `................................................................` *Carbon*
+
+  Implementation: `:lua require('carbon').explore()`
+  Alias:          Explore unless |carbon-settings-keep-netrw| is enabled.
+
+  This command replaces the current buffer with the Carbon buffer.
+
+  Lcarbon `..............................................................` *Lcarbon*
+
+  Implementation: `:lua require('carbon').explore_left()`
+  Alias:          Lexplore unless |carbon-settings-keep-netrw| is enabled.
+
+  Opens the Carbon buffer in a new vertical split. When Carbon is opened this
+  way, pressing the key mapped to |carbon-plug-edit| will open files in a
+  split directly to the right.
+
+================================================================================
+PLUGS                                                               *carbon-plugs*
+
+  All |<Plug>| mappings are created unconditionally.
+
+  <plug>(carbon-up) `.............................................` *carbon-plug-up*
+
+  Implementation: `:<c-u>lua require('carbon').up()<cr>`
+  Mapping:        |carbon-settings-actions-up|
+
+  Sets Carbon's root to the parent directory of the current working directory.
+  Accepts a [count].
+
+  <plug>(carbon-down) `.........................................` *carbon-plug-down*
+
+  Implementation: `:<c-u>lua require('carbon').down()<cr>`
+  Mapping:        |carbon-settings-actions-down|
+
+  Sets Carbon's root to the directory under the cursor. If the entry under the
+  cursor is a file then the parent directory of the file's path will be used.
+  Accepts a [count] to allow navigating deeper into compressed paths.
+
+  <plug>(carbon-edit) `.........................................` *carbon-plug-edit*
+
+  Implementation: `:<c-u>lua require('carbon').edit()<cr>`
+  Mapping:        |carbon-settings-actions-edit|
+
+  If the entry below the cursor is a directory, opens or closes the
+  directory. Otherwise the file is opened in the current window unless the
+  |Lcarbon| command was used.
+
+  <plug>(carbon-reset) `.......................................` *carbon-plug-reset*
+
+  Implementation: `:<c-u>lua require('carbon').reset()<cr>`
+  Mapping:        |carbon-settings-actions-reset|
+
+  Sets Carbon's root to the initial directory that Neovim was opened with.
+
+  <plug>(carbon-split) `.......................................` *carbon-plug-split*
+
+  Implementation: `:<c-u>lua require('carbon').split()<cr>`
+  Mapping:        |carbon-settings-actions-split|
+
+  Opens the entry below the cursor in a new |split| if it is a file. If the
+  entry is a directory then nothing happens.
+
+  <plug>(carbon-vsplit) `.....................................` *carbon-plug-vsplit*
+
+  Implementation: `:<c-u>lua require('carbon').vsplit()<cr>`
+  Mapping:        |carbon-settings-actions-vsplit|
+
+  Opens the entry below the cursor in a new |vsplit| if it is a file. If the
+  entry is a directory then nothing happens.
+
+================================================================================
+SETUP                                                               *carbon-setup*
+
+================================================================================
+UTIL                                                                 *carbon-util*
+
+  plug `........................................................` *carbon-util-plug*
+
+  tbl_find `................................................` *carbon-util-tbl-find*
+
+  tbl_except `............................................` *carbon-util-tbl-except*
+
+  map `..........................................................` *carbon-util-map*
+
+  command `..................................................` *carbon-util-command*
+
+  highlight `..............................................` *carbon-util-highlight*
+
+================================================================================
+ENTRY                                                               *carbon-entry*
+
+  new `.........................................................` *carbon-entry-new*
+
+  find `.......................................................` *carbon-entry-find*
+
+  clean `.....................................................` *carbon-entry-clean*
+
+  synchronize `.........................................` *carbon-entry-synchronize*
+
+  children `...............................................` *carbon-entry-children*
+
+  has_children `.......................................` *carbon-entry-has-children*
+
+  set_children `.......................................` *carbon-entry-set-children*
+
+  get_children `.......................................` *carbon-entry-get-children*
+
+================================================================================
+BUFFER                                                             *carbon-buffer*
+
+  handle `..................................................` *carbon-buffer-handle*
+
+  show `......................................................` *carbon-buffer-show*
+
+  render `..................................................` *carbon-buffer-render*
+
+  cursor `..................................................` *carbon-buffer-cursor*
+
+  lines `....................................................` *carbon-buffer-lines*
+
+  synchronize `........................................` *carbon-buffer-synchronize*
+
+  up `..........................................................` *carbon-buffer-up*
+
+  down `......................................................` *carbon-buffer-down*
+
+  cd `..........................................................` *carbon-buffer-cd*
+
+  reset `....................................................` *carbon-buffer-reset*
+
+================================================================================
+WATCHER                                                           *carbon-watcher*
+
+  on `.........................................................` *carbon-watcher-on*
+
+  off `.......................................................` *carbon-watcher-off*
+
+  emit `.....................................................` *carbon-watcher-emit*
+
+  clear `...................................................` *carbon-watcher-clear*
+
+  release `...............................................` *carbon-watcher-release*
+
+  register `.............................................` *carbon-watcher-register*
+
+================================================================================
+SETTINGS                                                         *carbon-settings*
+
+  compress `............................................` *carbon-settings-compress*
+
+  auto_open `..........................................` *carbon-settings-auto-open*
+
+  keep_netrw `........................................` *carbon-settings-keep-netrw*
+
+  sync_on-cd `........................................` *carbon-settings-sync-on-cd*
+
+  sync_delay `........................................` *carbon-settings-sync-delay*
+
+  sidebar_width `..................................` *carbon-settings-sidebar-width*
+
+  exclude `..............................................` *carbon-settings-exclude*
+
+  indicators `........................................` *carbon-settings-indicators*
+
+  actions `..............................................` *carbon-settings-actions*
+
+  highlights `........................................` *carbon-settings-highlights*
