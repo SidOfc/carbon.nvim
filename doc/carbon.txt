@@ -15,9 +15,9 @@ TABLE OF CONTENTS                                     *carbon-contents* *carbon-
 
   TABLE OF CONTENTS `.........` |carbon-contents|
   USAGE `.....................` |carbon-usage|
+  SETUP `.....................` |carbon-setup|
   COMMANDS `..................` |carbon-commands|
   PLUGS `.....................` |carbon-plugs|
-  SETUP `.....................` |carbon-setup|
   UTIL `......................` |carbon-util|
   ENTRY `.....................` |carbon-entry|
   BUFFER `....................` |carbon-buffer|
@@ -31,82 +31,10 @@ USAGE                                                               *carbon-usag
   |Lexplore| commands to Carbon's |Carbon| and |Lcarbon| commands respectively.
 
   For more specific usage and configuration information, see:
+
   - |carbon-commands| for command details.
   - |carbon-plugs| for mapping details.
   - |carbon-setup| for configuration details.
-
-================================================================================
-COMMANDS                                                         *carbon-commands*
-
-  Carbon `................................................................` *Carbon*
-
-  Implementation: `:lua require('carbon').explore()`
-  Alias:          Explore unless |carbon-settings-keep-netrw| is enabled.
-
-  This command replaces the current buffer with the Carbon buffer.
-
-  Lcarbon `..............................................................` *Lcarbon*
-
-  Implementation: `:lua require('carbon').explore_left()`
-  Alias:          Lexplore unless |carbon-settings-keep-netrw| is enabled.
-
-  Opens the Carbon buffer in a new vertical split. When Carbon is opened this
-  way, pressing the key mapped to |carbon-plug-edit| will open files in a
-  split directly to the right.
-
-================================================================================
-PLUGS                                                               *carbon-plugs*
-
-  All |<Plug>| mappings are created unconditionally.
-
-  <plug>(carbon-up) `.............................................` *carbon-plug-up*
-
-  Implementation: `:<c-u>lua require('carbon').up()<cr>`
-  Mapping:        |carbon-settings-actions-up|
-
-  Sets Carbon's root to the parent directory of the current working directory.
-  Accepts a [count].
-
-  <plug>(carbon-down) `.........................................` *carbon-plug-down*
-
-  Implementation: `:<c-u>lua require('carbon').down()<cr>`
-  Mapping:        |carbon-settings-actions-down|
-
-  Sets Carbon's root to the directory under the cursor. If the entry under the
-  cursor is a file then the parent directory of the file's path will be used.
-  Accepts a [count] to allow navigating deeper into compressed paths.
-
-  <plug>(carbon-edit) `.........................................` *carbon-plug-edit*
-
-  Implementation: `:<c-u>lua require('carbon').edit()<cr>`
-  Mapping:        |carbon-settings-actions-edit|
-
-  If the entry below the cursor is a directory, opens or closes the
-  directory. Otherwise the file is opened in the current window unless the
-  |Lcarbon| command was used.
-
-  <plug>(carbon-reset) `.......................................` *carbon-plug-reset*
-
-  Implementation: `:<c-u>lua require('carbon').reset()<cr>`
-  Mapping:        |carbon-settings-actions-reset|
-
-  Sets Carbon's root to the initial directory that Neovim was opened with.
-
-  <plug>(carbon-split) `.......................................` *carbon-plug-split*
-
-  Implementation: `:<c-u>lua require('carbon').split()<cr>`
-  Mapping:        |carbon-settings-actions-split|
-
-  Opens the entry below the cursor in a new |split| if it is a file. If the
-  entry is a directory then nothing happens.
-
-  <plug>(carbon-vsplit) `.....................................` *carbon-plug-vsplit*
-
-  Implementation: `:<c-u>lua require('carbon').vsplit()<cr>`
-  Mapping:        |carbon-settings-actions-vsplit|
-
-  Opens the entry below the cursor in a new |vsplit| if it is a file. If the
-  entry is a directory then nothing happens.
 
 ================================================================================
 SETUP                                                               *carbon-setup*
@@ -147,9 +75,101 @@ SETUP                                                               *carbon-setu
   are directly modified and no merging of any kind will occur.
 
 ================================================================================
+COMMANDS                                                         *carbon-commands*
+
+  This section documents the behavior as well as the implementation of the
+  various |command| commands provided by Carbon.
+
+  `------------------------------------------------------------------------------`
+  Carbon                                                                  *Carbon*
+
+  Implementation: `:lua require('carbon').explore()`
+  Alias:          Explore unless |carbon-settings-keep-netrw| is enabled.
+
+  This command replaces the current buffer with the Carbon buffer.
+
+  `------------------------------------------------------------------------------`
+  Lcarbon                                                                *Lcarbon*
+
+  Implementation: `:lua require('carbon').explore_left()`
+  Alias:          Lexplore unless |carbon-settings-keep-netrw| is enabled.
+
+  Opens the Carbon buffer in a new vertical split. When Carbon is opened this
+  way, pressing the key mapped to |carbon-plug-edit| will open files in a
+  split directly to the right.
+
+================================================================================
+PLUGS                                                               *carbon-plugs*
+
+  Documentation for the default |<Plug>| mappings that Carbon provides.
+  |<Plug>| mappings are created unconditionally.
+
+  `------------------------------------------------------------------------------`
+  <plug>(carbon-up)                                               *carbon-plug-up*
+
+  Implementation: `:<c-u>lua require('carbon').up()<cr>`
+  Mapping:        |carbon-settings-actions-up|
+
+  Sets Carbon's root to the parent directory of the current working directory.
+  Accepts a [count].
+
+  `------------------------------------------------------------------------------`
+  <plug>(carbon-down)                                           *carbon-plug-down*
+
+  Implementation: `:<c-u>lua require('carbon').down()<cr>`
+  Mapping:        |carbon-settings-actions-down|
+
+  Sets Carbon's root to the directory under the cursor. If the entry under the
+  cursor is a file then the parent directory of the file's path will be used.
+  Accepts a [count] to allow navigating deeper into compressed paths.
+
+  `------------------------------------------------------------------------------`
+  <plug>(carbon-edit)                                           *carbon-plug-edit*
+
+  Implementation: `:<c-u>lua require('carbon').edit()<cr>`
+  Mapping:        |carbon-settings-actions-edit|
+
+  If the entry below the cursor is a directory, opens or closes the
+  directory. Otherwise the file is opened in the current window unless the
+  |Lcarbon| command was used.
+
+  `------------------------------------------------------------------------------`
+  <plug>(carbon-reset)                                         *carbon-plug-reset*
+
+  Implementation: `:<c-u>lua require('carbon').reset()<cr>`
+  Mapping:        |carbon-settings-actions-reset|
+
+  Sets Carbon's root to the initial directory that Neovim was opened with.
+
+  `------------------------------------------------------------------------------`
+  <plug>(carbon-split)                                         *carbon-plug-split*
+
+  Implementation: `:<c-u>lua require('carbon').split()<cr>`
+  Mapping:        |carbon-settings-actions-split|
+
+  Opens the entry below the cursor in a new |split| if it is a file. If the
+  entry is a directory then nothing happens.
+
+  `------------------------------------------------------------------------------`
+  <plug>(carbon-vsplit)                                       *carbon-plug-vsplit*
+
+  Implementation: `:<c-u>lua require('carbon').vsplit()<cr>`
+  Mapping:        |carbon-settings-actions-vsplit|
+
+  Opens the entry below the cursor in a new |vsplit| if it is a file. If the
+  entry is a directory then nothing happens.
+
+================================================================================
 UTIL                                                                 *carbon-util*
 
-  plug `........................................................` *carbon-util-plug*
+  Usage: `require('carbon.util')`
+
+  This sections describes the internal utilities used by Carbon itself. These
+  methods must always be considered unstable and should not be used in code
+  external to Carbon.
+
+  `------------------------------------------------------------------------------`
+  plug                                                          *carbon-util-plug*
 
   `require('carbon.util').plug(`{name}`)`
 
@@ -158,7 +178,8 @@ UTIL                                                                 *carbon-uti
 
   This function fails when {name} is not a string.
 
-  tbl_find `................................................` *carbon-util-tbl-find*
+  `------------------------------------------------------------------------------`
+  tbl_find                                                  *carbon-util-tbl-find*
 
   `require('carbon.util').tbl_find(`{tbl}, {callback}`)`
 
@@ -169,7 +190,8 @@ UTIL                                                                 *carbon-uti
   This function fails when {tbl} is not a table or when
   {callback} is not callable.
 
-  tbl_except `............................................` *carbon-util-tbl-except*
+  `------------------------------------------------------------------------------`
+  tbl_except                                              *carbon-util-tbl-except*
 
   `require('carbon.util').tbl_except(`{tbl}, {keys}`)`
 
@@ -178,7 +200,8 @@ UTIL                                                                 *carbon-uti
 
   This function fails when either {tbl} or {keys} is not a table.
 
-  map `..........................................................` *carbon-util-map*
+  `------------------------------------------------------------------------------`
+  map                                                            *carbon-util-map*
 
   `require('carbon.util').map(`{lhs}, {rhs}[, {options}]`)`
 
@@ -197,7 +220,8 @@ UTIL                                                                 *carbon-uti
   This function fails when {lhs} or {rhs} are not strings or if {options} is
   provided but not a table.
 
-  command `..................................................` *carbon-util-command*
+  `------------------------------------------------------------------------------`
+  command                                                    *carbon-util-command*
 
   `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
 
@@ -208,7 +232,8 @@ UTIL                                                                 *carbon-uti
   This function fails when {lhs} or {rhs} are not strings or if {options} is
   provided but not a table.
 
-  highlight `..............................................` *carbon-util-highlight*
+  `------------------------------------------------------------------------------`
+  highlight                                                *carbon-util-highlight*
 
   `require('carbon.util').highlight(`{group}, {properties}`)`
 
@@ -222,9 +247,22 @@ UTIL                                                                 *carbon-uti
 ================================================================================
 ENTRY                                                               *carbon-entry*
 
-  new `.........................................................` *carbon-entry-new*
+  Usage: `require('carbon.entry')`
 
-  `require('carbon.entry').new(`{path}[, {parent}]`)`
+  Provides a consistent interface for working with files and directories and
+  includes methods for fetching, caching, sorting, watching, and unwatching
+  entries. See |carbon-entry-new| for details on entry objects, a term which
+  will be used throughout this section to refer to entry instance objects.
+
+  WARNING:
+  static methods of this module are called using dot-syntax (`.`) whereas
+  instance methods of this module are called using colon-syntax (`:`). This
+  difference is visible in the function signature of each method.
+
+  `------------------------------------------------------------------------------`
+  new                                                           *carbon-entry-new*
+
+  Signature: `require('carbon.entry').new(`{path}[, {parent}]`)`
 
   Returns a new entry object for provided absolute {path}. The {path}
   parameter must be a string. {path} may point to files as well as
@@ -254,19 +292,24 @@ ENTRY                                                               *carbon-entr
   indicates a valid symlink, and `nil` is used when {path} is not a symlink.
 
   The following methods can be called on entries:
+
   - |carbon-entry-synchronize|
   - |carbon-entry-children|
   - |carbon-entry-has-children|
   - |carbon-entry-get-children|
   - |carbon-entry-set-children|
 
+  For example: `require('carbon.entry').new('/'):children()` will return a
+  table with the direct children of `/` as entry objects.
+
   This function will fail if {path} is not a path to an existing file or
   directory and passing a {parent} that is not an entry object created via
   `require('carbon.entry').new()` will lead to fatal rendering errors.
 
-  find `.......................................................` *carbon-entry-find*
+  `------------------------------------------------------------------------------`
+  find                                                         *carbon-entry-find*
 
-  `require('carbon.entry').find(`{path}`)`
+  Signature: `require('carbon.entry').find(`{path}`)`
 
   Used to find the entry object associated with {path}. The {path} entry must
   already be loaded by Carbon for this to work. That is, it only finds
@@ -277,21 +320,24 @@ ENTRY                                                               *carbon-entr
 
   For more information about entry objects, see: |carbon-entry-new|.
 
-  clean `.....................................................` *carbon-entry-clean*
+  `------------------------------------------------------------------------------`
+  clean                                                       *carbon-entry-clean*
 
-  `require('carbon.entry').clean(`{path}`)`
+  Signature: `require('carbon.entry').clean(`{path}`)`
 
   Removes all parent and sibling files and directories from the internal
   children cache used by Carbon. Also removes watchers from all removed
   children.
 
+  WARNING:
   It is not recommended to call this function manually because it
   has a high likelyhood of breaking Carbon if not used with caution. It is
   only documented for completeness.
 
-  synchronize `.........................................` *carbon-entry-synchronize*
+  `------------------------------------------------------------------------------`
+  synchronize                                           *carbon-entry-synchronize*
 
-  `entry:synchronize()`
+  Signature: `entry:synchronize()`
 
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| function.
@@ -304,9 +350,10 @@ ENTRY                                                               *carbon-entr
   When `entry.is_directory` is `false`, nothing happens because Carbon only
   listens to changes on and within directories.
 
-  children `...............................................` *carbon-entry-children*
+  `------------------------------------------------------------------------------`
+  children                                                 *carbon-entry-children*
 
-  `entry:children()`
+  Signature: `entry:children()`
 
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| function.
@@ -316,9 +363,10 @@ ENTRY                                                               *carbon-entr
   child entry objects or an empty table if it has no children such as regular
   files and empty directories.
 
-  has_children `.......................................` *carbon-entry-has-children*
+  `------------------------------------------------------------------------------`
+  has_children                                         *carbon-entry-has-children*
 
-  `entry:has_children()`
+  Signature: `entry:has_children()`
 
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| function.
@@ -326,9 +374,10 @@ ENTRY                                                               *carbon-entr
   Returns `true` when children of `entry.path` have already been cached.
   Returns `false` otherwise.
 
-  set_children `.......................................` *carbon-entry-set-children*
+  `------------------------------------------------------------------------------`
+  set_children                                         *carbon-entry-set-children*
 
-  `entry:set_children(`{children}`)`
+  Signature: `entry:set_children(`{children}`)`
 
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| function.
@@ -339,9 +388,10 @@ ENTRY                                                               *carbon-entr
   When {children} is `nil` the next call to |carbon-entry-children| will
   result in a fresh listing directly from the file system.
 
-  get_children `.......................................` *carbon-entry-get-children*
+  `------------------------------------------------------------------------------`
+  get_children                                         *carbon-entry-get-children*
 
-  `entry:get_children()`
+  Signature: `entry:get_children()`
 
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| function.
@@ -357,60 +407,86 @@ ENTRY                                                               *carbon-entr
 ================================================================================
 BUFFER                                                             *carbon-buffer*
 
-  handle `..................................................` *carbon-buffer-handle*
+  `------------------------------------------------------------------------------`
+  handle                                                    *carbon-buffer-handle*
 
-  show `......................................................` *carbon-buffer-show*
+  `------------------------------------------------------------------------------`
+  show                                                        *carbon-buffer-show*
 
-  render `..................................................` *carbon-buffer-render*
+  `------------------------------------------------------------------------------`
+  render                                                    *carbon-buffer-render*
 
-  cursor `..................................................` *carbon-buffer-cursor*
+  `------------------------------------------------------------------------------`
+  cursor                                                    *carbon-buffer-cursor*
 
-  lines `....................................................` *carbon-buffer-lines*
+  `------------------------------------------------------------------------------`
+  lines                                                      *carbon-buffer-lines*
 
-  synchronize `........................................` *carbon-buffer-synchronize*
+  `------------------------------------------------------------------------------`
+  synchronize                                          *carbon-buffer-synchronize*
 
-  up `..........................................................` *carbon-buffer-up*
+  `------------------------------------------------------------------------------`
+  up                                                            *carbon-buffer-up*
 
-  down `......................................................` *carbon-buffer-down*
+  `------------------------------------------------------------------------------`
+  down                                                        *carbon-buffer-down*
 
-  cd `..........................................................` *carbon-buffer-cd*
+  `------------------------------------------------------------------------------`
+  cd                                                            *carbon-buffer-cd*
 
-  reset `....................................................` *carbon-buffer-reset*
+  `------------------------------------------------------------------------------`
+  reset                                                      *carbon-buffer-reset*
 
 ================================================================================
 WATCHER                                                           *carbon-watcher*
 
-  on `.........................................................` *carbon-watcher-on*
+  `------------------------------------------------------------------------------`
+  on                                                           *carbon-watcher-on*
 
-  off `.......................................................` *carbon-watcher-off*
+  `------------------------------------------------------------------------------`
+  off                                                         *carbon-watcher-off*
 
-  emit `.....................................................` *carbon-watcher-emit*
+  `------------------------------------------------------------------------------`
+  emit                                                       *carbon-watcher-emit*
 
-  clear `...................................................` *carbon-watcher-clear*
+  `------------------------------------------------------------------------------`
+  clear                                                     *carbon-watcher-clear*
 
-  release `...............................................` *carbon-watcher-release*
+  `------------------------------------------------------------------------------`
+  release                                                 *carbon-watcher-release*
 
-  register `.............................................` *carbon-watcher-register*
+  `------------------------------------------------------------------------------`
+  register                                               *carbon-watcher-register*
 
 ================================================================================
 SETTINGS                                                         *carbon-settings*
 
-  compress `............................................` *carbon-settings-compress*
+  `------------------------------------------------------------------------------`
+  compress                                              *carbon-settings-compress*
 
-  auto_open `..........................................` *carbon-settings-auto-open*
+  `------------------------------------------------------------------------------`
+  auto_open                                            *carbon-settings-auto-open*
 
-  keep_netrw `........................................` *carbon-settings-keep-netrw*
+  `------------------------------------------------------------------------------`
+  keep_netrw                                          *carbon-settings-keep-netrw*
 
-  sync_on-cd `........................................` *carbon-settings-sync-on-cd*
+  `------------------------------------------------------------------------------`
+  sync_on-cd                                          *carbon-settings-sync-on-cd*
 
-  sync_delay `........................................` *carbon-settings-sync-delay*
+  `------------------------------------------------------------------------------`
+  sync_delay                                          *carbon-settings-sync-delay*
 
-  sidebar_width `..................................` *carbon-settings-sidebar-width*
+  `------------------------------------------------------------------------------`
+  sidebar_width                                    *carbon-settings-sidebar-width*
 
-  exclude `..............................................` *carbon-settings-exclude*
+  `------------------------------------------------------------------------------`
+  exclude                                                *carbon-settings-exclude*
 
-  indicators `........................................` *carbon-settings-indicators*
+  `------------------------------------------------------------------------------`
+  indicators                                          *carbon-settings-indicators*
 
-  actions `..............................................` *carbon-settings-actions*
+  `------------------------------------------------------------------------------`
+  actions                                                *carbon-settings-actions*
 
-  highlights `........................................` *carbon-settings-highlights*
+  `------------------------------------------------------------------------------`
+  highlights                                          *carbon-settings-highlights*
