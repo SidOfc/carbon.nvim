@@ -54,8 +54,7 @@ SETUP                                                               *carbon-setu
   `  })`
   `EOF`
 
-  If setting options directly is preferred, passing a function
-  is also possible:
+  If setting options directly is preferred, passing a function is also possible:
 
   init.lua:
   `require('carbon').setup(function(settings)`
@@ -84,7 +83,7 @@ COMMANDS                                                         *carbon-command
   Carbon                                                                  *Carbon*
 
   Implementation: `:lua require('carbon').explore()`
-  Alias:          Explore unless |carbon-settings-keep-netrw| is enabled.
+  Alias:          Explore unless |carbon-setting-keep-netrw| is enabled.
 
   This command replaces the current buffer with the Carbon buffer.
 
@@ -92,7 +91,7 @@ COMMANDS                                                         *carbon-command
   Lcarbon                                                                *Lcarbon*
 
   Implementation: `:lua require('carbon').explore_left()`
-  Alias:          Lexplore unless |carbon-settings-keep-netrw| is enabled.
+  Alias:          Lexplore unless |carbon-setting-keep-netrw| is enabled.
 
   Opens the Carbon buffer in a new vertical split. When Carbon is opened this
   way, pressing the key mapped to |carbon-plug-edit| will open files in a
@@ -108,7 +107,7 @@ PLUGS                                                               *carbon-plug
   <plug>(carbon-up)                                               *carbon-plug-up*
 
   Implementation: `:<c-u>lua require('carbon').up()<cr>`
-  Mapping:        |carbon-settings-actions-up|
+  Mapping:        |carbon-setting-actions-up|
 
   Sets Carbon's root to the parent directory of the current working directory.
   Accepts a [count].
@@ -117,7 +116,7 @@ PLUGS                                                               *carbon-plug
   <plug>(carbon-down)                                           *carbon-plug-down*
 
   Implementation: `:<c-u>lua require('carbon').down()<cr>`
-  Mapping:        |carbon-settings-actions-down|
+  Mapping:        |carbon-setting-actions-down|
 
   Sets Carbon's root to the directory under the cursor. If the entry under the
   cursor is a file then the parent directory of the file's path will be used.
@@ -127,7 +126,7 @@ PLUGS                                                               *carbon-plug
   <plug>(carbon-edit)                                           *carbon-plug-edit*
 
   Implementation: `:<c-u>lua require('carbon').edit()<cr>`
-  Mapping:        |carbon-settings-actions-edit|
+  Mapping:        |carbon-setting-actions-edit|
 
   If the entry below the cursor is a directory, opens or closes the
   directory. Otherwise the file is opened in the current window unless the
@@ -137,7 +136,7 @@ PLUGS                                                               *carbon-plug
   <plug>(carbon-reset)                                         *carbon-plug-reset*
 
   Implementation: `:<c-u>lua require('carbon').reset()<cr>`
-  Mapping:        |carbon-settings-actions-reset|
+  Mapping:        |carbon-setting-actions-reset|
 
   Sets Carbon's root to the initial directory that Neovim was opened with.
 
@@ -145,7 +144,7 @@ PLUGS                                                               *carbon-plug
   <plug>(carbon-split)                                         *carbon-plug-split*
 
   Implementation: `:<c-u>lua require('carbon').split()<cr>`
-  Mapping:        |carbon-settings-actions-split|
+  Mapping:        |carbon-setting-actions-split|
 
   Opens the entry below the cursor in a new |split| if it is a file. If the
   entry is a directory then nothing happens.
@@ -154,7 +153,7 @@ PLUGS                                                               *carbon-plug
   <plug>(carbon-vsplit)                                       *carbon-plug-vsplit*
 
   Implementation: `:<c-u>lua require('carbon').vsplit()<cr>`
-  Mapping:        |carbon-settings-actions-vsplit|
+  Mapping:        |carbon-setting-actions-vsplit|
 
   Opens the entry below the cursor in a new |vsplit| if it is a file. If the
   entry is a directory then nothing happens.
@@ -254,7 +253,7 @@ ENTRY                                                               *carbon-entr
   entries. See |carbon-entry-new| for details on entry objects, a term which
   will be used throughout this section to refer to entry instance objects.
 
-  WARNING:
+  NOTE:
   static methods of this module are called using dot-syntax (`.`) whereas
   instance methods of this module are called using colon-syntax (`:`). This
   difference is visible in the function signature of each method.
@@ -330,7 +329,7 @@ ENTRY                                                               *carbon-entr
   children.
 
   WARNING:
-  It is not recommended to call this function manually because it
+  It is not recommended to call this method manually because it
   has a high likelyhood of breaking Carbon if not used with caution. It is
   only documented for completeness.
 
@@ -340,7 +339,7 @@ ENTRY                                                               *carbon-entr
   Signature: `entry:synchronize()`
 
   The variable `entry` in this section refers to an entry object as returned by
-  the |carbon-entry-new| function.
+  the |carbon-entry-new| method.
 
   When `entry.is_directory` is `true`, synchronizes all its children with the
   current state of the file system recursively. Files and folders that were
@@ -348,7 +347,7 @@ ENTRY                                                               *carbon-entr
   will be refreshed.
 
   When `entry.is_directory` is `false`, nothing happens because Carbon only
-  listens to changes on and within directories.
+  listens to changes to and within directories.
 
   `------------------------------------------------------------------------------`
   children                                                 *carbon-entry-children*
@@ -356,7 +355,7 @@ ENTRY                                                               *carbon-entr
   Signature: `entry:children()`
 
   The variable `entry` in this section refers to an entry object as returned by
-  the |carbon-entry-new| function.
+  the |carbon-entry-new| method.
 
   When `entry.is_directory` is true, fetches children using
   |carbon-entry-get-children| and caches them. Always returns a table with
@@ -369,7 +368,7 @@ ENTRY                                                               *carbon-entr
   Signature: `entry:has_children()`
 
   The variable `entry` in this section refers to an entry object as returned by
-  the |carbon-entry-new| function.
+  the |carbon-entry-new| method.
 
   Returns `true` when children of `entry.path` have already been cached.
   Returns `false` otherwise.
@@ -380,7 +379,7 @@ ENTRY                                                               *carbon-entr
   Signature: `entry:set_children(`{children}`)`
 
   The variable `entry` in this section refers to an entry object as returned by
-  the |carbon-entry-new| function.
+  the |carbon-entry-new| method.
 
   Set the cached children of `entry.path` to {children}. The {children} must
   be a table with entry object elements or `nil`.
@@ -394,48 +393,209 @@ ENTRY                                                               *carbon-entr
   Signature: `entry:get_children()`
 
   The variable `entry` in this section refers to an entry object as returned by
-  the |carbon-entry-new| function.
+  the |carbon-entry-new| method.
 
   Returns a table of entry object elements by calling |readdir| on `entry.path`.
   The entry objects will be direct children of `entry.path`. The table will be
   sorted in case-insensitive alphabetical order and all directories will come
   before any files.
 
-  Paths matching any of the patterns defined in |carbon-settings-exclude| will
+  Paths matching any of the patterns defined in |carbon-setting-exclude| will
   be excluded from the returned table.
 
 ================================================================================
 BUFFER                                                             *carbon-buffer*
 
+  Usage: `require('carbon.buffer')`
+
+  This module is one of Carbon's core modules. It provides methods and
+  utilities to show the directory tree, interact with it, and keep it
+  synchronized with changes from the file system.
+
+                                                         *carbon-buffer-data-root*
+
+  The following sections may refer to a `data.root` entry object.
+  This `data.root` variable is local and private to this module. It is set to
+  a |carbon-entry-new| created with the value of |getcwd()| as only argument.
+
+  This variable is the internal representation of the file tree which functions
+  such as |carbon-buffer-lines| can use as a data source or functions like
+  |carbon-buffer-up|, |carbon-buffer-down|, |carbon-buffer-reset|, or
+  |carbon-buffer-cd| can manipulate to enable navigating up from the current
+  working directory, down into a child, reset back to the original
+  directory Neovim was opened with, or set to an arbitrary path.
+
   `------------------------------------------------------------------------------`
   handle                                                    *carbon-buffer-handle*
+
+  Signature: `require('carbon.buffer').handle()`
+
+  Checks the current buffer handle and if valid, returns it. Otherwise creates
+  and configures a new buffer, updates the current buffer handle and returns
+  the new buffer handle.
+
+  The buffer name will always be `'carbon'` and the following buffer-local
+  options are always set:
+
+  |swapfile|    =>  `false`
+  |filetype|    =>  `'carbon'`
+  |bufhidden|   =>  `'hide'`
+  |buftype|     =>  `'nofile'`
+  |modifiable|  =>  `false`
+
+  Finally, if there are actions to map in |carbon-setting-actions| then they
+  will be mapped locally to this buffer to a |<Plug>| mapping with the
+  same suffix from |carbon-plugs|.
 
   `------------------------------------------------------------------------------`
   show                                                        *carbon-buffer-show*
 
+  Signature: `require('carbon.buffer').show()`
+
+  Show the Carbon buffer in the current window. Triggers a |carbon-buffer-render|.
+
   `------------------------------------------------------------------------------`
   render                                                    *carbon-buffer-render*
+
+  Signature: `require('carbon.buffer').render()`
+
+  Renders the Carbon buffer. The contents are determined by calling the
+  |carbon-buffer-lines| method with the `data.root` entry object as only
+  argument. See |carbon-buffer-data-root| for more information about `data.root`.
 
   `------------------------------------------------------------------------------`
   cursor                                                    *carbon-buffer-cursor*
 
+  Signature: `require('carbon.buffer').cursor()`
+
+  Returns the result at index `line('.')` from |carbon-buffer-lines| called with
+  |carbon-buffer-data-root| as only argument.
+
   `------------------------------------------------------------------------------`
   lines                                                      *carbon-buffer-lines*
+
+  Signature: `require('carbon.buffer').lines(`{entry}[, {lines}[, {depth}]]`)`
+
+  The {entry} argument must be an entry object as returned by |carbon-entry-new|.
+  The {lines} argument is optional. Defaults to an empty table `{}`.
+  When {lines} is set to a table, this table will be used instead as accumulator
+  for the results. Finally, the optional {depth} argument can be used to specify
+  the initial indentation level. Defaults to `0`.
+
+  Returns a table of "line objects" to render. A "line object" has the
+  following data layout:
+
+  `{`
+  `  entry = `{entry}`,`
+  `  line = <string>,`
+  `  highlights = <table<table<string, number, number>>>,`
+  `  path = <table<string>>,`
+  `}`
+
+  Property: `entry`
+
+  The {entry} which was used to generate the `line`, `highlights`,
+  and `path` property values.
+
+  Property: `line`
+
+  This property is set to the text that should be rendered to the buffer.
+
+  Property: `highlights`
+
+  The `highlights` property provides zero or more highlights for the current
+  {entry}. A highlight in this context is a table with the following structure:
+
+  `{`
+  `  <string HighlightGroupName>,`
+  `  <number start_column>,`
+  `  <number end_column>,`
+  `}`
+
+  |carbon-buffer-render| uses |nvim_buf_add_highlight| to set the highlights.
+  It is called the following way:
+
+  `vim.api.nvim_buf_add_highlight(`
+  `  buffer.handle(),`
+  `  data.namespace,`
+  `  highlight[1],` => `<string HighlightGroupName>`
+  `  lnum - 1,`
+  `  highlight[2],` => `<number start_column>`
+  `  highlight[3],` => `<number end_column>`
+  `)`
+
+  Property: `path`
+
+  When |carbon-setting-compress| is enabled, this table is filled with the
+  compressed parent entry objects of `entry`.
 
   `------------------------------------------------------------------------------`
   synchronize                                          *carbon-buffer-synchronize*
 
+  Signature: `require('carbon.buffer').synchronize()`
+
+  Calls |carbon-entry-synchronize| on |carbon-buffer-data-root| and calls
+  |carbon-buffer-render| afterwards.
+
   `------------------------------------------------------------------------------`
   up                                                            *carbon-buffer-up*
+
+  Signature: `require('carbon.buffer').up(`[{count}]`)`
+
+  Set |carbon-buffer-data-root| to its {count}th parent directory. When {count}
+  is not supplied, it will use `vim.v.count1` which defaults to `1` or [count] if
+  specified while executing this method in a mapping.
+
+  This method moves the root up one level at a time. It queries the children
+  of the parent and replaces the child with the same path as the current
+  `data.root` with `data.root`. It also sets `data.root` to an open state so
+  when "zooming out" you still see what you had open.
+
+  After doing all this, the `data.root` is finally set to the actual parent.
+  This routine then is repeated {count} `- 1` more times.
+
+  Returns `true` if the root is replaced at least once. `nil` otherwise. This
+  can happen when you are at your OS root directory and try to go up more.
 
   `------------------------------------------------------------------------------`
   down                                                        *carbon-buffer-down*
 
+  Signature: `require('carbon.buffer').down(`[{count}]`)`
+
+  Set |carbon-buffer-data-root| to its {count}th child directory below the
+  cursor. When {count} is not supplied, it will use `vim.v.count1` which defaults
+  to `1` or [count] if specified while executing this method in a mapping.
+
+  Specifying a {count} is only useful when the cursor is on a compressed path.
+  The |carbon-setting-compress| section explains how compressed paths work.
+
+  With the cursor on this path `a/b/c/d/e.txt`, calling this method without
+  specifying a {count} will move the root to `/a`, you will now see the path
+  `b/c/d/e.txt`. If you call the method again, but this time you supply `2` as
+  {count} you will navigate "past" `c/` directly into `d/`. You will now only
+  see `e.txt`.
+
+  Returns `true` when the root is replaced, `nil` when the `new_root` path is the
+  same as the current `data.root` path in which case the root is not replaced.
+
   `------------------------------------------------------------------------------`
   cd                                                            *carbon-buffer-cd*
 
+  Signature: `require('carbon.buffer').cd(`{path}`)`
+
+  Set |carbon-buffer-data-root| to a |carbon-entry-new| created using {path}.
+  This method remembers the state of all child directories when navigating up
+  directories. When navigating to a child of the current working directory
+  Carbon tries look for any children in its own state to jump to without
+  having to perform additional file system reads. In any other case, Carbon
+  navigates to the {path} entry object.
+
   `------------------------------------------------------------------------------`
   reset                                                      *carbon-buffer-reset*
+
+  Signature: `require('carbon.buffer').reset()`
+
+  Set |carbon-buffer-data-root| to the original |pwd| using |carbon-buffer-cd|.
 
 ================================================================================
 WATCHER                                                           *carbon-watcher*
@@ -462,31 +622,31 @@ WATCHER                                                           *carbon-watche
 SETTINGS                                                         *carbon-settings*
 
   `------------------------------------------------------------------------------`
-  compress                                              *carbon-settings-compress*
+  compress                                               *carbon-setting-compress*
 
   `------------------------------------------------------------------------------`
-  auto_open                                            *carbon-settings-auto-open*
+  auto_open                                             *carbon-setting-auto-open*
 
   `------------------------------------------------------------------------------`
-  keep_netrw                                          *carbon-settings-keep-netrw*
+  keep_netrw                                           *carbon-setting-keep-netrw*
 
   `------------------------------------------------------------------------------`
-  sync_on-cd                                          *carbon-settings-sync-on-cd*
+  sync_on-cd                                           *carbon-setting-sync-on-cd*
 
   `------------------------------------------------------------------------------`
-  sync_delay                                          *carbon-settings-sync-delay*
+  sync_delay                                           *carbon-setting-sync-delay*
 
   `------------------------------------------------------------------------------`
-  sidebar_width                                    *carbon-settings-sidebar-width*
+  sidebar_width                                     *carbon-setting-sidebar-width*
 
   `------------------------------------------------------------------------------`
-  exclude                                                *carbon-settings-exclude*
+  exclude                                                 *carbon-setting-exclude*
 
   `------------------------------------------------------------------------------`
-  indicators                                          *carbon-settings-indicators*
+  indicators                                           *carbon-setting-indicators*
 
   `------------------------------------------------------------------------------`
-  actions                                                *carbon-settings-actions*
+  actions                                                 *carbon-setting-actions*
 
   `------------------------------------------------------------------------------`
-  highlights                                          *carbon-settings-highlights*
+  highlights                                           *carbon-setting-highlights*
