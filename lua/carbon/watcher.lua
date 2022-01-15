@@ -1,5 +1,8 @@
 local watcher = {}
-local data = { listeners = {}, events = {} }
+local data = {
+  listeners = {},
+  events = { change = {}, rename = {}, ['change-and-rename'] = {} },
+}
 
 function watcher.clear()
   for path in pairs(data.listeners) do
@@ -24,33 +27,49 @@ function watcher.register(path)
     path,
     {},
     vim.schedule_wrap(function(error, filename, status)
-      if status.rename then
-        watcher.emit('rename', path, filename, error)
+      if status.change and status.rename then
+        watcher.emit('change-and-rename', path, filename, error)
       elseif status.change then
         watcher.emit('change', path, filename, error)
+      elseif status.rename then
+        watcher.emit('rename', path, filename, error)
       end
     end)
   )
 end
 
 function watcher.emit(event, ...)
-  if type(data.events[event]) == 'function' then
-    data.events[event](event, ...)
+  for callback in pairs(data.events[event]) do
+    callback(event, ...)
   end
 end
 
 function watcher.on(event, callback)
-  if type(event) == 'table' then
-    for _, event in ipairs(event) do
-      data.events[event] = callback
+  if event == '*' then
+    for key in pairs(data.events) do
+      data.events[key][callback] = callback
+    end
+  elseif type(event) == 'table' then
+    for key in ipairs(event) do
+      data.events[key][callback] = callback
     end
   else
     data.events[event] = callback
   end
 end
 
-function watcher.off(event)
-  data.events[event] = nil
+function watcher.off(event, callback)
+  if event == '*' then
+    for key in pairs(data.events) do
+      data.events[key][callback] = nil
+    end
+  elseif type(event) == 'table' then
+    for key in pairs(event) do
+      data.events[key][callback] = nil
+    end
+  else
+    data.events[event][callback] = nil
+  end
 end
 
 return watcher
