@@ -1,5 +1,6 @@
 local util = require('carbon.util')
 local buffer = require('carbon.buffer')
+local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local carbon = {}
 
@@ -18,6 +19,8 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
+  watcher.on('*', buffer.watch)
+
   util.command('Carbon', carbon.explore)
   util.command('Lcarbon', carbon.explore_left)
 

@@ -1,6 +1,5 @@
 local util = require('carbon.util')
 local entry = require('carbon.entry')
-local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local buffer = {}
 local open_cwd = vim.fn.getcwd()
@@ -12,14 +11,14 @@ local data = {
   status_timer = -1,
 }
 
-watcher.on('*', function(path, filename)
+function buffer.watch(path, filename)
   vim.fn.timer_stop(data.status_timer)
 
   data.status_timer = vim.fn.timer_start(
     settings.sync_delay,
     buffer.synchronize
   )
-end)
+end
 
 function buffer.handle()
   if vim.api.nvim_buf_is_loaded(data.handle) then
