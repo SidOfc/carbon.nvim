@@ -109,8 +109,8 @@ PLUGS                                                               *carbon-plug
   Implementation: `:<c-u>lua require('carbon').up()<cr>`
   Mapping:        |carbon-setting-actions-up|
 
-  Sets Carbon's root to the parent directory of the current working directory.
-  Accepts a [count].
+  Sets |carbon-buffer-data-root| to the parent directory of the current
+  working directory. Accepts a [count].
 
   `------------------------------------------------------------------------------`
   <plug>(carbon-down)                                           *carbon-plug-down*
@@ -118,9 +118,18 @@ PLUGS                                                               *carbon-plug
   Implementation: `:<c-u>lua require('carbon').down()<cr>`
   Mapping:        |carbon-setting-actions-down|
 
-  Sets Carbon's root to the directory under the cursor. If the entry under the
-  cursor is a file then the parent directory of the file's path will be used.
-  Accepts a [count] to allow navigating deeper into compressed paths.
+  Sets |carbon-buffer-data-root| to the directory under the cursor. If the entry
+  under the cursor is a file then the parent directory of the file's path will
+  be used. Accepts a [count] to allow navigating deeper into compressed paths.
+
+  `------------------------------------------------------------------------------`
+  <plug>(carbon-reset)                                         *carbon-plug-reset*
+
+  Implementation: `:<c-u>lua require('carbon').reset()<cr>`
+  Mapping:        |carbon-setting-actions-reset|
+
+  Sets |carbon-buffer-data-root| to the initial directory that Neovim
+  was opened with.
 
   `------------------------------------------------------------------------------`
   <plug>(carbon-edit)                                           *carbon-plug-edit*
@@ -131,14 +140,6 @@ PLUGS                                                               *carbon-plug
   If the entry below the cursor is a directory, opens or closes the
   directory. Otherwise the file is opened in the current window unless the
   |Lcarbon| command was used.
-
-  `------------------------------------------------------------------------------`
-  <plug>(carbon-reset)                                         *carbon-plug-reset*
-
-  Implementation: `:<c-u>lua require('carbon').reset()<cr>`
-  Mapping:        |carbon-setting-actions-reset|
-
-  Sets Carbon's root to the initial directory that Neovim was opened with.
 
   `------------------------------------------------------------------------------`
   <plug>(carbon-split)                                         *carbon-plug-split*
@@ -246,7 +247,7 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').reset()`
 
-  Calls |carbon-buffer-reset|. When the |buffer-data-root| is updated
+  Calls |carbon-buffer-reset|. When the |carbon-buffer-data-root| is updated
   successfully, this method will move the cursor to the top of the buffer and
   rerender.
 
@@ -255,7 +256,7 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').down()`
 
-  Calls |carbon-buffer-down|. When the |buffer-data-root| is updated
+  Calls |carbon-buffer-down|. When the |carbon-buffer-data-root| is updated
   successfully, this method will move the cursor to the top of the buffer and
   rerender.
 
@@ -264,8 +265,8 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').cd(`[{path}]`)`
 
-  Calls |carbon-buffer-cd| to set |buffer-data-root| to {path}. If {path} is not
-  supplied then |vim.v| variable `vim.v.event.cwd` will be used. When updated
+  Calls |carbon-buffer-cd| to set |carbon-buffer-data-root| to {path}. If {path}
+  is not supplied then |vim.v| variable `vim.v.event.cwd` will be used. When updated
   successfully, this method will move the cursor to the top of the buffer
   and rerender.
 
@@ -896,26 +897,113 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   auto_open                                             *carbon-setting-auto-open*
 
+  Default: `true`
+
+  When enabled and Neovim is opened with a directory path argument, Carbon's
+  buffer will open immediately.
+
   `------------------------------------------------------------------------------`
   keep_netrw                                           *carbon-setting-keep-netrw*
 
+  Default: `false`
+
+  When `true` NetRW will not be harmed by Carbon. This also means that
+  `Explore` and `Lexplore` are no longer aliased to `Carbon` and `Lcarbon` anymore.
+
+  This does not prevent Carbon from showing on vim startup instead of NetRW.
+  To control this behavior, see |carbon-setting-auto-open|.
+
   `------------------------------------------------------------------------------`
-  sync_on-cd                                           *carbon-setting-sync-on-cd*
+  sync_on_cd                                           *carbon-setting-sync-on-cd*
+
+  Default: `not vim.opt.autochdir:get()`
+
+  Disabled by default when |autochdir| is set to `1`, enabled by default when
+  |autochdir| set to `0`. When enabled, Carbon listens for `:cd` commands.
+  Once a `:cd` command is executed Carbon will automatically update
+  |carbon-buffer-data-root| to that path.
 
   `------------------------------------------------------------------------------`
   sync_delay                                           *carbon-setting-sync-delay*
 
+  Default: `30`
+
+  The amount of milliseconds to wait before updating and rerendering the
+  buffer. Carbon debounces file system events by default to reduce the amount
+  of updating and rerendering.
+
   `------------------------------------------------------------------------------`
   sidebar_width                                     *carbon-setting-sidebar-width*
+
+  Default: `30`
+
+  The width in columns of the sidebar window opened by |Lcarbon|.
 
   `------------------------------------------------------------------------------`
   exclude                                                 *carbon-setting-exclude*
 
+  Default:
+    `{`
+    `  '~$',`
+    `  '#$',`
+    `  '%.git$',`
+    `  '%.bak$',`
+    `  '%.rbc$',`
+    `  '%.class$',`
+    `  '%.sw[a-p]$',`
+    `  '%.py[cod]$',`
+    `  '%.Trashes$',`
+    `  '%.DS_Store$',`
+    `  'Thumbs%.db$',`
+    `  '__pycache__',`
+    `  'node_modules',`
+    `}`
+
+  Paths matching any lua pattern are filtered removed. For more information
+  about these patterns, see: https://www.lua.org/pil/20.2.html.
+  This setting may be set to `nil` to show everything.
+
   `------------------------------------------------------------------------------`
   indicators                                           *carbon-setting-indicators*
+                                                *carbon-setting-indicators-expand*
+                                              *carbon-setting-indicators-collapse*
+
+  Default:
+    `{`
+    `  expand = '+',`
+    `  collapse = '-',`
+    `}`
+
+  Controls the expand and collapse indicators shown before a directory. Using
+  more than one character is allowed. Use `' '` to remove an indicator.
 
   `------------------------------------------------------------------------------`
   actions                                                 *carbon-setting-actions*
+                           *carbon-setting-actions-up* *carbon-setting-actions-down*
+                        *carbon-setting-actions-edit* *carbon-setting-actions-reset*
+                      *carbon-setting-actions-split* *carbon-setting-actions-vsplit*
+
+  Default:
+    `{`
+    `  up = '[',`
+    `  down = ']',`
+    `  edit = '<cr>',`
+    `  reset = '.',`
+    `  split = '<c-x>',`
+    `  vsplit = '<c-v>',`
+    `}`
+
+  Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
+  Carbon from creating any mapping. Setting one of its properties to `nil`
+  will disable the mapping for that specific property. Each property maps
+  to a |<Plug>| mapping defined in |carbon-plugs|:
+
+  `up`      =>  |carbon-plug-up|
+  `down`    =>  |carbon-plug-down|
+  `edit`    =>  |carbon-plug-edit|
+  `reset`   =>  |carbon-plug-reset|
+  `split`   =>  |carbon-plug-split|
+  `vsplit`  =>  |carbon-plug-vsplit|
 
   `------------------------------------------------------------------------------`
   highlights                                           *carbon-setting-highlights*
