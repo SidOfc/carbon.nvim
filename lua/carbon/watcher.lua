@@ -50,7 +50,7 @@ function watcher.on(event, callback)
       data.events[key][callback] = callback
     end
   elseif type(event) == 'table' then
-    for key in ipairs(event) do
+    for _, key in ipairs(event) do
       data.events[key][callback] = callback
     end
   else
@@ -64,7 +64,7 @@ function watcher.off(event, callback)
       data.events[key][callback] = nil
     end
   elseif type(event) == 'table' then
-    for key in pairs(event) do
+    for _, key in ipairs(event) do
       data.events[key][callback] = nil
     end
   else
