@@ -314,10 +314,23 @@ UTIL                                                                 *carbon-uti
 
   `require('carbon.util').map(`{lhs}, {rhs}[, {options}]`)`
 
-  Wraps |nvim_set_keymap| and |nvim_buf_set_keymap|. Maps {lhs} to
-  {rhs}. An optional {options} table can supplied. It accepts the same
-  options as |nvim_set_keymap| does and also supports two extra options:
-  `mode` which defaults to `'n'` and `buffer` which defaults to `nil`.
+  Wraps |nvim_set_keymap| and |nvim_buf_set_keymap|. Maps {lhs} to {rhs}.
+  An optional {options} table can supplied. It accepts the same options
+  as |nvim_set_keymap| does and also supports two extra options: `mode` which
+  defaults to `'n'` and `buffer` which defaults to `nil`.
+
+  {lhs} must be a string containing the key for this mapping.
+  {rhs} must be a vim command string or a function.
+
+  When a function is passed to {rhs}, it is pushed to a table local to the
+  util module. The {rhs} is then replaced with a sequence which calls
+  |carbon-util-map-callback| with the correct index. For example:
+
+  `require('carbon.util').map(`"n", function() print("hello") end`)`
+
+  Will map the key `"n"` to:
+
+  `:<c-u>lua require("carbon.util").map_callback(1)<cr>`
 
   To create a |Visual| mapping pass `mode = 'v'`, to create a buffer-local
   mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
@@ -326,8 +339,16 @@ UTIL                                                                 *carbon-uti
   functions because they are explicitly filtered out for internal use by the
   map utility function. All other {options} keys will be passed through.
 
-  This function fails when {lhs} or {rhs} are not strings or if {options} is
-  provided but not a table.
+  This function fails when {lhs} is not a string or {rhs} is not a string or
+  function or if {options} is provided but not a table.
+
+  `------------------------------------------------------------------------------`
+  map_callback                                          *carbon-util-map-callback*
+
+  Signature: `require('carbon.util').map_callback(`{index}`)`
+
+  Calls the function stored at {index}. The |carbon-util-map| method uses this
+  method to be able to accept callback functions.
 
   `------------------------------------------------------------------------------`
   command                                                    *carbon-util-command*
