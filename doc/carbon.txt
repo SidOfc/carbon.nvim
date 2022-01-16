@@ -848,6 +848,51 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   compress                                               *carbon-setting-compress*
 
+  Default: `true`
+
+  When enabled, allows Carbon to compress deeply nested children as long as
+  they only contain a single child. For example, take the following structure:
+
+  `pwd`
+  `|-- a/`
+  `|-- |-- b/`
+  `|-- |-- |-- c/`
+  `|-- |-- |-- |-- d.txt`
+  `|-- t/`
+  `|-- |-- u/`
+  `|-- |-- |-- v.txt`
+  `|-- |-- |-- w.txt`
+  `|-- |-- x/`
+  `|-- |-- |-- y/`
+  `|-- |-- |-- |-- z.txt`
+
+  We can see here that `a/` contains a single child `b/` which contains a
+  single child `c/` which contains a single child `d.txt`. We can also see
+  that `t/` contains two children, `u/` which contains `v.txt` and `w.txt`, and `x/`
+  which contains a single child `y` which contains a single child `z.txt`. When
+  compression is enabled, Carbon shows the above structure like this:
+
+  `pwd/`
+  `  a/b/c/d.txt`
+  `+ v/`
+
+  Because `a/`, `b/`, `c/`, and `d.txt` are all only children of their parent,
+  this path can be compressed to the point where we can directly see `d.txt`
+  even though it is nested quite deep in the directory tree. For the other
+  directory `t/` however, no compression can take place at the top level
+  because `t/` itself contains two children. If we open `t/` however, you will
+  see the following:
+
+  `pwd/`
+  `  a/b/c/d.txt`
+  `- t/`
+  `  + u/`
+  `    x/y/z.txt`
+
+  We see here that `u/` is not expanded because it contains two children,
+  `v.txt` and `w.txt` whereas `x/`, `y/`, and `z.txt` are all only children of
+  their parent which means those can be compressed.
+
   `------------------------------------------------------------------------------`
   auto_open                                             *carbon-setting-auto-open*
 
