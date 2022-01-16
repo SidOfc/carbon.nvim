@@ -17,6 +17,7 @@ TABLE OF CONTENTS                                     *carbon-contents* *carbon-
   SETUP `.....................` |carbon-setup|
   COMMANDS `..................` |carbon-commands|
   PLUGS `.....................` |carbon-plugs|
+  CARBON `....................` |carbon-carbon|
   UTIL `......................` |carbon-util|
   ENTRY `.....................` |carbon-entry|
   BUFFER `....................` |carbon-buffer|
@@ -156,6 +157,116 @@ PLUGS                                                               *carbon-plug
 
   Opens the entry below the cursor in a new |vsplit| if it is a file. If the
   entry is a directory then nothing happens.
+
+================================================================================
+CARBON                                                             *carbon-carbon*
+
+  Usage: `require('carbon')`
+
+  `------------------------------------------------------------------------------`
+  setup                                                      *carbon-carbon-setup*
+
+  Signature: `require('carbon').setup(`{preferences}`)`
+
+  This method updates Carbon's |carbon-settings| with user {preferences}.
+  The {preferences} argument can be a table which will be deep-merged with
+  |carbon-settings-table| or a callback function which accepts
+  |carbon-settings-table| as argument. The callback can modify the settings
+  freely. See |carbon-setup| for init.vim / init.lua setup call examples.
+
+  `------------------------------------------------------------------------------`
+  initialize                                            *carbon-carbon-initialize*
+
+  Signature: `require('carbon').initialize()`
+
+  Initializes Carbon. This method creates |carbon-commands|, |carbon-plugs|,
+  autocommands, and highlights. It hijacks NetRW depending on the value of
+  |carbon-setting-keep-netrw| and automatically opens the Carbon buffer if
+  Neovim was opened with a directory path depending on |carbon-setting-auto-open|.
+
+  This method must be called before the buffer is created otherwise the buffer
+  will not function properly.
+
+  `------------------------------------------------------------------------------`
+  edit                                                        *carbon-carbon-edit*
+
+  Signature: `require('carbon').edit()`
+
+  If the entry which the cursor is on is a directory then this method expands
+  or collapses it depending on its current state. If it is a file and the
+  current buffer was opened using |carbon-carbon-explore-left| then the file will
+  be opened in a new split to the right. A split will be created if it does not
+  exist. Otherwise if it is a file it will be edited in the current window.
+
+  `------------------------------------------------------------------------------`
+  split                                                      *carbon-carbon-split*
+
+  Signature: `require('carbon').split()`
+
+  If the entry which the cursor is on is a directory then this will result in
+  a no-op. If it is a file it will be opened in a horizontal split. Respects
+  your |splitbelow| preference.
+
+  `------------------------------------------------------------------------------`
+  vsplit                                                    *carbon-carbon-vsplit*
+
+  Signature: `require('carbon').vsplit()`
+
+  Like |carbon-carbon-split| but instead of a horizontal split, opens a
+  vertical split. Respects your |splitright| preference.
+
+  `------------------------------------------------------------------------------`
+  explore                                                  *carbon-carbon-explore*
+
+  Signature: `require('carbon').explore()`
+
+  Show Carbon in the current window. Calls |carbon-buffer-show| internally.
+  Used by the |Carbon| command.
+
+  `------------------------------------------------------------------------------`
+  explore_left                                        *carbon-carbon-explore-left*
+
+  Signature: `require('carbon').explore_left()`
+
+  Show Carbon in a new vertical split on the left side with a width of
+  |carbon-setting-sidebar-width|. Used by the |Lcarbon| command and modifies how
+  |carbon-carbon-edit| works for that window.
+
+  `------------------------------------------------------------------------------`
+  up                                                            *carbon-carbon-up*
+
+  Signature: `require('carbon').up()`
+
+  Calls |carbon-buffer-up|. When the |buffer-data-root| is updated
+  successfully, this method will move the cursor to the top of the buffer and
+  rerender.
+
+  `------------------------------------------------------------------------------`
+  reset                                                      *carbon-carbon-reset*
+
+  Signature: `require('carbon').reset()`
+
+  Calls |carbon-buffer-reset|. When the |buffer-data-root| is updated
+  successfully, this method will move the cursor to the top of the buffer and
+  rerender.
+
+  `------------------------------------------------------------------------------`
+  down                                                        *carbon-carbon-down*
+
+  Signature: `require('carbon').down()`
+
+  Calls |carbon-buffer-down|. When the |buffer-data-root| is updated
+  successfully, this method will move the cursor to the top of the buffer and
+  rerender.
+
+  `------------------------------------------------------------------------------`
+  cd                                                            *carbon-carbon-cd*
+
+  Signature: `require('carbon').cd(`[{path}]`)`
+
+  Set |buffer-data-root| to {path}. If {path} is not supplied then |vim.v|
+  variable `vim.v.event.cwd` will be used. When updated successfully, this method
+  will move the cursor to the top of the buffer and rerender.
 
 ================================================================================
 UTIL                                                                 *carbon-util*
