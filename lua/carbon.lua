@@ -146,8 +146,8 @@ function carbon.down()
   end
 end
 
-function carbon.cd()
-  if buffer.cd(vim.v.event.cwd) then
+function carbon.cd(path)
+  if buffer.cd(path or vim.v.event.cwd) then
     vim.fn.cursor(1, 1)
     buffer.render()
   end
