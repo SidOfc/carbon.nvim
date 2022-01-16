@@ -1,4 +1,5 @@
 local util = {}
+local data = { map_callbacks = {} }
 
 function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'
@@ -24,10 +25,22 @@ function util.tbl_except(tbl, keys)
   return settings
 end
 
+function util.map_callback(index, ...)
+  if type(data.map_callbacks[index]) == 'function' then
+    return data.map_callbacks[index](...)
+  end
+end
+
 function util.map(lhs, rhs, settings_param)
   local settings = settings_param or {}
   local options = util.tbl_except(settings, { 'mode', 'buffer' })
   local mode = settings.mode or 'n'
+
+  if type(rhs) == 'function' then
+    local index = #data.map_callbacks + 1
+    data.map_callbacks[index] = rhs
+    rhs = ':<c-u>lua require("carbon.util").map_callback(' .. index .. ')<cr>'
+  end
 
   if settings.buffer then
     vim.api.nvim_buf_set_keymap(settings.buffer, mode, lhs, rhs, options)
