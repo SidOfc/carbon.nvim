@@ -264,9 +264,10 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').cd(`[{path}]`)`
 
-  Set |buffer-data-root| to {path}. If {path} is not supplied then |vim.v|
-  variable `vim.v.event.cwd` will be used. When updated successfully, this method
-  will move the cursor to the top of the buffer and rerender.
+  Calls |carbon-buffer-cd| to set |buffer-data-root| to {path}. If {path} is not
+  supplied then |vim.v| variable `vim.v.event.cwd` will be used. When updated
+  successfully, this method will move the cursor to the top of the buffer
+  and rerender.
 
 ================================================================================
 UTIL                                                                 *carbon-util*
