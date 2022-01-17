@@ -965,13 +965,11 @@ SETTINGS                                                         *carbon-setting
 
   `------------------------------------------------------------------------------`
   indicators                                           *carbon-setting-indicators*
-                                                *carbon-setting-indicators-expand*
-                                              *carbon-setting-indicators-collapse*
 
   Default:
     `{`
-    `  expand = '+',`
-    `  collapse = '-',`
+    `  expand = '+',`                             *carbon-setting-indicators-expand*
+    `  collapse = '-',`                         *carbon-setting-indicators-collapse*
     `}`
 
   Controls the expand and collapse indicators shown before a directory. Using
@@ -979,18 +977,15 @@ SETTINGS                                                         *carbon-setting
 
   `------------------------------------------------------------------------------`
   actions                                                 *carbon-setting-actions*
-                           *carbon-setting-actions-up* *carbon-setting-actions-down*
-                        *carbon-setting-actions-edit* *carbon-setting-actions-reset*
-                      *carbon-setting-actions-split* *carbon-setting-actions-vsplit*
 
   Default:
     `{`
-    `  up = '[',`
-    `  down = ']',`
-    `  edit = '<cr>',`
-    `  reset = '.',`
-    `  split = '<c-x>',`
-    `  vsplit = '<c-v>',`
+    `  up = '[',`                                        *carbon-setting-actions-up*
+    `  down = ']',`                                    *carbon-setting-actions-down*
+    `  edit = '<cr>',`                                 *carbon-setting-actions-edit*
+    `  reset = '.',`                                  *carbon-setting-actions-reset*
+    `  split = '<c-x>',`                              *carbon-setting-actions-split*
+    `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
     `}`
 
   Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
@@ -1007,5 +1002,50 @@ SETTINGS                                                         *carbon-setting
 
   `------------------------------------------------------------------------------`
   highlights                                           *carbon-setting-highlights*
+
+  Default:
+    `highlights = {`
+    `  CarbonDir = {`                          *carbon-setting-highlights-CarbonDir*
+    `    ctermfg = 'DarkBlue',`
+    `    guifg = '#00aaff',`
+    `    cterm = 'bold',`
+    `    gui = 'bold',`
+    `  },`
+    `  CarbonFile = {`                        *carbon-setting-highlights-CarbonFile*
+    `    ctermfg = 'LightGray',`
+    `    guifg = '#f8f8f8',`
+    `    cterm = 'bold',`
+    `    gui = 'bold',`
+    `  },`
+    `  CarbonExe = {`                          *carbon-setting-highlights-CarbonExe*
+    `    ctermfg = 'Green',`
+    `    guifg = '#22cc22',`
+    `    cterm = 'bold',`
+    `    gui = 'bold',`
+    `  },`
+    `  CarbonSymlink = {`                  *carbon-setting-highlights-CarbonSymlink*
+    `    ctermfg = 'Magenta',`
+    `    guifg = '#d77ee0',`
+    `    cterm = 'bold',`
+    `    gui = 'bold',`
+    `  },`
+    `  CarbonBrokenSymlink = {`      *carbon-setting-highlights-CarbonBrokenSymlink*
+    `    ctermfg = 'Brown',`
+    `    guifg = '#ea871e',`
+    `    cterm = 'bold',`
+    `    gui = 'bold',`
+    `  },`
+    `  CarbonIndicator = {`              *carbon-settings-highlight-CarbonIndicator*
+    `    ctermfg = 'DarkGray',`
+    `    guifg = 'Gray',`
+    `    cterm = 'bold',`
+    `    gui = 'bold',`
+    `  },`
+    `}`
+
+  The full highlighting configuration used by Carbon. Each key of this table
+  will become a highlight group. The table of properties attached to each key will
+  determine how the final generated highlight group will look. Any valid
+  property of |highlight| commands is also valid in this table.
 
 vim:ft=help

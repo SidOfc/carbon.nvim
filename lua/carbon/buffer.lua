@@ -85,6 +85,13 @@ function buffer.lines(entry, lines, depth)
   entry = entry or data.root
   lines = lines or {}
   depth = depth or 0
+  local expand_indicator = ' '
+  local collapse_indicator = ' '
+
+  if type(settings.indicators) == 'table' then
+    expand_indicator = settings.indicators.expand or expand_indicator
+    collapse_indicator = settings.indicators.collapse or collapse_indicator
+  end
 
   if #lines == 0 then
     lines[#lines + 1] = {
@@ -116,9 +123,9 @@ function buffer.lines(entry, lines, depth)
       path_suffix = '/'
 
       if not is_empty and tmp.is_open then
-        indicator = settings.indicators.collapse
+        indicator = collapse_indicator
       elseif not is_empty then
-        indicator = settings.indicators.expand
+        indicator = expand_indicator
       end
     end
 
