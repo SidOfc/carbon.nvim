@@ -2,7 +2,7 @@ local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local entry = {}
-local data = { children = {} }
+local data = { children = {}, open = {} }
 
 entry.__index = entry
 entry.__lt = function(a, b)
@@ -19,9 +19,12 @@ end
 
 function entry.new(path, parent)
   local is_directory = vim.fn.isdirectory(path) == 1
-  local resolved = select(2, pcall(function()
-    return vim.fn.resolve(path)
-  end))
+  local resolved = select(
+    2,
+    pcall(function()
+      return vim.fn.resolve(path)
+    end)
+  )
 
   if is_directory then
     watcher.register(path)
@@ -80,7 +83,7 @@ function entry:synchronize()
       end)
 
       if previous then
-        child.is_open = previous.is_open
+        child:set_open(previous:is_open())
 
         if previous:has_children() then
           child:synchronize()
@@ -88,6 +91,14 @@ function entry:synchronize()
       end
     end
   end
+end
+
+function entry:set_open(value)
+  data.open[self.path] = value
+end
+
+function entry:is_open()
+  return data.open[self.path]
 end
 
 function entry:children()

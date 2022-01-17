@@ -122,7 +122,7 @@ function buffer.lines(entry, lines, depth)
       is_empty = #tmp:children() == 0
       path_suffix = '/'
 
-      if not is_empty and tmp.is_open then
+      if not is_empty and tmp:is_open() then
         indicator = collapse_indicator
       elseif not is_empty then
         indicator = expand_indicator
@@ -174,7 +174,7 @@ function buffer.lines(entry, lines, depth)
       path = path,
     }
 
-    if tmp.is_directory and tmp.is_open then
+    if tmp.is_directory and tmp:is_open() then
       buffer.lines(tmp, lines, depth + 1)
     end
   end
@@ -198,7 +198,7 @@ function buffer.up(count)
     if new_root.path ~= data.root.path then
       new_root:set_children(vim.tbl_map(function(entry)
         if entry.path == data.root.path then
-          data.root.is_open = true
+          data.root:set_open(true)
           data.root.parent = new_root
 
           return data.root
@@ -224,7 +224,8 @@ function buffer.down(count)
   end
 
   if new_root.path ~= data.root.path then
-    data.root.is_open = true
+    data.root:set_open(true)
+
     data.root = new_root
 
     entry.clean(data.root.path)

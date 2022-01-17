@@ -502,6 +502,24 @@ ENTRY                                                               *carbon-entr
   listens to changes to and within directories.
 
   `------------------------------------------------------------------------------`
+  set_open                                                 *carbon-entry-set-open*
+
+  Signature: `entry:set_open(`{value}`)`
+
+  Any truthy value will be treated as if the `entry` is open, any falsy value
+  will be treated as if the `entry` is closed.
+
+  `------------------------------------------------------------------------------`
+  is_open                                                   *carbon-entry-is-open*
+
+  Signature: `entry:is_open()`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| method.
+
+  Returns `true`, `false`, `nil`, or otherwise the value set by |carbon-entry-set-open|.
+
+  `------------------------------------------------------------------------------`
   children                                                 *carbon-entry-children*
 
   Signature: `entry:children()`

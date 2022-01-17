@@ -78,7 +78,7 @@ function carbon.edit()
   local entry = buffer.cursor().entry
 
   if entry.is_directory then
-    entry.is_open = not entry.is_open
+    entry:set_open(not entry:is_open())
 
     buffer.render()
   elseif vim.w.carbon_lexplore_window then
