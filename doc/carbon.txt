@@ -32,9 +32,9 @@ USAGE                                                               *carbon-usag
 
   For more specific usage and configuration information, see:
 
+  - |carbon-setup| for configuration details.
   - |carbon-commands| for command details.
   - |carbon-plugs| for mapping details.
-  - |carbon-setup| for configuration details.
 
 ================================================================================
 SETUP                                                               *carbon-setup*
@@ -85,7 +85,7 @@ COMMANDS                                                         *carbon-command
   Implementation: `:lua require('carbon').explore()`
   Alias:          Explore unless |carbon-setting-keep-netrw| is enabled.
 
-  This command replaces the current buffer with the Carbon buffer.
+  Replaces the current buffer with the Carbon buffer.
 
   `------------------------------------------------------------------------------`
   Lcarbon                                                                *Lcarbon*
@@ -110,7 +110,8 @@ PLUGS                                                               *carbon-plug
   Mapping:        |carbon-setting-actions-up|
 
   Sets |carbon-buffer-data-root| to the parent directory of the current
-  working directory. Accepts a [count].
+  working directory. Accepts a [count], when given, jumps to [count]nth parent
+  directory of the current working directory.
 
   `------------------------------------------------------------------------------`
   <plug>(carbon-down)                                           *carbon-plug-down*
@@ -121,6 +122,8 @@ PLUGS                                                               *carbon-plug
   Sets |carbon-buffer-data-root| to the directory under the cursor. If the entry
   under the cursor is a file then the parent directory of the file's path will
   be used. Accepts a [count] to allow navigating deeper into compressed paths.
+  See |carbon-setting-compress| and |carbon-buffer-down| for more information
+  about how compressed paths work and how they are handled.
 
   `------------------------------------------------------------------------------`
   <plug>(carbon-reset)                                         *carbon-plug-reset*
@@ -137,7 +140,7 @@ PLUGS                                                               *carbon-plug
   Implementation: `:<c-u>lua require('carbon').edit()<cr>`
   Mapping:        |carbon-setting-actions-edit|
 
-  If the entry below the cursor is a directory, opens or closes the
+  If the entry below the cursor is a directory, expands or collapses the
   directory. Otherwise the file is opened in the current window unless the
   |Lcarbon| command was used.
 
@@ -164,6 +167,9 @@ CARBON                                                             *carbon-carbo
 
   Usage: `require('carbon')`
 
+  This is Carbon's main module. It contains functions which are used for
+  configuration, initialization, and mappings.
+
   `------------------------------------------------------------------------------`
   setup                                                      *carbon-carbon-setup*
 
@@ -184,9 +190,11 @@ CARBON                                                             *carbon-carbo
   autocommands, and highlights. It hijacks NetRW depending on the value of
   |carbon-setting-keep-netrw| and automatically opens the Carbon buffer if
   Neovim was opened with a directory path depending on |carbon-setting-auto-open|.
+  It also attaches a callback to the watcher to enable auto-refreshing the
+  buffer when file system events occur.
 
-  This method must be called before the buffer is created otherwise the buffer
-  will not function properly.
+  This method should be called only once per Neovim instance and must be called
+  before any buffer is created otherwise such buffer will not function properly.
 
   `------------------------------------------------------------------------------`
   edit                                                        *carbon-carbon-edit*
@@ -275,7 +283,7 @@ UTIL                                                                 *carbon-uti
 
   Usage: `require('carbon.util')`
 
-  This sections describes the internal utilities used by Carbon itself. These
+  This section describes the internal utilities used by Carbon itself. These
   methods must always be considered unstable and should not be used in code
   external to Carbon.
 
@@ -361,8 +369,11 @@ UTIL                                                                 *carbon-uti
   function and |nvim_add_user_command| is that the {options} argument is
   optional, when not passed it will default to an empty table.
 
-  This function fails when {lhs} or {rhs} are not strings or if {options} is
-  provided but not a table.
+  {lhs} must be a string containing the key name for this |user-command|.
+  {rhs} must be a vim command string or a function.
+
+  This function fails when {lhs} is not a string or {rhs} is not a string or
+  function or if {options} is provided but not a table.
 
   `------------------------------------------------------------------------------`
   highlight                                                *carbon-util-highlight*
@@ -382,9 +393,9 @@ ENTRY                                                               *carbon-entr
   Usage: `require('carbon.entry')`
 
   Provides a consistent interface for working with files and directories and
-  includes methods for fetching, caching, sorting, watching, and unwatching
-  entries. See |carbon-entry-new| for details on entry objects, a term which
-  will be used throughout this section to refer to entry instance objects.
+  includes methods for fetching, caching, and sorting entries.
+  See |carbon-entry-new| for details on entry objects, a term which will be used
+  throughout this documentation to refer to entry instance objects.
 
   NOTE:
   static methods of this module are called using dot-syntax (`.`) whereas
@@ -846,6 +857,48 @@ WATCHER                                                           *carbon-watche
 ================================================================================
 SETTINGS                                                         *carbon-settings*
 
+  Usage: `require('carbon.settings')`
+
+  Stores all the settings Carbon needs to function properly, it does not expose
+  any methods of its own. See below for a table with references to helptags:
+
+                                                           *carbon-settings-table*
+
+  `{`
+  `  compress      = `|carbon-setting-compress|`,`
+  `  auto_open     = `|carbon-setting-auto-open|`,`
+  `  keep_netrw    = `|carbon-setting-keep-netrw|`,`
+  `  sync_on_cd    = `|carbon-setting-sync-on-cd|`,`
+  `  sync_delay    = `|carbon-setting-sync-delay|`,`
+  `  sidebar_width = `|carbon-setting-sidebar-width|`,`
+  `  exclude       = `|carbon-setting-exclude|`,`
+
+  `  indicators = {`
+  `    expand   = `|carbon-setting-indicators-expand|`,`
+  `    collapse = `|carbon-setting-indicators-collapse|`,`
+  `  },`
+
+  `  actions = {`
+  `    up     = `|carbon-setting-actions-up|`,`
+  `    down   = `|carbon-setting-actions-down|`,`
+  `    edit   = `|carbon-setting-actions-edit|`,`
+  `    reset  = `|carbon-setting-actions-reset|`,`
+  `    split  = `|carbon-setting-actions-split|`,`
+  `    vsplit = `|carbon-setting-actions-vsplit|`,`
+  `  },`
+
+  `  highlights = {`
+  `    CarbonDir           = `|carbon-setting-highlights-CarbonDir|`,`
+  `    CarbonFile          = `|carbon-setting-highlights-CarbonFile|`,`
+  `    CarbonExe           = `|carbon-setting-highlights-CarbonExe|`,`
+  `    CarbonSymlink       = `|carbon-setting-highlights-CarbonSymlink|`,`
+  `    CarbonBrokenSymlink = `|carbon-setting-highlights-CarbonBrokenSymlink|`,`
+  `    CarbonIndicator     = `|carbon-setting-highlights-CarbonIndicator|`,`
+  `  },`
+  `}`
+
+  Each specific setting is detailed in this module's documentation.
+
   `------------------------------------------------------------------------------`
   compress                                               *carbon-setting-compress*
 
@@ -973,7 +1026,9 @@ SETTINGS                                                         *carbon-setting
     `}`
 
   Controls the expand and collapse indicators shown before a directory. Using
-  more than one character is allowed. Use `' '` to remove an indicator.
+  more than one character is allowed. This setting may be set to `nil` to
+  disable indicators. Individual indicators can also be disabled by setting
+  them to `nil`.
 
   `------------------------------------------------------------------------------`
   actions                                                 *carbon-setting-actions*
@@ -1004,7 +1059,7 @@ SETTINGS                                                         *carbon-setting
   highlights                                           *carbon-setting-highlights*
 
   Default:
-    `highlights = {`
+    `{`
     `  CarbonDir = {`                          *carbon-setting-highlights-CarbonDir*
     `    ctermfg = 'DarkBlue',`
     `    guifg = '#00aaff',`
@@ -1047,5 +1102,8 @@ SETTINGS                                                         *carbon-setting
   will become a highlight group. The table of properties attached to each key will
   determine how the final generated highlight group will look. Any valid
   property of |highlight| commands is also valid in this table.
+
+  The `highlights` setting may be set to `nil` to prevent any highlight groups
+  from being generated.
 
 vim:ft=help
