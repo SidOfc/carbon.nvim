@@ -412,6 +412,9 @@ ENTRY                                                               *carbon-entr
   directories. When {parent} is supplied, it is set as the entry object's
   `parent` property. {parent} must be another entry object if provided.
 
+  This method will also use |carbon-watcher-register| to register a listener
+  for {path}.
+
   The returned entry object has the following shape:
 
   `{`
@@ -458,8 +461,9 @@ ENTRY                                                               *carbon-entr
   already be loaded by Carbon for this to work. That is, it only finds
   children that have already been loaded by Carbon.
 
-  When an entry object matches {path} it is returned, otherwise the return
-  value will be `nil`. This function will not fail if {path} is not a string!
+  When an entry object's `path` matches {path} it is returned, otherwise the
+  return value will be `nil`. This function will not fail if {path}
+  is not a string!
 
   For more information about entry objects, see: |carbon-entry-new|.
 
@@ -470,7 +474,7 @@ ENTRY                                                               *carbon-entr
 
   Removes all parent and sibling files and directories from the internal
   children cache used by Carbon. Also removes watchers from all removed
-  children.
+  children using |carbon-watcher-release|.
 
   WARNING:
   It is not recommended to call this method manually because it
@@ -489,6 +493,10 @@ ENTRY                                                               *carbon-entr
   current state of the file system recursively. Files and folders that were
   added, removed, renamed, or had their permissions changed within `entry.path`
   will be refreshed.
+
+  The method |carbon-watcher-release| will be called with the `path` of each
+  entry that will be removed. New entries will automatically call
+  |carbon-watcher-register| in |carbon-entry-new|.
 
   When `entry.is_directory` is `false`, nothing happens because Carbon only
   listens to changes to and within directories.
@@ -624,7 +632,7 @@ BUFFER                                                             *carbon-buffe
   The {lines} argument is optional. Defaults to an empty table `{}`.
   When {lines} is set to a table, this table will be used instead as accumulator
   for the results. Finally, the optional {depth} argument can be used to specify
-  the initial indentation level. Defaults to `0`.
+  the initial indentation depth. Defaults to `0`.
 
   Returns a table of "line objects" to render. A "line object" has the
   following data layout:
@@ -633,7 +641,7 @@ BUFFER                                                             *carbon-buffe
   `  entry = `{entry}`,`
   `  line = <string>,`
   `  highlights = <table<table<string, number, number>>>,`
-  `  path = <table<string>>,`
+  `  path = <table<entry>>,`
   `}`
 
   Property: `entry`
@@ -648,7 +656,7 @@ BUFFER                                                             *carbon-buffe
   Property: `highlights`
 
   The `highlights` property provides zero or more highlights for the current
-  {entry}. A highlight in this context is a table with the following structure:
+  `line`. A highlight in this context is a table with the following structure:
 
   `{`
   `  <string HighlightGroupName>,`
