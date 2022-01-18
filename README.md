@@ -54,6 +54,8 @@ Carbon comes with a few mappings out of the box, each is described below:
 
 ### Move root up
 
+![Carbon up example](/doc/assets/carbon-up.webm)
+
 Mapping: <kbd>[</kbd>
 
 Moves Carbon's root directory up one level and rerender. See `:h carbon-plug-up`
