@@ -54,17 +54,15 @@ Carbon comes with a few mappings out of the box, each is described below:
 
 ### Move root up
 
-![Carbon up example](/doc/assets/carbon-up.gif)
-
 Mapping: <kbd>[</kbd>
 
 Moves Carbon's root directory up one level and rerender. See `:h carbon-plug-up`
 for more information and customization options. Accepts a **count** to go up
 multiple levels at once.
 
-### Move root down
+![Carbon up example](/doc/assets/carbon-up.gif)
 
-![Carbon down example](/doc/assets/carbon-down.gif)
+### Move root down
 
 Mapping: <kbd>]</kbd>
 
@@ -72,18 +70,18 @@ Moves Carbon's root directory down one level and rerender. See
 `:h carbon-plug-down` for more information and customization options. Accepts
 a **count** to go down multiple levels at once on compressed paths.
 
-### Reset root
+![Carbon down example](/doc/assets/carbon-down.gif)
 
-![Carbon reset example](/doc/assets/carbon-reset.gif)
+### Reset root
 
 Mapping: <kbd>.</kbd>
 
 Resets Carbon's root directory back to the directory Neovim is opened with.
 See `:h carbon-plug-reset` for more information and customization options.
 
-### Edit file or toggle directory
+![Carbon reset example](/doc/assets/carbon-reset.gif)
 
-![Carbon edit example](/doc/assets/carbon-edit.gif)
+### Edit file or toggle directory
 
 Mapping: <kbd>enter</kbd>
 
@@ -92,21 +90,22 @@ that file in the current buffer and hide Carbon. This mapping works differently
 when Carbon is opened with `:Lcarbon`. See `:h carbon-plug-edit` for more
 information and customization options.
 
-### Edit file in horizontal split
+![Carbon edit example](/doc/assets/carbon-edit.gif)
 
-![Carbon split example](/doc/assets/carbon-split.gif)
+### Edit file in horizontal split
 
 Mapping: <kbd>ctrl</kbd>+<kbd>x</kbd>
 
 Does nothing when on a directory. Edit a file in a new horizontal split. See
 `:h carbon-plug-split` for more information and customization points.
 
-### Edit file in vertical split
+![Carbon split example](/doc/assets/carbon-split.gif)
 
-![Carbon vsplit example](/doc/assets/carbon-vsplit.gif)
+### Edit file in vertical split
 
 Mapping: <kbd>ctrl</kbd>+<kbd>v</kbd>
 
 Does nothing when on a directory. Edit a file in a new vertical split. See
 `:h carbon-plug-vsplit` for more information and customization points.
 
+![Carbon vsplit example](/doc/assets/carbon-vsplit.gif)
