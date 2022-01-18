@@ -31,6 +31,28 @@ Configuration can be supplied like this:
 
 ```viml
 lua << EOF
+  require('carbon').setup({
+    setting = 'value',
+  })
+EOF
+```
+
+**init.lua**
+
+```lua
+require('carbon').setup({
+  setting = 'value',
+})
+```
+
+These settings will be deep merged with the default settings. See
+`:h carbon-settings-table` for a list of available settings. An
+alternative option of calling this method also exists:
+
+**init.vim**
+
+```viml
+lua << EOF
   require('carbon').setup(function(settings)
     settings.setting = 'value';
   end)
@@ -44,6 +66,9 @@ require('carbon').setup(function(settings)
   settings.setting = 'value';
 end)
 ```
+
+This option is more flexible as you have full control over the settings.
+You are free to modify them as you wish, no merging will occur.
 
 See `:h carbon-setup` for a more detailed explanation on configuration.
 See `:h carbon-carbon-setup` for documentation about the `.setup` method.
