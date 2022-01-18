@@ -54,7 +54,7 @@ Carbon comes with a few mappings out of the box, each is described below:
 
 ### Move root up
 
-![Carbon up example](/doc/assets/carbon-up.webm)
+![Carbon up example](/doc/assets/carbon-up.mov)
 
 Mapping: <kbd>[</kbd>
 
