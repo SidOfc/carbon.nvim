@@ -64,6 +64,8 @@ multiple levels at once.
 
 ### Move root down
 
+![Carbon down example](/doc/assets/carbon-down.gif)
+
 Mapping: <kbd>]</kbd>
 
 Moves Carbon's root directory down one level and rerender. See
@@ -72,12 +74,16 @@ a **count** to go down multiple levels at once on compressed paths.
 
 ### Reset root
 
+![Carbon reset example](/doc/assets/carbon-reset.gif)
+
 Mapping: <kbd>.</kbd>
 
 Resets Carbon's root directory back to the directory Neovim is opened with.
 See `:h carbon-plug-reset` for more information and customization options.
 
 ### Edit file or toggle directory
+
+![Carbon edit example](/doc/assets/carbon-edit.gif)
 
 Mapping: <kbd>enter</kbd>
 
@@ -88,12 +94,16 @@ information and customization options.
 
 ### Edit file in horizontal split
 
+![Carbon split example](/doc/assets/carbon-split.gif)
+
 Mapping: <kbd>ctrl</kbd>+<kbd>x</kbd>
 
 Does nothing when on a directory. Edit a file in a new horizontal split. See
 `:h carbon-plug-split` for more information and customization points.
 
 ### Edit file in vertical split
+
+![Carbon vsplit example](/doc/assets/carbon-vsplit.gif)
 
 Mapping: <kbd>ctrl</kbd>+<kbd>v</kbd>
 
