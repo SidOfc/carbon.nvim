@@ -1,6 +1,6 @@
 # Carbon.nvim
 
-![Carbon logo](doc/assets/logo-green.png)
+![Carbon logo](doc/assets/logo.svg)
 
 The simple directory tree viewer for Neovim written in Lua.
 
