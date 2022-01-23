@@ -502,6 +502,23 @@ ENTRY                                                               *carbon-entr
   listens to changes to and within directories.
 
   `------------------------------------------------------------------------------`
+  terminate                                               *carbon-entry-terminate*
+
+  Signature: `entry:terminate()`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| method.
+
+  This method calls |carbon-watcher-release| with `entry.path`, calls
+  `entry:terminate` on |carbon-entry-children| if |carbon-entry-has-children|
+  is `true`, and if `entry.parent` exists and has children, then entries with
+  the same path as `entry.path` are removed.
+
+  The above actions remove an entry from existence within Carbon's state. This
+  method only performs in-memory operations on cached children and can be
+  safely called on any entry that have since been removed from the file system.
+
+  `------------------------------------------------------------------------------`
   set_open                                                 *carbon-entry-set-open*
 
   Signature: `entry:set_open(`{value}`)`
@@ -594,6 +611,19 @@ BUFFER                                                             *carbon-buffe
   |carbon-buffer-cd| can manipulate to enable navigating up from the current
   working directory, down into a child, reset back to the original
   directory Neovim was opened with, or set to an arbitrary path.
+
+  `------------------------------------------------------------------------------`
+  process_event                                      *carbon-buffer-process-event*
+
+  Signature: `require('carbon.buffer').process_event()`
+
+  During |carbon-carbon-initialize| this method is attached using
+  |carbon-watcher-on| to process file change events.
+
+  When this method is called, it will start a timer for
+  |carbon-setting-sync-delay| milliseconds after which |carbon-buffer-synchronize|
+  is called. When called twice within a single |carbon-settings-sync-delay|
+  the previous timer will be cancelled and a new one will be started.
 
   `------------------------------------------------------------------------------`
   handle                                                    *carbon-buffer-handle*

@@ -70,6 +70,7 @@ end
 
 function entry:synchronize()
   if self.is_directory then
+    local current_paths = {}
     local previous_children = data.children[self.path] or {}
     data.children[self.path] = nil
 
@@ -78,6 +79,7 @@ function entry:synchronize()
     end
 
     for _, child in ipairs(self:children()) do
+      current_paths[#current_paths + 1] = child.path
       local previous = util.tbl_find(previous_children, function(previous)
         return previous.path == child.path
       end)
@@ -90,6 +92,30 @@ function entry:synchronize()
         end
       end
     end
+
+    for _, child in ipairs(previous_children) do
+      if not vim.tbl_contains(current_paths, child.path) then
+        child:terminate()
+      end
+    end
+  end
+end
+
+function entry:terminate()
+  watcher.release(self.path)
+
+  if self:has_children() then
+    for _, child in ipairs(self:children()) do
+      child:terminate()
+    end
+
+    self:set_children(nil)
+  end
+
+  if self.parent and self.parent:has_children() then
+    self.parent:set_children(vim.tbl_filter(function(sibling)
+      return sibling.path ~= self.path
+    end, data.children[self.parent.path]))
   end
 end
 

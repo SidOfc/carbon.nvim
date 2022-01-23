@@ -8,16 +8,13 @@ local data = {
   handle = -1,
   open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
-  status_timer = -1,
+  sync_timer = -1,
 }
 
-function buffer.watch(path, filename)
-  vim.fn.timer_stop(data.status_timer)
+function buffer.process_event()
+  vim.fn.timer_stop(data.sync_timer)
 
-  data.status_timer = vim.fn.timer_start(
-    settings.sync_delay,
-    buffer.synchronize
-  )
+  data.sync_timer = vim.fn.timer_start(settings.sync_delay, buffer.synchronize)
 end
 
 function buffer.handle()

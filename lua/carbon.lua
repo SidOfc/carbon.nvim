@@ -19,7 +19,7 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
-  watcher.on('*', buffer.watch)
+  watcher.on('*', buffer.process_event)
 
   util.command('Carbon', carbon.explore)
   util.command('Lcarbon', carbon.explore_left)
