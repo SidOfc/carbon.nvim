@@ -2,7 +2,9 @@
 
 ![Carbon logo](/doc/assets/logo.svg)
 
-The simple directory tree viewer for Neovim written in Lua.
+<p style="text-align: center;">
+  <strong>The simple directory tree viewer for Neovim written in Lua.</strong>
+</p>
 
 ![Carbon banner](/doc/assets/carbon-banner.gif)
 
