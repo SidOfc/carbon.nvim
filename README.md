@@ -1,13 +1,15 @@
 # Carbon.nvim
 
-![Carbon logo](doc/assets/logo.svg)
+![Carbon logo](/doc/assets/logo.svg)
 
 The simple directory tree viewer for Neovim written in Lua.
+
+![Carbon banner](/doc/assets/carbon-banner.gif)
 
 Carbon.nvim uses Neovim's fantastic Lua API to provide an optimal tree view
 of the parent working directory and synchronizes changes to the file system
 automatically. It does not handle renaming/moving, creating, or deleting
-files or folders by the user.
+files or folders.
 
 ## Installation
 
