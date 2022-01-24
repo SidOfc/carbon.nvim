@@ -2,7 +2,7 @@
 
 ![Carbon logo](/doc/assets/logo.svg)
 
-<p style="text-align: center;">
+<p align="center">
   <strong>The simple directory tree viewer for Neovim written in Lua.</strong>
 </p>
 
