@@ -79,9 +79,35 @@ See `:h carbon-carbon-setup` for documentation about the `.setup` method.
 
 ## Usage
 
-Carbon comes with a few mappings out of the box, each is described below:
+Carbon comes with a few commands and mappings out of the box, each is described below:
 
-### Move root up
+### Commands
+
+See `:h carbon-commands` for more detailed information about commands and their
+customization options.
+
+#### Carbon / Explore
+
+![Carbon / Explore command example](/doc/assets/carbon-explore.gif)
+
+The `:Carbon` command replaces the current buffer with a Carbon buffer.
+When `:h carbon-setting-keep-netrw` is `false` then NetRW's `:Explore`
+command is aliased to `:Carbon`.
+
+#### Lcarbon / Lexplore
+
+![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
+
+The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
+current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
+`:Lexplore` command is aliased to `:Lcarbon`.
+
+### Mappings
+
+See `:h carbon-plugs` for more detailed information about mappings and their
+customization options.
+
+#### Move root up
 
 Mapping: <kbd>[</kbd>
 
@@ -91,7 +117,7 @@ multiple levels at once.
 
 ![Carbon up example](/doc/assets/carbon-up.gif)
 
-### Move root down
+#### Move root down
 
 Mapping: <kbd>]</kbd>
 
@@ -101,7 +127,7 @@ a **count** to go down multiple levels at once on compressed paths.
 
 ![Carbon down example](/doc/assets/carbon-down.gif)
 
-### Reset root
+#### Reset root
 
 Mapping: <kbd>.</kbd>
 
@@ -110,7 +136,7 @@ See `:h carbon-plug-reset` for more information and customization options.
 
 ![Carbon reset example](/doc/assets/carbon-reset.gif)
 
-### Edit file or toggle directory
+#### Edit file or toggle directory
 
 Mapping: <kbd>enter</kbd>
 
@@ -121,7 +147,7 @@ information and customization options.
 
 ![Carbon edit example](/doc/assets/carbon-edit.gif)
 
-### Edit file in horizontal split
+#### Edit file in horizontal split
 
 Mapping: <kbd>ctrl</kbd>+<kbd>x</kbd>
 
@@ -130,7 +156,7 @@ Does nothing when on a directory. Edit a file in a new horizontal split. See
 
 ![Carbon split example](/doc/assets/carbon-split.gif)
 
-### Edit file in vertical split
+#### Edit file in vertical split
 
 Mapping: <kbd>ctrl</kbd>+<kbd>v</kbd>
 
