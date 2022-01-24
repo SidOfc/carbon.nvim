@@ -1,4 +1,4 @@
-# Carbon.nvim
+# Carbon.nvim [![GitHub tag](https://img.shields.io/github/tag/SidOfc/carbon.nvim.svg?label=version)](https://github.com/SidOfc/carbon.nvim/releases) [![GitHub issues](https://img.shields.io/github/issues/SidOfc/carbon.nvim.svg)](https://github.com/SidOfc/carbon.nvim/issues)
 
 ![Carbon logo](/doc/assets/logo.svg)
 
