@@ -13,7 +13,7 @@ of the parent working directory and synchronizes changes to the file system
 automatically. It does not handle renaming/moving, creating, or deleting
 files or folders.
 
-## Why use this over NetRW?
+## Why use Carbon.nvim instead of NetRW
 
 While Carbon.nvim does replace NetRW by default, it can live side by side
 with NetRW without any issues. See `:h carbon-setting-keep-netrw` for more
