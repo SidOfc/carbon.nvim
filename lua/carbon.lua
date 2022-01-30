@@ -140,16 +140,14 @@ function carbon.explore_left()
 end
 
 function carbon.explore_float()
+  local window_settings = settings.float_settings
+
+  if type(window_settings) == 'function' then
+    window_settings = window_settings()
+  end
+
   local carbon_fexplore_window = vim.api.nvim_get_current_win()
-  local window = vim.api.nvim_open_win(buffer.handle(), 1, {
-    relative = 'editor',
-    style = 'minimal',
-    border = 'single',
-    width = 50,
-    height = 20,
-    row = math.floor(vim.opt.lines:get() / 2 - 20 / 2 - 2),
-    col = math.floor(vim.opt.columns:get() / 2 - 50 / 2),
-  })
+  local window = vim.api.nvim_open_win(buffer.handle(), 1, window_settings)
 
   vim.api.nvim_win_set_option(
     window,
