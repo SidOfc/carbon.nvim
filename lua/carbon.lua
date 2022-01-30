@@ -23,6 +23,7 @@ function carbon.initialize()
 
   util.command('Carbon', carbon.explore)
   util.command('Lcarbon', carbon.explore_left)
+  util.command('Fcarbon', carbon.explore_float)
 
   util.map(util.plug('up'), carbon.up)
   util.map(util.plug('down'), carbon.down)
@@ -38,7 +39,8 @@ function carbon.initialize()
           \ setlocal fillchars& fillchars=eob:\ |
           \ autocmd BufHidden <buffer>
               \ setlocal nowrap& fillchars& |
-              \ let w:carbon_lexplore_window = v:false
+              \ let w:carbon_lexplore_window = v:false |
+              \ let w:carbon_fexplore_window = v:false |
     augroup END
   ]])
 
@@ -93,6 +95,10 @@ function carbon.edit()
       vim.cmd('edit ' .. entry.path)
     end
   else
+    if vim.w.carbon_fexplore_window then
+      vim.api.nvim_win_close(0, 1)
+    end
+
     vim.cmd('edit ' .. entry.path)
   end
 end
@@ -101,6 +107,10 @@ function carbon.split()
   local entry = buffer.cursor().entry
 
   if not entry.is_directory then
+    if vim.w.carbon_fexplore_window then
+      vim.api.nvim_win_close(0, 1)
+    end
+
     vim.cmd('split ' .. entry.path)
   end
 end
@@ -109,6 +119,10 @@ function carbon.vsplit()
   local entry = buffer.cursor().entry
 
   if not entry.is_directory then
+    if vim.w.carbon_fexplore_window then
+      vim.api.nvim_win_close(0, 1)
+    end
+
     vim.cmd('vsplit ' .. entry.path)
   end
 end
@@ -123,6 +137,25 @@ function carbon.explore_left()
   buffer.show()
 
   vim.w.carbon_lexplore_window = vim.api.nvim_get_current_win()
+end
+
+function carbon.explore_float()
+  local window_settings = settings.float_settings
+
+  if type(window_settings) == 'function' then
+    window_settings = window_settings()
+  end
+
+  local carbon_fexplore_window = vim.api.nvim_get_current_win()
+  local window = vim.api.nvim_open_win(buffer.handle(), 1, window_settings)
+
+  vim.api.nvim_win_set_option(
+    window,
+    'winhl',
+    'FloatBorder:Normal,Normal:Normal'
+  )
+
+  vim.w.carbon_fexplore_window = carbon_fexplore_window
 end
 
 function carbon.up()

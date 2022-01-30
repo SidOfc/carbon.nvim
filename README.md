@@ -30,9 +30,10 @@ Some main features that NetRW offers which Carbon.nvim does not:
 
 Some main features that Carbon.nvim offers which NetRW does not:
 
+- Has a [floating window mode](#fcarbon)
 - Automatically reflects changes to the file system in the buffer
 - Compresses deeply nested child paths like GitHub does, but even better!
-  (See `:h carbon-setting-compress` for more information).
+  (See `:h carbon-setting-compress` for more information)
 
 If Carbon.nvim looks like it's for you then feel free to continue
 to the [Installation](#installation) section!
@@ -114,19 +115,34 @@ customization options.
 
 #### Carbon / Explore
 
-![Carbon / Explore command example](/doc/assets/carbon-explore.gif)
+Command: `:Carbon`
+Alias: `:Explore`
 
 The `:Carbon` command replaces the current buffer with a Carbon buffer.
 When `:h carbon-setting-keep-netrw` is `false` then NetRW's `:Explore`
 command is aliased to `:Carbon`.
 
+![Carbon / Explore command example](/doc/assets/carbon-explore.gif)
+
 #### Lcarbon / Lexplore
 
-![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
+Command: `:Lcarbon`
+Alias: `:Lexplore`
 
 The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
 current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
 `:Lexplore` command is aliased to `:Lcarbon`.
+
+![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
+
+#### Fcarbon
+
+Command: `:Fcarbon`
+
+The `:Fcarbon` command opens a Carbon buffer in a floating window. This
+window can be configured using `:h carbon-setting-float-settings`.
+
+![Fcarbon command example](/doc/assets/carbon-fexplore.gif)
 
 ### Mappings
 
