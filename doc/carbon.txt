@@ -97,6 +97,26 @@ COMMANDS                                                         *carbon-command
   way, pressing the key mapped to |carbon-plug-edit| will open files in a
   split directly to the right.
 
+  `------------------------------------------------------------------------------`
+  Fcarbon                                                                *Fcarbon*
+
+  Implementation: `:lua require('carbon').explore_float()`
+
+  Opens the Carbon buffer in a floating window. When Carbon is opened this
+  way, Carbon will open files the following way:
+
+  |carbon-plug-edit| will close the floating Carbon window and open the file in
+  the current window.
+
+  |carbon-plug-split| will close the floating Carbon window and open the file
+  in a split relative to the current window.
+
+  |carbon-plug-vsplit| will close the floating Carbon window and open the file
+  in a vertical split relative to the current window.
+
+  See |carbon-setting-float-settings| for more information on how to configure
+  the floating window spawned by `:Fcarbon`.
+
 ================================================================================
 PLUGS                                                               *carbon-plugs*
 
@@ -142,7 +162,7 @@ PLUGS                                                               *carbon-plug
 
   If the entry below the cursor is a directory, expands or collapses the
   directory. Otherwise the file is opened in the current window unless the
-  |Lcarbon| command was used.
+  |Lcarbon| or |Fcarbon| command was used.
 
   `------------------------------------------------------------------------------`
   <plug>(carbon-split)                                         *carbon-plug-split*
@@ -151,7 +171,8 @@ PLUGS                                                               *carbon-plug
   Mapping:        |carbon-setting-actions-split|
 
   Opens the entry below the cursor in a new |split| if it is a file. If the
-  entry is a directory then nothing happens.
+  entry is a directory then nothing happens. When Carbon was opened with
+  |Fcarbon| this works slightly different. See |Fcarbon| for more information.
 
   `------------------------------------------------------------------------------`
   <plug>(carbon-vsplit)                                       *carbon-plug-vsplit*
@@ -160,7 +181,8 @@ PLUGS                                                               *carbon-plug
   Mapping:        |carbon-setting-actions-vsplit|
 
   Opens the entry below the cursor in a new |vsplit| if it is a file. If the
-  entry is a directory then nothing happens.
+  entry is a directory then nothing happens. When Carbon was opened with
+  |Fcarbon| this works slightly different. See |Fcarbon| for more information.
 
 ================================================================================
 CARBON                                                             *carbon-carbon*
@@ -1085,6 +1107,41 @@ SETTINGS                                                         *carbon-setting
   more than one character is allowed. This setting may be set to `nil` to
   disable indicators. Individual indicators can also be disabled by setting
   them to `nil`.
+
+  `------------------------------------------------------------------------------`
+  float_settings                                   *carbon-setting-float-settings*
+
+  Default:
+    `function()`
+      `local columns = vim.opt.columns:get()`
+      `local rows = vim.opt.lines:get()`
+      `local width = math.min(50, columns * 0.8)`
+      `local height = math.min(20, rows * 0.8)`
+
+      `return {`
+        `relative = 'editor',`
+        `style = 'minimal',`
+        `border = 'single',`
+        `width = width,`
+        `height = height,`
+        `col = math.floor(columns / 2 - width / 2),`
+        `row = math.floor(rows / 2 - height / 2 - 2),`
+      `}`
+    `end`
+
+  This setting controls the window settings used in floating windows spawned
+  via |Fcarbon|. When set to a table, this table will be passed to
+  |nvim_open_window| directly.
+
+  When set to a function, the function will be executed and its return value
+  must be a table which will then be passed to |nvim_open_window|. The function
+  form allows you to specify the size based on the current dimensions of the
+  editor which is not possible when passing a table directly!
+
+  The default function will create a horizontally and vertically centered
+  popup with a maximum width of 80% up to 50 columns and maximum height of 80%
+  up to 20 lines. All dimensions and offsets will be based on the current
+  dimensions of the editor when this function is called.
 
   `------------------------------------------------------------------------------`
   actions                                                 *carbon-setting-actions*
