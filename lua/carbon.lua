@@ -31,6 +31,7 @@ function carbon.initialize()
   util.map(util.plug('reset'), carbon.reset)
   util.map(util.plug('split'), carbon.split)
   util.map(util.plug('vsplit'), carbon.vsplit)
+  util.map(util.plug('quit'), carbon.quit)
 
   vim.cmd([[
     augroup CarbonBufEnter
@@ -183,6 +184,12 @@ function carbon.cd(path)
   if buffer.cd(path or vim.v.event.cwd) then
     vim.fn.cursor(1, 1)
     buffer.render()
+  end
+end
+
+function carbon.quit()
+  if #vim.fn.getbufinfo() > 1 then
+    vim.cmd('quit')
   end
 end
 
