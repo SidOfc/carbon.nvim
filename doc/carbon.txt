@@ -190,7 +190,13 @@ PLUGS                                                               *carbon-plug
   Implementation: `:<c-u>lua require('carbon').quit()<cr>`
   Mapping:        |carbon-setting-actions-quit|
 
-  Closes the Carbon buffer unless it is the last buffer.
+  When Carbon is active in the only window and there are multiple buffers
+  this mapping will show the |alternate-file|. When Carbon is showing in one of
+  several windows, the window will be closed. Finally, if Carbon is the only
+  buffer in the only window, nothing happens.
+
+  This mapping will never exit Neovim completely. See |carbon-carbon-quit| for
+  more technical details.
 
 ================================================================================
 CARBON                                                             *carbon-carbon*
@@ -313,7 +319,15 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').quit()`
 
-  Closes the Carbon buffer using |quit| unless it is the last buffer.
+  This method calls |getwininfo| to check if there is more than one window, if
+  this is the case |nvim_win_close| is called to close the current window.
+
+  When there is only one window this method calls |getbufinfo| to check if
+  there is more than one buffer, if this is the case the |alternate-file| is
+  shown in the current window if it exists.
+
+  Finally, if the Carbon buffer is the only active buffer in the only active
+  window, nothing happens.
 
 ================================================================================
 UTIL                                                                 *carbon-util*
