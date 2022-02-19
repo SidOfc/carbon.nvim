@@ -17,8 +17,18 @@ function buffer.process_event()
   data.sync_timer = vim.fn.timer_start(settings.sync_delay, buffer.synchronize)
 end
 
+function buffer.is_loaded()
+  return vim.api.nvim_buf_is_loaded(data.handle)
+end
+
+function buffer.is_hidden()
+  local properties = vim.fn.getbufinfo(data.handle)[1]
+
+  return properties and properties.hidden == 1
+end
+
 function buffer.handle()
-  if vim.api.nvim_buf_is_loaded(data.handle) then
+  if buffer.is_loaded() then
     return data.handle
   end
 
@@ -60,6 +70,10 @@ function buffer.show()
 end
 
 function buffer.render()
+  if not buffer.is_loaded() or buffer.is_hidden() then
+    return
+  end
+
   local handle = buffer.handle()
   local lines = {}
   local hls = {}

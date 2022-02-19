@@ -150,6 +150,8 @@ function carbon.explore_float()
   local carbon_fexplore_window = vim.api.nvim_get_current_win()
   local window = vim.api.nvim_open_win(buffer.handle(), 1, window_settings)
 
+  buffer.render()
+
   vim.api.nvim_win_set_option(
     window,
     'winhl',
