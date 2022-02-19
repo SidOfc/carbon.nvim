@@ -47,7 +47,7 @@ return {
     reset = '.',
     split = '<c-x>',
     vsplit = '<c-v>',
-    quit = 'q',
+    quit = { 'q', '<esc>' },
   },
   highlights = {
     CarbonDir = {
