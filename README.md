@@ -206,3 +206,12 @@ Does nothing when on a directory. Edit a file in a new vertical split. See
 `:h carbon-plug-vsplit` for more information and customization points.
 
 ![Carbon vsplit example](/doc/assets/carbon-vsplit.gif)
+
+#### Close a Carbon buffer
+
+Mapping: <kbd>q</kbd> or <kbd>escape</kbd>
+
+Close a Carbon buffer, useful for closing Carbon buffers which were
+opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
+
+![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
