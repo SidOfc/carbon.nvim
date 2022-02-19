@@ -1170,7 +1170,7 @@ SETTINGS                                                         *carbon-setting
     `  reset = '.',`                                  *carbon-setting-actions-reset*
     `  split = '<c-x>',`                              *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
-    `  quit = '<c-v>',`                                *carbon-setting-actions-quit*
+    `  quit = 'q',`                                    *carbon-setting-actions-quit*
     `}`
 
   Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
