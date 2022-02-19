@@ -34,11 +34,19 @@ function buffer.handle()
   if type(settings.actions) == 'table' then
     for action, mapping in pairs(settings.actions) do
       if mapping then
-        util.map(
-          mapping,
-          util.plug(action),
-          { buffer = data.handle, nowait = true, silent = true }
-        )
+        local keys = mapping
+
+        if type(keys) == 'string' then
+          keys = { keys }
+        end
+
+        for _, key in ipairs(keys) do
+          util.map(
+            key,
+            util.plug(action),
+            { buffer = data.handle, nowait = true, silent = true }
+          )
+        end
       end
     end
   end
