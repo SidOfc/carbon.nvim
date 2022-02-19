@@ -59,7 +59,7 @@ function entry.clean(path)
 end
 
 function entry.find(path)
-  for parent_path, children in pairs(data.children) do
+  for _, children in pairs(data.children) do
     for _, child in ipairs(children) do
       if child.path == path then
         return child
@@ -149,10 +149,10 @@ function entry:get_children()
   end, vim.fn.readdir(self.path))
 
   if type(settings.exclude) == 'table' then
-    entries = vim.tbl_filter(function(entry)
+    entries = vim.tbl_filter(function(child)
       for _, pattern in ipairs(settings.exclude) do
-        if string.find(vim.fn.fnamemodify(entry.path, ':.'), pattern) then
-          watcher.release(entry.path)
+        if string.find(vim.fn.fnamemodify(child.path, ':.'), pattern) then
+          watcher.release(child.path)
 
           return false
         end

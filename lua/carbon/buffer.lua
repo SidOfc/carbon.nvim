@@ -78,10 +78,10 @@ function buffer.render()
   local lines = {}
   local hls = {}
 
-  for lnum, data in ipairs(buffer.lines()) do
-    lines[#lines + 1] = data.line
+  for lnum, line_data in ipairs(buffer.lines()) do
+    lines[#lines + 1] = line_data.line
 
-    for _, hl in ipairs(data.highlights) do
+    for _, hl in ipairs(line_data.highlights) do
       hls[#hls + 1] = { hl[1], lnum - 1, hl[2], hl[3] }
     end
   end
@@ -100,8 +100,8 @@ function buffer.cursor()
   return buffer.lines()[vim.fn.line('.')]
 end
 
-function buffer.lines(entry, lines, depth)
-  entry = entry or data.root
+function buffer.lines(target, lines, depth)
+  target = target or data.root
   lines = lines or {}
   depth = depth or 0
   local expand_indicator = ' '
@@ -121,7 +121,7 @@ function buffer.lines(entry, lines, depth)
     }
   end
 
-  for _, child in ipairs(entry:children()) do
+  for _, child in ipairs(target:children()) do
     local tmp = child
     local hls = {}
     local path = {}
@@ -153,8 +153,8 @@ function buffer.lines(entry, lines, depth)
     local path_start = indent_end + #indicator + 1
     local file_group = 'CarbonFile'
     local dir_path = table.concat(
-      vim.tbl_map(function(entry)
-        return entry.name
+      vim.tbl_map(function(parent)
+        return parent.name
       end, path),
       '/'
     )
@@ -215,8 +215,8 @@ function buffer.up(count)
     local new_root = entry.new(vim.fn.fnamemodify(data.root.path, ':h'))
 
     if new_root.path ~= data.root.path then
-      new_root:set_children(vim.tbl_map(function(entry)
-        if entry.path == data.root.path then
+      new_root:set_children(vim.tbl_map(function(child)
+        if child.path == data.root.path then
           data.root:set_open(true)
           data.root.parent = new_root
 
