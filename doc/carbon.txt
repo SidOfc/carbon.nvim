@@ -642,8 +642,8 @@ BUFFER                                                             *carbon-buffe
   This `data.root` variable is local and private to this module. It is set to
   a |carbon-entry-new| created with the value of |getcwd()| as only argument.
 
-  This variable is the internal representation of the file tree which functions
-  such as |carbon-buffer-lines| can use as a data source or functions like
+  This variable is the internal representation of the file tree which methods
+  such as |carbon-buffer-lines| can use as a data source or methods like
   |carbon-buffer-up|, |carbon-buffer-down|, |carbon-buffer-reset|, or
   |carbon-buffer-cd| can manipulate to enable navigating up from the current
   working directory, down into a child, reset back to the original
@@ -661,6 +661,23 @@ BUFFER                                                             *carbon-buffe
   |carbon-setting-sync-delay| milliseconds after which |carbon-buffer-synchronize|
   is called. When called twice within a single |carbon-settings-sync-delay|
   the previous timer will be cancelled and a new one will be started.
+
+  `------------------------------------------------------------------------------`
+  is_loaded                                              *carbon-buffer-is-loaded*
+
+  Signature: `require('carbon.buffer').is_loaded()`
+
+  Returns `true` or `false` depending on whether the current Carbon buffer handle is
+  valid and loaded. Uses |nvim_buf_is_loaded| internally.
+
+  `------------------------------------------------------------------------------`
+  is_hidden                                              *carbon-buffer-is-hidden*
+
+  Signature: `require('carbon.buffer').is_hidden()`
+
+  Returns `nil` if there is no Carbon buffer handle, `true` if the current
+  buffer handle is hidden, and `false` if the current buffer handle is not
+  hidden. Uses the `hidden` attribute from |getbufinfo| internally.
 
   `------------------------------------------------------------------------------`
   handle                                                    *carbon-buffer-handle*
@@ -699,6 +716,9 @@ BUFFER                                                             *carbon-buffe
   Renders the Carbon buffer. The contents are determined by calling the
   |carbon-buffer-lines| method with the `data.root` entry object as only
   argument. See |carbon-buffer-data-root| for more information about `data.root`.
+
+  The Carbon buffer is NOT rendered if |carbon-buffer-is-loaded| returns
+  `false` or if |carbon-buffer-is-hidden| returns `true`.
 
   `------------------------------------------------------------------------------`
   cursor                                                    *carbon-buffer-cursor*
