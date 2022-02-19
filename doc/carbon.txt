@@ -1175,8 +1175,15 @@ SETTINGS                                                         *carbon-setting
 
   Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
   Carbon from creating any mapping. Setting one of its properties to `nil`
-  will disable the mapping for that specific property. Each property maps
-  to a |<Plug>| mapping defined in |carbon-plugs|:
+  will disable the mapping for that specific property.
+
+  More than one key may be mapped to an action by supplying a table of keys.
+  For example mapping |carbon-setting-actions-reset| to `,` in addition to `.`
+  looks like the following:
+
+  `reset = { '.', ',' },`
+
+  Each property maps to a |<Plug>| mapping defined in |carbon-plugs|:
 
   `up`      =>  |carbon-plug-up|
   `down`    =>  |carbon-plug-down|
