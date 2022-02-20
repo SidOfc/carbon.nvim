@@ -69,7 +69,11 @@ function entry.find(path)
 end
 
 function entry:synchronize()
-  if self.is_directory then
+  if not self.is_directory then
+    return
+  end
+
+  if vim.fn.isdirectory(self.path) == 1 then
     local current_paths = {}
     local previous_children = data.children[self.path] or {}
     data.children[self.path] = nil
@@ -98,6 +102,8 @@ function entry:synchronize()
         child:terminate()
       end
     end
+  else
+    self:terminate()
   end
 end
 
