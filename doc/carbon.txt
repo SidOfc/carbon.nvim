@@ -540,17 +540,20 @@ ENTRY                                                               *carbon-entr
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| method.
 
-  When `entry.is_directory` is `true`, synchronizes all its children with the
-  current state of the file system recursively. Files and folders that were
-  added, removed, renamed, or had their permissions changed within `entry.path`
-  will be refreshed.
+  When `entry.is_directory` is `false`, nothing happens because Carbon only
+  listens to changes to and within directories.
+
+  When `entry.is_directory` is `true` and |isdirectory| of `entry.path` is `1`,
+  synchronizes all its children with the current state of the file system
+  recursively. Files and folders that were added, removed, renamed, or had
+  their permissions changed within `entry.path` will be refreshed.
+
+  When `entry.is_directory` is `true` and |isdirectory| of `entry.path` is `0`
+  then |carbon-entry-terminate| is called.
 
   The method |carbon-watcher-release| will be called with the `path` of each
   entry that will be removed. New entries will automatically call
   |carbon-watcher-register| in |carbon-entry-new|.
-
-  When `entry.is_directory` is `false`, nothing happens because Carbon only
-  listens to changes to and within directories.
 
   `------------------------------------------------------------------------------`
   terminate                                               *carbon-entry-terminate*
