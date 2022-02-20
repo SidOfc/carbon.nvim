@@ -9,12 +9,19 @@ local data = {
   open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
   sync_timer = -1,
+  resync_paths = {},
 }
 
-function buffer.process_event()
+function buffer.process_event(_, path)
   vim.fn.timer_stop(data.sync_timer)
 
-  data.sync_timer = vim.fn.timer_start(settings.sync_delay, buffer.synchronize)
+  data.resync_paths[path] = true
+
+  data.sync_timer = vim.fn.timer_start(settings.sync_delay, function()
+    buffer.synchronize()
+
+    data.resync_paths = {}
+  end)
 end
 
 function buffer.is_loaded()
@@ -202,7 +209,29 @@ function buffer.lines(target, lines, depth)
 end
 
 function buffer.synchronize()
-  data.root:synchronize()
+  local paths = vim.tbl_keys(data.resync_paths)
+
+  table.sort(paths, function(a, b)
+    return #a < #b
+  end)
+
+  for idx = #paths, 1, -1 do
+    local path = paths[idx]
+    local found_path = util.tbl_find(paths, function(other)
+      return path ~= other and vim.startswith(path, other)
+    end)
+
+    if not found_path then
+      local found_entry = entry.find(path)
+
+      if found_entry then
+        found_entry:synchronize()
+      elseif path == data.root.path then
+        data.root:synchronize()
+      end
+    end
+  end
+
   buffer.render()
 end
 
