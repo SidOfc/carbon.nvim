@@ -1,4 +1,8 @@
-# Carbon.nvim [![GitHub tag](https://img.shields.io/github/tag/SidOfc/carbon.nvim.svg?label=version)](https://github.com/SidOfc/carbon.nvim/releases) [![GitHub issues](https://img.shields.io/github/issues/SidOfc/carbon.nvim.svg)](https://github.com/SidOfc/carbon.nvim/issues)
+Carbon.nvim
+[![GitHub tag](https://img.shields.io/github/tag/SidOfc/carbon.nvim.svg?label=version)](https://github.com/SidOfc/carbon.nvim/releases)
+[![GitHub issues](https://img.shields.io/github/issues/SidOfc/carbon.nvim.svg)](https://github.com/SidOfc/carbon.nvim/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/sidofc/carbon.nvim)](https://github.com/SidOfc/carbon.nvim/commits)
+===========
 
 ![Carbon logo](/doc/assets/logo.svg)
 
