@@ -55,7 +55,7 @@ end
 
 function util.highlight(group, properties)
   if type(properties) == 'table' then
-    local command = 'highlight ' .. group
+    local command = 'highlight default ' .. group
 
     for property, value in pairs(properties) do
       command = command .. ' ' .. property .. '=' .. value
