@@ -73,6 +73,7 @@ end
 
 function buffer.show()
   vim.api.nvim_win_set_buf(0, buffer.handle())
+  vim.api.nvim_win_set_option(0, 'spell', false)
   buffer.render()
 end
 
