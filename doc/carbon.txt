@@ -1265,7 +1265,7 @@ SETTINGS                                                         *carbon-setting
     `    cterm = 'bold',`
     `    gui = 'bold',`
     `  },`
-    `  CarbonIndicator = {`              *carbon-settings-highlight-CarbonIndicator*
+    `  CarbonIndicator = {`              *carbon-setting-highlights-CarbonIndicator*
     `    ctermfg = 'DarkGray',`
     `    guifg = 'Gray',`
     `    cterm = 'bold',`
