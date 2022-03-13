@@ -119,8 +119,9 @@ customization options.
 
 #### Carbon / Explore
 
-Command: `:Carbon`
-Alias: `:Explore`
+| Command   | Alias      |
+|:----------|:-----------|
+| `:Carbon` | `:Explore` |
 
 The `:Carbon` command replaces the current buffer with a Carbon buffer.
 When `:h carbon-setting-keep-netrw` is `false` then NetRW's `:Explore`
@@ -130,8 +131,9 @@ command is aliased to `:Carbon`.
 
 #### Lcarbon / Lexplore
 
-Command: `:Lcarbon`
-Alias: `:Lexplore`
+| Command    | Alias       |
+|:-----------|:------------|
+| `:Lcarbon` | `:Lexplore` |
 
 The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
 current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
@@ -141,7 +143,9 @@ current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
 
 #### Fcarbon
 
-Command: `:Fcarbon`
+| Command    |
+|:-----------|
+| `:Fcarbon` |
 
 The `:Fcarbon` command opens a Carbon buffer in a floating window. This
 window can be configured using `:h carbon-setting-float-settings`.
@@ -155,7 +159,9 @@ customization options.
 
 #### Move root up
 
-Mapping: <kbd>[</kbd>
+| Mapping      |
+|:-------------|
+| <kbd>[</kbd> |
 
 Moves Carbon's root directory up one level and rerender. See `:h carbon-plug-up`
 for more information and customization options. Accepts a **count** to go up
@@ -165,7 +171,9 @@ multiple levels at once.
 
 #### Move root down
 
-Mapping: <kbd>]</kbd>
+| Mapping      |
+|:-------------|
+| <kbd>]</kbd> |
 
 Moves Carbon's root directory down one level and rerender. See
 `:h carbon-plug-down` for more information and customization options. Accepts
@@ -175,7 +183,9 @@ a **count** to go down multiple levels at once on compressed paths.
 
 #### Reset root
 
-Mapping: <kbd>.</kbd>
+| Mapping      |
+|:-------------|
+| <kbd>.</kbd> |
 
 Resets Carbon's root directory back to the directory Neovim is opened with.
 See `:h carbon-plug-reset` for more information and customization options.
@@ -184,7 +194,9 @@ See `:h carbon-plug-reset` for more information and customization options.
 
 #### Edit file or toggle directory
 
-Mapping: <kbd>enter</kbd>
+| Mapping          |
+|:-----------------|
+| <kbd>enter</kbd> |
 
 When on a directory, expand or collapse that directory. When on a file, edit
 that file in the current buffer and hide Carbon. This mapping works differently
@@ -195,7 +207,9 @@ information and customization options.
 
 #### Edit file in horizontal split
 
-Mapping: <kbd>ctrl</kbd>+<kbd>x</kbd>
+| Mapping                      |
+|:-----------------------------|
+| <kbd>ctrl</kbd>+<kbd>x</kbd> |
 
 Does nothing when on a directory. Edit a file in a new horizontal split. See
 `:h carbon-plug-split` for more information and customization points.
@@ -204,7 +218,9 @@ Does nothing when on a directory. Edit a file in a new horizontal split. See
 
 #### Edit file in vertical split
 
-Mapping: <kbd>ctrl</kbd>+<kbd>v</kbd>
+| Mapping                      |
+|:-----------------------------|
+| <kbd>ctrl</kbd>+<kbd>v</kbd> |
 
 Does nothing when on a directory. Edit a file in a new vertical split. See
 `:h carbon-plug-vsplit` for more information and customization points.
@@ -213,7 +229,9 @@ Does nothing when on a directory. Edit a file in a new vertical split. See
 
 #### Close a Carbon buffer
 
-Mapping: <kbd>q</kbd> or <kbd>escape</kbd>
+| Mapping      | Alias             |
+|:-------------|:------------------|
+| <kbd>q</kbd> | <kbd>escape</kbd> |
 
 Close a Carbon buffer, useful for closing Carbon buffers which were
 opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
