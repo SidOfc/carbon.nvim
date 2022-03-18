@@ -385,13 +385,13 @@ UTIL                                                                 *carbon-uti
 
   When a function is passed to {rhs}, it is pushed to a table local to the
   util module. The {rhs} is then replaced with a sequence which calls
-  |carbon-util-map-callback| with the correct index. For example:
+  |carbon-util-indexed-callback| with the correct index. For example:
 
   `require('carbon.util').map(`"n", function() print("hello") end`)`
 
   Will map the key `"n"` to:
 
-  `:<c-u>lua require("carbon.util").map_callback(1)<cr>`
+  `:<c-u>lua require("carbon.util").indexed_callback(1)<cr>`
 
   To create a |Visual| mapping pass `mode = 'v'`, to create a buffer-local
   mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
@@ -404,9 +404,9 @@ UTIL                                                                 *carbon-uti
   function or if {options} is provided but not a table.
 
   `------------------------------------------------------------------------------`
-  map_callback                                          *carbon-util-map-callback*
+  indexed_callback                                  *carbon-util-indexed-callback*
 
-  Signature: `require('carbon.util').map_callback(`{index}`)`
+  Signature: `require('carbon.util').indexed_callback(`{index}`)`
 
   Calls the function stored at {index}. The |carbon-util-map| method uses this
   method to be able to accept callback functions.
