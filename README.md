@@ -19,7 +19,7 @@ files or folders.
 
 ## CHANGELOG
 
-See the [releases](/releases) page for more information.
+See the [releases](https://github.com/SidOfc/carbon.nvim/releases) page for more information.
 
 ## Installation
 
