@@ -17,7 +17,9 @@ of the parent working directory and synchronizes changes to the file system
 automatically. It does not handle renaming/moving, creating, or deleting
 files or folders.
 
-[View changelog](/releases)
+## CHANGELOG
+
+See the [releases](/releases) page for more information.
 
 ## Installation
 
