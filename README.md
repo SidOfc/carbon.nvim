@@ -17,30 +17,7 @@ of the parent working directory and synchronizes changes to the file system
 automatically. It does not handle renaming/moving, creating, or deleting
 files or folders.
 
-## Why use Carbon.nvim instead of NetRW
-
-While Carbon.nvim does replace NetRW by default, it can live side by side
-with NetRW without any issues. See `:h carbon-setting-keep-netrw` for more
-information. Additionally, while there is some feature overlap between
-Carbon.nvim and NetRW, NetRW supports more features and scenarios.
-Carbon.nvim is merely a local directory tree viewer. Below a subjective
-list of relevant differences:
-
-Some main features that NetRW offers which Carbon.nvim does not:
-
-- Remote file system support
-- The ability to handle renaming/moving, creating, or deleting files or folders
-- A ton of commands and mappings I haven't bothered looking into supporting
-
-Some main features that Carbon.nvim offers which NetRW does not:
-
-- Has a [floating window mode](#fcarbon)
-- Automatically reflects changes to the file system in the buffer
-- Compresses deeply nested child paths like GitHub does, but even better!
-  (See `:h carbon-setting-compress` for more information)
-
-If Carbon.nvim looks like it's for you then feel free to continue
-to the [Installation](#installation) section!
+[View changelog](/releases)
 
 ## Installation
 
@@ -237,3 +214,28 @@ Close a Carbon buffer, useful for closing Carbon buffers which were
 opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
+
+## Why use Carbon.nvim instead of NetRW
+
+While Carbon.nvim does replace NetRW by default, it can live side by side
+with NetRW without any issues. See `:h carbon-setting-keep-netrw` for more
+information. Additionally, while there is some feature overlap between
+Carbon.nvim and NetRW, NetRW supports more features and scenarios.
+Carbon.nvim is merely a local directory tree viewer. Below a subjective
+list of relevant differences:
+
+Some main features that NetRW offers which Carbon.nvim does not:
+
+- Remote file system support
+- The ability to handle renaming/moving, creating, or deleting files or folders
+- A ton of commands and mappings I haven't bothered looking into supporting
+
+Some main features that Carbon.nvim offers which NetRW does not:
+
+- Has a [floating window mode](#fcarbon)
+- Automatically reflects changes to the file system in the buffer
+- Compresses deeply nested child paths like GitHub does, but even better!
+  (See `:h carbon-setting-compress` for more information)
+
+If Carbon.nvim looks like it's for you then feel free to continue
+to the [Installation](#installation) section!
