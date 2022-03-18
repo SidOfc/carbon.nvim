@@ -44,7 +44,7 @@ to the [Installation](#installation) section!
 
 ## Installation
 
-Install on Neovim v0.7.0+ using your favorite plugin manager:
+Install on Neovim using your favorite plugin manager:
 
 [vim-plug](https://github.com/junegunn/vim-plug)
 
