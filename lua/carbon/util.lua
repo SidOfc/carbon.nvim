@@ -1,5 +1,12 @@
 local util = {}
-local data = { map_callbacks = {} }
+local data = { indexed_callbacks = {} }
+
+local function index_callback(callback)
+  local index = #data.indexed_callbacks + 1
+  data.indexed_callbacks[index] = callback
+
+  return index
+end
 
 function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'
@@ -25,9 +32,9 @@ function util.tbl_except(tbl, keys)
   return settings
 end
 
-function util.map_callback(index, ...)
-  if type(data.map_callbacks[index]) == 'function' then
-    return data.map_callbacks[index](...)
+function util.indexed_callback(index, ...)
+  if type(data.indexed_callbacks[index]) == 'function' then
+    return data.indexed_callbacks[index](...)
   end
 end
 
@@ -37,9 +44,9 @@ function util.map(lhs, rhs, settings_param)
   local mode = settings.mode or 'n'
 
   if type(rhs) == 'function' then
-    local index = #data.map_callbacks + 1
-    data.map_callbacks[index] = rhs
-    rhs = ':<c-u>lua require("carbon.util").map_callback(' .. index .. ')<cr>'
+    rhs = ':<c-u>lua require("carbon.util").indexed_callback('
+      .. index_callback(rhs)
+      .. ')<cr>'
   end
 
   if settings.buffer then
@@ -50,7 +57,17 @@ function util.map(lhs, rhs, settings_param)
 end
 
 function util.command(lhs, rhs, options)
-  vim.api.nvim_add_user_command(lhs, rhs, options or {})
+  if not vim.api.nvim_add_user_command then
+    if type(rhs) == 'function' then
+      rhs = ':lua require("carbon.util").indexed_callback('
+        .. index_callback(rhs)
+        .. ')'
+    end
+
+    vim.cmd('command! ' .. lhs .. ' ' .. rhs)
+  else
+    vim.api.nvim_add_user_command(lhs, rhs, options or {})
+  end
 end
 
 function util.highlight(group, properties)
