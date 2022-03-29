@@ -2,7 +2,7 @@ local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local entry = {}
-local data = { children = {}, open = {} }
+local data = { children = {}, open = {}, compressible = {} }
 
 entry.__index = entry
 entry.__lt = function(a, b)
@@ -125,12 +125,21 @@ function entry:terminate()
   end
 end
 
+function entry:set_compressible(value)
+  data.compressible[self.path] = value
+end
+
+function entry:is_compressible()
+  return data.compressible[self.path] == nil and true
+    or data.compressible[self.path]
+end
+
 function entry:set_open(value)
   data.open[self.path] = value
 end
 
 function entry:is_open()
-  return data.open[self.path]
+  return data.open[self.path] and true or false
 end
 
 function entry:children()

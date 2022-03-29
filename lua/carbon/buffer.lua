@@ -139,7 +139,11 @@ function buffer.lines(target, lines, depth)
     local path_suffix = ''
 
     if settings.compress then
-      while tmp.is_directory and #tmp:children() == 1 do
+      while
+        tmp.is_directory
+        and #tmp:children() == 1
+        and tmp:is_compressible()
+      do
         path[#path + 1] = tmp
         tmp = tmp:children()[1]
       end
