@@ -32,6 +32,10 @@ function util.tbl_except(tbl, keys)
   return settings
 end
 
+function util.tbl_extend(...)
+  return vim.tbl_extend('force', {}, ...)
+end
+
 function util.indexed_callback(index, ...)
   if type(data.indexed_callbacks[index]) == 'function' then
     return data.indexed_callbacks[index](...)
@@ -40,7 +44,7 @@ end
 
 function util.map(lhs, rhs, settings_param)
   local settings = settings_param or {}
-  local options = util.tbl_except(settings, { 'mode', 'buffer' })
+  local options = util.tbl_except(settings, { 'mode', 'buffer', 'rhs_prefix' })
   local mode = settings.mode or 'n'
 
   if type(rhs) == 'function' then
@@ -49,11 +53,25 @@ function util.map(lhs, rhs, settings_param)
       .. ')<cr>'
   end
 
+  rhs = (settings.rhs_prefix or '') .. rhs
+
   if settings.buffer then
     vim.api.nvim_buf_set_keymap(settings.buffer, mode, lhs, rhs, options)
   else
     vim.api.nvim_set_keymap(mode, lhs, rhs, options)
   end
+end
+
+function util.autocmd(group, event, lhs, rhs)
+  if type(rhs) == 'function' then
+    rhs = 'lua require("carbon.util").indexed_callback('
+      .. index_callback(rhs)
+      .. ')'
+  end
+
+  local autocmd = vim.fn.join({ 'autocmd!', event, lhs, rhs }, ' ')
+
+  vim.cmd(vim.fn.join({ 'augroup ' .. group, autocmd, 'augroup END' }, '\n'))
 end
 
 function util.command(lhs, rhs, options)

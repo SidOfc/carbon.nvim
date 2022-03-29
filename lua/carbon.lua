@@ -34,26 +34,12 @@ function carbon.initialize()
   util.map(util.plug('create'), carbon.create)
   util.map(util.plug('quit'), carbon.quit)
 
-  vim.cmd([[
-    augroup CarbonBufEnter
-      autocmd! BufEnter carbon
-          \ setlocal nowrap& nowrap |
-          \ setlocal fillchars& fillchars=eob:\ |
-          \ autocmd BufHidden <buffer>
-              \ setlocal nowrap& fillchars& |
-              \ let w:carbon_lexplore_window = v:false |
-              \ let w:carbon_fexplore_window = v:false |
-          \ autocmd CursorMovedI <buffer>
-              \ lua require('carbon.buffer').ensure_cursor_bounds()
-    augroup END
-  ]])
+  util.autocmd('Carbon', 'BufEnter', 'carbon', buffer.process_enter)
+  util.autocmd('Carbon', 'BufHidden', 'carbon', buffer.process_hidden)
+  util.autocmd('Carbon', 'CursorMovedI', 'carbon', buffer.process_insert_move)
 
   if settings.sync_on_cd then
-    vim.cmd([[
-      augroup CarbonDirChanged
-        autocmd! DirChanged global lua require("carbon").cd()
-      augroup END
-    ]])
+    util.autocmd('Carbon', 'DirChanged', 'global', carbon.cd)
   end
 
   if type(settings.highlights) == 'table' then
