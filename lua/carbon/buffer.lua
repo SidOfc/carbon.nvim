@@ -405,12 +405,16 @@ end
 function buffer.create_confirm()
   local text = vim.fn.trim(vim.fn.getline('.'))
   local name = vim.fn.fnamemodify(text, ':t')
-  local parent_dir = data.line_entry.path
+  local parent_directory = data.line_entry.path
     .. '/'
     .. vim.fn.trim(vim.fn.fnamemodify(text, ':h'), './')
 
-  vim.fn.mkdir(parent_dir, 'p')
-  vim.fn.writefile({}, parent_dir .. '/' .. name)
+  vim.fn.mkdir(parent_directory, 'p')
+
+  if name ~= '' then
+    vim.fn.writefile({}, parent_directory .. '/' .. name)
+  end
+
   data.line_entry:synchronize()
   buffer.create_reset()
 end
