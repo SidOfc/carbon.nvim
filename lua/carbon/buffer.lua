@@ -68,6 +68,21 @@ function buffer.handle()
     end
   end
 
+  util.map('<cr>', '<esc>:lua require("carbon.buffer").create_confirm()<cr>', {
+    buffer = data.handle,
+    nowait = true,
+    silent = true,
+    noremap = true,
+    mode = 'i',
+  })
+  util.map('<esc>', '<esc>:lua require("carbon.buffer").create_cancel()<cr>', {
+    buffer = data.handle,
+    nowait = true,
+    silent = true,
+    noremap = true,
+    mode = 'i',
+  })
+
   return data.handle
 end
 
@@ -326,6 +341,110 @@ function buffer.cd(path)
     entry.clean(data.root.path)
 
     return true
+  end
+end
+
+function buffer.entry_line(target_entry)
+  for _, current_line in ipairs(buffer.lines()) do
+    if current_line.entry.path == target_entry.path then
+      return current_line
+    end
+
+    for _, parent in ipairs(current_line.path) do
+      if parent.path == target_entry.path then
+        return current_line
+      end
+    end
+  end
+end
+
+function buffer.create()
+  local line = buffer.cursor()
+  local handle = buffer.handle()
+  local line_entry = line.entry
+  local line_lnum = line.lnum
+  local line_depth = line.depth + 2
+
+  if not line_entry.is_directory then
+    line_entry = line.path and line.path[#line.path] or line_entry.parent
+  end
+
+  data.line_entry = line_entry
+  data.prev_open = line_entry:is_open()
+  data.prev_compressible = line_entry:is_compressible()
+
+  line_entry:set_open(true)
+  line_entry:set_compressible(false)
+
+  if line_entry ~= line.entry then
+    line = buffer.entry_line(line_entry)
+    line_lnum = line.lnum
+    line_depth = line.depth + 2
+  end
+
+  if line_entry.path == data.root.path then
+    line_depth = 1
+  end
+
+  local edit_lnum = line_lnum + #buffer.lines(line_entry)
+  local edit_indent = string.rep('  ', line_depth)
+
+  buffer.render()
+  buffer.modifiable(function()
+    vim.api.nvim_buf_set_lines(handle, edit_lnum, edit_lnum, 1, { edit_indent })
+  end)
+
+  data.cancel_jump = { lnum = line.lnum, col = 1 }
+  data.cursor_bounds = { lnum = edit_lnum + 1, col = #edit_indent }
+
+  vim.fn.cursor(edit_lnum + 1, #edit_indent)
+  vim.api.nvim_buf_set_option(handle, 'modifiable', true)
+  vim.cmd('startinsert!')
+end
+
+function buffer.create_confirm()
+  local text = vim.fn.trim(vim.fn.getline('.'))
+  local name = vim.fn.fnamemodify(text, ':t')
+  local parent_dir = data.line_entry.path
+    .. '/'
+    .. vim.fn.trim(vim.fn.fnamemodify(text, ':h'), './')
+
+  vim.fn.mkdir(parent_dir, 'p')
+  vim.fn.writefile({}, parent_dir .. '/' .. name)
+  data.line_entry:synchronize()
+  buffer.create_reset()
+end
+
+function buffer.create_cancel()
+  data.line_entry:set_open(data.prev_open)
+  buffer.create_reset()
+  buffer.render()
+end
+
+function buffer.create_reset()
+  local handle = buffer.handle()
+  local lnum = vim.fn.line('.')
+
+  vim.api.nvim_buf_set_lines(handle, lnum - 1, lnum, 1, {})
+  vim.api.nvim_buf_set_option(handle, 'modifiable', false)
+  vim.api.nvim_buf_set_option(handle, 'modified', false)
+
+  vim.fn.cursor(data.cancel_jump.lnum, data.cancel_jump.col)
+  data.line_entry:set_compressible(data.prev_compressible)
+
+  data.prev_open = nil
+  data.line_entry = nil
+  data.cancel_jump = nil
+  data.cursor_bounds = nil
+  data.prev_compressible = nil
+end
+
+function buffer.ensure_cursor_bounds()
+  if data.cursor_bounds then
+    vim.fn.cursor(
+      data.cursor_bounds.lnum,
+      math.max(data.cursor_bounds.col, vim.fn.col('.'))
+    )
   end
 end
 

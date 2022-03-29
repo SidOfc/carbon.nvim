@@ -47,6 +47,7 @@ return {
     reset = '.',
     split = '<c-x>',
     vsplit = '<c-v>',
+    create = 'c',
     quit = { 'q', '<esc>' },
   },
   highlights = {

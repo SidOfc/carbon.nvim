@@ -31,6 +31,7 @@ function carbon.initialize()
   util.map(util.plug('reset'), carbon.reset)
   util.map(util.plug('split'), carbon.split)
   util.map(util.plug('vsplit'), carbon.vsplit)
+  util.map(util.plug('create'), carbon.create)
   util.map(util.plug('quit'), carbon.quit)
 
   vim.cmd([[
@@ -42,6 +43,8 @@ function carbon.initialize()
               \ setlocal nowrap& fillchars& |
               \ let w:carbon_lexplore_window = v:false |
               \ let w:carbon_fexplore_window = v:false |
+          \ autocmd CursorMovedI <buffer>
+              \ lua require('carbon.buffer').ensure_cursor_bounds()
     augroup END
   ]])
 
@@ -195,6 +198,10 @@ function carbon.quit()
   elseif #vim.fn.getbufinfo() > 1 then
     vim.cmd('try | b# | catch | endtry')
   end
+end
+
+function carbon.create()
+  buffer.create()
 end
 
 return carbon
