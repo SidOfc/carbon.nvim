@@ -120,10 +120,10 @@ function buffer.cursor()
   return buffer.lines()[vim.fn.line('.')]
 end
 
-function buffer.lines(target, lines, depth)
-  target = target or data.root
+function buffer.lines(input_target, lines, depth)
   lines = lines or {}
   depth = depth or 0
+  local target = input_target or data.root
   local expand_indicator = ' '
   local collapse_indicator = ' '
 
@@ -132,8 +132,10 @@ function buffer.lines(target, lines, depth)
     collapse_indicator = settings.indicators.collapse or collapse_indicator
   end
 
-  if #lines == 0 then
+  if not input_target and #lines == 0 then
     lines[#lines + 1] = {
+      lnum = 1,
+      depth = depth,
       entry = data.root,
       line = data.root.name .. '/',
       highlights = { { 'CarbonDir', 0, -1 } },
@@ -145,6 +147,7 @@ function buffer.lines(target, lines, depth)
     local tmp = child
     local hls = {}
     local path = {}
+    local lnum = 1 + #lines
     local indent = string.rep('  ', depth)
     local is_empty = true
     local indicator = ' '
@@ -211,6 +214,8 @@ function buffer.lines(target, lines, depth)
     end
 
     lines[#lines + 1] = {
+      lnum = lnum,
+      depth = depth,
       entry = tmp,
       line = indent .. indicator .. ' ' .. full_path,
       highlights = hls,
