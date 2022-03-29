@@ -94,14 +94,26 @@ function buffer.render()
     end
   end
 
-  vim.api.nvim_buf_set_option(handle, 'modifiable', true)
-  vim.api.nvim_buf_set_lines(handle, 0, -1, 1, lines)
-  vim.api.nvim_buf_set_option(handle, 'modifiable', false)
   vim.api.nvim_buf_clear_namespace(handle, data.namespace, 0, -1)
+  buffer.modifiable(function()
+    vim.api.nvim_buf_set_lines(handle, 0, -1, 1, lines)
+  end)
 
   for _, hl in ipairs(hls) do
     vim.api.nvim_buf_add_highlight(handle, data.namespace, unpack(hl))
   end
+end
+
+function buffer.modifiable(callback)
+  local handle = buffer.handle()
+
+  vim.api.nvim_buf_set_option(handle, 'modifiable', true)
+
+  local result = callback()
+
+  vim.api.nvim_buf_set_option(handle, 'modifiable', false)
+
+  return result
 end
 
 function buffer.cursor()
