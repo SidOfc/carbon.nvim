@@ -44,6 +44,7 @@ function buffer.handle()
     mode = 'i',
   })
 
+  util.map('i', '<nop>', action_options)
   util.map('<cr>', buffer.create_confirm, insert_options)
   util.map('<esc>', buffer.create_cancel, insert_options)
 
