@@ -332,7 +332,11 @@ function buffer.create()
   local line_depth = line.depth + 2
 
   if not line_entry.is_directory then
-    line_entry = line.path and line.path[#line.path] or line_entry.parent
+    line_entry = line.path[#line.path] or line_entry.parent
+  end
+
+  if vim.v.count > 0 and #line.path > 0 then
+    line_entry = line.path[math.min(vim.v.count, #line.path)]
   end
 
   data.line_entry = line_entry
