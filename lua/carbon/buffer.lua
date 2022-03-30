@@ -358,7 +358,7 @@ function buffer.create()
   buffer.render()
   buffer.set_lines(edit_lnum, edit_lnum, 1, { edit_indent })
 
-  data.cancel_jump = { lnum = line.lnum, col = 1 }
+  data.reset_jump = { lnum = line.lnum, col = 1 }
   data.cursor_bounds = { lnum = edit_lnum + 1, col = #edit_indent + 1 }
 
   vim.fn.cursor(edit_lnum + 1, #edit_indent)
@@ -395,13 +395,12 @@ function buffer.create_reset()
   vim.api.nvim_buf_set_lines(handle, lnum - 1, lnum, 1, {})
   vim.api.nvim_buf_set_option(handle, 'modifiable', false)
   vim.api.nvim_buf_set_option(handle, 'modified', false)
-
-  vim.fn.cursor(data.cancel_jump.lnum, data.cancel_jump.col)
+  vim.fn.cursor(data.reset_jump.lnum, data.reset_jump.col)
   data.line_entry:set_compressible(data.prev_compressible)
 
   data.prev_open = nil
   data.line_entry = nil
-  data.cancel_jump = nil
+  data.reset_jump = nil
   data.cursor_bounds = nil
   data.prev_compressible = nil
 
