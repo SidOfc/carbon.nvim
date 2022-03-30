@@ -466,9 +466,11 @@ function buffer.process_hidden()
 end
 
 function buffer.process_insert_move()
-  local text = vim.fn.getline('.')
   local start_lnum = data.cursor_bounds.lnum - 1
-  local split_col = data.cursor_bounds.col - 1
+  local start_col = data.cursor_bounds.col - 1
+  local split_col = start_col
+  local text = string.rep(' ', start_col)
+    .. vim.fn.trim(vim.fn.getline('.'), ' ', 1)
 
   for col = 1, #text do
     if string.sub(text, col, col) == '/' then
@@ -476,6 +478,7 @@ function buffer.process_insert_move()
     end
   end
 
+  vim.api.nvim_buf_set_lines(0, start_lnum, start_lnum + 1, 1, { text })
   buffer.clear_extmarks({ start_lnum, 0 }, { start_lnum, -1 }, {})
   buffer.add_highlight('CarbonDir', start_lnum, 0, split_col)
   buffer.add_highlight('CarbonFile', start_lnum, split_col, -1)
