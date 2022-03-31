@@ -116,7 +116,7 @@ function buffer.lines(input_target, lines, depth)
   if not input_target and #lines == 0 then
     lines[#lines + 1] = {
       lnum = 1,
-      depth = depth,
+      depth = -1,
       entry = data.root,
       line = data.root.name .. '/',
       highlights = { { 'CarbonDir', 0, -1 } },
@@ -350,10 +350,6 @@ function buffer.create()
     line = buffer.entry_line(line_entry)
     line_lnum = line.lnum
     line_depth = line.depth + 2
-  end
-
-  if line_entry.path == data.root.path then
-    line_depth = 1
   end
 
   local edit_lnum = line_lnum + #buffer.lines(line_entry)
