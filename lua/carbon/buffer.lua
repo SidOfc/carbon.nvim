@@ -371,7 +371,7 @@ function buffer.create_confirm()
   local name = vim.fn.fnamemodify(text, ':t')
   local parent_directory = data.line_entry.path
     .. '/'
-    .. vim.fn.trim(vim.fn.fnamemodify(text, ':h'), './')
+    .. vim.fn.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
 
   vim.fn.mkdir(parent_directory, 'p')
 
@@ -380,6 +380,7 @@ function buffer.create_confirm()
   end
 
   data.line_entry:synchronize()
+  buffer.cancel_synchronization()
   buffer.create_reset()
 end
 
@@ -487,6 +488,14 @@ function buffer.process_insert_move()
     data.cursor_bounds.lnum,
     math.max(data.cursor_bounds.col, vim.fn.col('.'))
   )
+end
+
+function buffer.cancel_synchronization()
+  vim.fn.timer_start(settings.sync_delay / 2, function()
+    vim.fn.timer_stop(data.sync_timer)
+
+    data.resync_paths = {}
+  end)
 end
 
 return buffer

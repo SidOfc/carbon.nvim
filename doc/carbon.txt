@@ -1050,51 +1050,173 @@ BUFFER                                                             *carbon-buffe
   Sets {key} to {value} in the Carbon buffer. When {key} is `'name'` then
   |nvim_buf_set_name| is called like this:
 
-  `vim.api.nvim_buf_set_name(`<handle>, {value}`)`
+  `vim.api.nvim_buf_set_name(`<bufnr>, {value}`)`
 
   Otherwise, |nvim_buf_set_option| is called like this:
 
-  `vim.api.nvim_buf_set_option(`<handle>, {key}, {value}`)`
+  `vim.api.nvim_buf_set_option(`<bufnr>, {key}, {value}`)`
 
-  <handle> refers to the current Carbon buffer handle.
+  <bufnr> will be set to the current Carbon buffer handle.
 
   `------------------------------------------------------------------------------`
   set_lines                                              *carbon-buffer-set-lines*
 
-  Signature: `require('carbon.buffer').set_lines(`{...,}`)`
+  Signature: `require('carbon.buffer').set_lines(`{from}, {to}, {strict}, {lines}`)`
 
   Makes the Carbon buffer |modifiable| and calls |nvim_buf_set_lines| like this:
 
-  `vim.api.nvim_buf_set_lines(`<handle>, {...,}`)`
+  `vim.api.nvim_buf_set_lines(`<bufnr>, {from}, {to}, {strict}, {lines}`)`
 
   After lines have been inserted, Carbon makes the buffer |nomodifiable| and
   sets |modified| to `false`.
 
-  <handle> refers to the current Carbon buffer handle.
+  <bufnr> will be set to the current Carbon buffer handle.
 
   `------------------------------------------------------------------------------`
   add_highlight                                      *carbon-buffer-add-highlight*
 
-  Signature: `require('carbon.buffer').add_highlight(`{...,}`)`
+  Signature: `require('carbon.buffer').add_highlight(`{hl}, {lnum}, {from}, {to}`)`
 
   Calls |nvim_buf_add_highlight| like this:
 
-  `vim.api.nvim_buf_add_highlight(`<handle>, <namespace_id>, {...,}`)`
+  `vim.api.nvim_buf_add_highlight(`<bufnr>, <ns_id>, {hl}, {lnum}, {from}, {to}`)`
 
-  <handle> refers to the current Carbon buffer handle.
-  <namespace_id> refers to the namespace stored internally by Carbon.
+  <bufnr> will be set to the current Carbon buffer handle.
+  <ns_id> will be set to the namespace stored internally by Carbon.
 
   `------------------------------------------------------------------------------`
-  clear_namespace                                    *carbon-buffer-add-highlight*
+  clear_namespace                                  *carbon-buffer-clear-namespace*
 
-  Signature: `require('carbon.buffer').clear_namespace(`{...,}`)`
+  Signature: `require('carbon.buffer').clear_namespace(`{from}, {to}`)`
 
   Calls |nvim_buf_clear_namespace| like this:
 
-  `vim.api.nvim_buf_clear_namespace(`<handle>, <namespace_id>, {...,}`)`
+  `vim.api.nvim_buf_clear_namespace(`<bufnr>, <ns_id>, {from}, {to}`)`
 
-  <handle> refers to the current Carbon buffer handle.
-  <namespace_id> refers to the namespace stored internally by Carbon.
+  <bufnr> will be set to the current Carbon buffer handle.
+  <ns_id> will be set to the namespace stored internally by Carbon.
+
+  `------------------------------------------------------------------------------`
+  clear_extmarks                                    *carbon-buffer-clear-extmarks*
+
+  Signature: `require('carbon.buffer').clear_extmarks(`{from}, {to}, {opts}`)`
+
+  Wraps |nvim_buf_get_extmarks| and |nvim_buf_del_extmark|. This function
+  first calls |nvim_buf_get_extmarks| like this:
+
+  `vim.api.nvim_buf_get_extmarks(`<bufnr>, <ns_id>, {from}, {to}, {opts}`)`
+
+  The resulting list of |extmarks| will all be cleared by calling
+  |nvim_buf_del_extmark| like this:
+
+  `vim.api.nvim_buf_del_extmark(`<bufnr>, <ns_id>, <extmark_id>`)`
+
+  <bufnr> will be set to the current Carbon buffer handle.
+  <ns_id> will be set to the namespace stored internally by Carbon.
+
+  `------------------------------------------------------------------------------`
+  entry_line                                            *carbon-buffer-entry-line*
+
+  Signature: `require('carbon.buffer').entry_line(`{entry}`)`
+
+  Returns line information for given {entry}. The format is the same as a
+  single line result from |carbon-buffer-lines|. When {entry} is not visible
+  in the buffer this function returns `nil`.
+
+  An entry is visible when it is shown in the buffer. This is also true for
+  compressed entries. While they are not displayed on their "own" line they
+  are visible "somewhere" in the buffer.
+
+  In those cases, Carbon returns the line info of the rendered entry which
+  will then have {entry} in its `line.path`.
+
+  See |carbon-setting-compress| for more information about compressed paths.
+
+  `------------------------------------------------------------------------------`
+  create                                                    *carbon-buffer-create*
+
+  Signature: `require('carbon.buffer').create()`
+
+  `------------------------------------------------------------------------------`
+  create_confirm                                    *carbon-buffer-create-confirm*
+
+  Signature: `require('carbon.buffer').create_confirm()`
+
+  This method is always mapped to <cr> in |insert-mode|. When <cr> is pressed
+  the typed path will be created. Any non-existing parent directories of the
+  supplied path will be created as well.
+
+  A path ending in a slash (`/`) will create a directory, otherwise a regular
+  file is created.
+
+  Pressing <cr> without typing anything will also not create anything. This is
+  effectively the same as pressing <esc> which triggers
+  |carbon-buffer-create-cancel|.
+
+  After confirming |carbon-buffer-create-reset| will be called to clean up and
+  exit path creation mode.
+
+  WARNING:
+  This method is used together with |carbon-buffer-create|. It is not intended
+  to be used as a standalone method! It depends on an internal variables
+  which are only set when |carbon-buffer-create| is called.
+
+  `------------------------------------------------------------------------------`
+  create_cancel                                      *carbon-buffer-create-cancel*
+
+  Signature: `require('carbon.buffer').create_cancel()`
+
+  This method is always mapped to <esc> in |insert-mode|. When <esc> is pressed
+  path creation will be cancelled and any typed path will be discarded.
+
+  After confirming |carbon-buffer-create-reset| will be called to clean up and
+  exit path creation mode.
+
+  WARNING:
+  This method is used together with |carbon-buffer-create|. It is not intended
+  to be used as a standalone method! It depends on an internal variables
+  which are only set when |carbon-buffer-create| is called.
+
+  `------------------------------------------------------------------------------`
+  create_reset                                        *carbon-buffer-create-reset*
+
+  Signature: `require('carbon.buffer').create_reset()`
+
+  Clean up the buffer by removing the temporarily inserted line used for
+  typing the path to create, setting both |modifiable| and |modified| to
+  `false`, restoring the cursor position, and restoring compressible state.
+
+  After all of the above is executed, all `data.*` variables which were
+  created and used in |carbon-buffer-create|, |carbon-buffer-create-confirm|, and
+  |carbon-buffer-create-cancel| will be reset to `nil`.
+
+  Finally, |carbon-buffer-render| is called to rerender the buffer.
+
+  WARNING:
+  This method is used together with |carbon-buffer-create|. It is not intended
+  to be used as a standalone method! It depends on an internal variables
+  which are only set when |carbon-buffer-create| is called.
+
+  `------------------------------------------------------------------------------`
+  cancel_synchronization                    *carbon-buffer-cancel-synchronization*
+
+  Signature: `require('carbon.buffer').cancel_synchronization()`
+
+  This method cancels the next |carbon-buffer-synchronize| which is planned
+  within the next |carbon-setting-sync-delay| time divided by 2.
+
+  File system events are deferred due to the fact that even a single
+  change, addition, or deletion of a file or directory will likely lead to
+  multiple events firing in quick succession.
+
+  For this reason, buffer synchronization is deferred by
+  |carbon-setting-sync-delay| milliseconds. This also means that after an
+  event occurs, it will take "some" time before synchronization happens.
+
+  To make sure synchronization skips "work" they themselves are also deferred,
+  but by |carbon-setting-sync-delay| time divided by 2 to make sure that
+  cancellation happens before the timer runs out. At the same time this also
+  removes the need to keep some "skip_next_sync" state which is nice.
 
 ================================================================================
 WATCHER                                                           *carbon-watcher*
@@ -1177,11 +1299,12 @@ WATCHER                                                           *carbon-watche
   `------------------------------------------------------------------------------`
   emit                                                       *carbon-watcher-emit*
 
-  Signature: `require('carbon.watcher').emit(`{event}, {...}`)`
+  Signature: `require('carbon.watcher').emit(`{event}[, {...varargs}]`)`
 
-  Emits {event} with {event} and {...} as arguments to registered callbacks.
-  The {event} can only be one of |carbon-watcher-event-names|, unlike
-  |carbon-watcher-on| or |carbon-watcher-off| which support some shortcuts.
+  Emits {event} with {event} as first argument and remaining {...varargs}
+  as varargs arguments to registered callbacks. The {event} can only be one of
+  |carbon-watcher-event-names|, unlike |carbon-watcher-on| or |carbon-watcher-off|
+  which support some shortcuts.
 
   `------------------------------------------------------------------------------`
   clear                                                     *carbon-watcher-clear*
