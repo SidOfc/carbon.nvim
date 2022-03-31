@@ -58,14 +58,14 @@ function util.map(lhs, rhs, settings_param)
   end
 end
 
-function util.autocmd(group, event, lhs, rhs)
+function util.autocmd(group, event, aupat, rhs)
   if type(rhs) == 'function' then
     rhs = 'lua require("carbon.util").indexed_callback('
       .. index_callback(rhs)
       .. ')'
   end
 
-  local autocmd = vim.fn.join({ 'autocmd!', event, lhs, rhs }, ' ')
+  local autocmd = vim.fn.join({ 'autocmd!', event, aupat, rhs }, ' ')
 
   vim.cmd(vim.fn.join({ 'augroup ' .. group, autocmd, 'augroup END' }, '\n'))
 end
