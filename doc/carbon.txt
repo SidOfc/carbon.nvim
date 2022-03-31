@@ -32,9 +32,10 @@ USAGE                                                               *carbon-usag
 
   For more specific usage and configuration information, see:
 
-  - |carbon-setup| for configuration details.
-  - |carbon-commands| for command details.
-  - |carbon-plugs| for mapping details.
+  - |carbon-setup|
+  - |carbon-commands|
+  - |carbon-autocmds|
+  - |carbon-plugs|
 
 ================================================================================
 SETUP                                                               *carbon-setup*
@@ -118,13 +119,63 @@ COMMANDS                                                         *carbon-command
   the floating window spawned by `:Fcarbon`.
 
 ================================================================================
+AUTOCMDS                                                         *carbon-autocmds*
+
+  This section documents the default |autocmd| commands that Carbon uses.
+  |autocmd| commands are created unconditionally except for
+  |carbon-autocmd-dirchanged| which depends on the value of
+  |carbon-setting-sync-on-cd|.
+
+  `------------------------------------------------------------------------------`
+  BufEnter                                               *carbon-autocmd-bufenter*
+
+  Group:          `Carbon`
+  Event:          `BufEnter`
+  Pattern:        `carbon`
+  Implementation: `lua require('carbon.buffer').process_enter()`
+
+  Calls |carbon-buffer-process-enter| when entering a Carbon buffer.
+
+  `------------------------------------------------------------------------------`
+  BufHidden                                             *carbon-autocmd-bufhidden*
+
+  Group:          `Carbon`
+  Event:          `BufHidden`
+  Pattern:        `carbon`
+  Implementation: `lua require('carbon.buffer').process_hidden()`
+
+  Calls |carbon-buffer-process-hidden| when the Carbon buffer is hidden.
+
+  `------------------------------------------------------------------------------`
+  CursorMovedI                                       *carbon-autocmd-cursormovedi*
+
+  Group:          `Carbon`
+  Event:          `CursorMovedI`
+  Pattern:        `carbon`
+  Implementation: `lua require('carbon.buffer').process_insert_move()`
+
+  Calls |carbon-buffer-process-insert-move| when moving the cursor in insert mode.
+  Used during |carbon-buffer-create| to control the line and minimul column
+  offset of the cursor.
+
+  `------------------------------------------------------------------------------`
+  DirChanged                                           *carbon-autocmd-dirchanged*
+
+  Group:          `Carbon`
+  Event:          `DirChanged`
+  Pattern:        `global`
+  Implementation: `lua require('carbon').cd()`
+
+  Calls |carbon-buffer-cd| when changing |pwd| using |cd|.
+
+================================================================================
 PLUGS                                                               *carbon-plugs*
 
-  Documentation for the default |<Plug>| mappings that Carbon provides.
+  This section documents the default |<Plug>| mappings that Carbon provides.
   |<Plug>| mappings are created unconditionally.
 
   `------------------------------------------------------------------------------`
-  <plug>(carbon-up)                                               *carbon-plug-up*
+  <Plug>(carbon-up)                                               *carbon-plug-up*
 
   Implementation: `:<c-u>lua require('carbon').up()<cr>`
   Mapping:        |carbon-setting-actions-up|
@@ -134,7 +185,7 @@ PLUGS                                                               *carbon-plug
   directory of the current working directory.
 
   `------------------------------------------------------------------------------`
-  <plug>(carbon-down)                                           *carbon-plug-down*
+  <Plug>(carbon-down)                                           *carbon-plug-down*
 
   Implementation: `:<c-u>lua require('carbon').down()<cr>`
   Mapping:        |carbon-setting-actions-down|
@@ -146,7 +197,7 @@ PLUGS                                                               *carbon-plug
   about how compressed paths work and how they are handled.
 
   `------------------------------------------------------------------------------`
-  <plug>(carbon-reset)                                         *carbon-plug-reset*
+  <Plug>(carbon-reset)                                         *carbon-plug-reset*
 
   Implementation: `:<c-u>lua require('carbon').reset()<cr>`
   Mapping:        |carbon-setting-actions-reset|
@@ -155,7 +206,7 @@ PLUGS                                                               *carbon-plug
   was opened with.
 
   `------------------------------------------------------------------------------`
-  <plug>(carbon-edit)                                           *carbon-plug-edit*
+  <Plug>(carbon-edit)                                           *carbon-plug-edit*
 
   Implementation: `:<c-u>lua require('carbon').edit()<cr>`
   Mapping:        |carbon-setting-actions-edit|
@@ -165,7 +216,7 @@ PLUGS                                                               *carbon-plug
   |Lcarbon| or |Fcarbon| command was used.
 
   `------------------------------------------------------------------------------`
-  <plug>(carbon-split)                                         *carbon-plug-split*
+  <Plug>(carbon-split)                                         *carbon-plug-split*
 
   Implementation: `:<c-u>lua require('carbon').split()<cr>`
   Mapping:        |carbon-setting-actions-split|
@@ -175,7 +226,7 @@ PLUGS                                                               *carbon-plug
   |Fcarbon| this works slightly different. See |Fcarbon| for more information.
 
   `------------------------------------------------------------------------------`
-  <plug>(carbon-vsplit)                                       *carbon-plug-vsplit*
+  <Plug>(carbon-vsplit)                                       *carbon-plug-vsplit*
 
   Implementation: `:<c-u>lua require('carbon').vsplit()<cr>`
   Mapping:        |carbon-setting-actions-vsplit|
@@ -185,7 +236,20 @@ PLUGS                                                               *carbon-plug
   |Fcarbon| this works slightly different. See |Fcarbon| for more information.
 
   `------------------------------------------------------------------------------`
-  <plug>(carbon-quit)                                           *carbon-plug-quit*
+  <Plug>(carbon-create)                                       *carbon-plug-create*
+
+  Implementation: `:<c-u>lua require('carbon').create()<cr>`
+  Mapping:        |carbon-setting-actions-create|
+
+  Enters a context-aware insert mode in which a file or directory path can be
+  typed. When done press <enter> to create the path, any non-existing
+  parent directories will be created using |mkdir|. Pressing <enter> without
+  typing anything will not create anything. Press <esc> to cancel.
+
+  For more information see |carbon-buffer-create|.
+
+  `------------------------------------------------------------------------------`
+  <Plug>(carbon-quit)                                           *carbon-plug-quit*
 
   Implementation: `:<c-u>lua require('carbon').quit()<cr>`
   Mapping:        |carbon-setting-actions-quit|
@@ -204,7 +268,8 @@ CARBON                                                             *carbon-carbo
   Usage: `require('carbon')`
 
   This is Carbon's main module. It contains functions which are used for
-  configuration, initialization, and mappings.
+  setup and initialization and it also defines the core actions which are
+  exposed via |<Plug>| mappings
 
   `------------------------------------------------------------------------------`
   setup                                                      *carbon-carbon-setup*
@@ -223,7 +288,7 @@ CARBON                                                             *carbon-carbo
   Signature: `require('carbon').initialize()`
 
   Initializes Carbon. This method creates |carbon-commands|, |carbon-plugs|,
-  autocommands, and highlights. It hijacks NetRW depending on the value of
+  |carbon-autocmds|, and highlights. It hijacks NetRW depending on the value of
   |carbon-setting-keep-netrw| and automatically opens the Carbon buffer if
   Neovim was opened with a directory path depending on |carbon-setting-auto-open|.
   It also attaches a callback to the watcher to enable auto-refreshing the
@@ -305,6 +370,13 @@ CARBON                                                             *carbon-carbo
   rerender.
 
   `------------------------------------------------------------------------------`
+  create                                                    *carbon-carbon-create*
+
+  Signature: `require('carbon').create()`
+
+  Calls |carbon-buffer-create|.
+
+  `------------------------------------------------------------------------------`
   cd                                                            *carbon-carbon-cd*
 
   Signature: `require('carbon').cd(`[{path}]`)`
@@ -341,39 +413,40 @@ UTIL                                                                 *carbon-uti
   `------------------------------------------------------------------------------`
   plug                                                          *carbon-util-plug*
 
-  `require('carbon.util').plug(`{name}`)`
+  Signature: `require('carbon.util').plug(`{name}`)`
 
   Converts {name} to a |<Plug>| map string. For example calling
-  `require('carbon.util').plug('up')` will return the string `'<plug>(carbon-up)'`.
+  `require('carbon.util').plug('up')` will return the string `'<Plug>(carbon-up)'`.
 
-  This function fails when {name} is not a string.
+  {name} must be a string.
 
   `------------------------------------------------------------------------------`
   tbl_find                                                  *carbon-util-tbl-find*
 
-  `require('carbon.util').tbl_find(`{tbl}, {callback}`)`
+  Signature: `require('carbon.util').tbl_find(`{tbl}, {callback}`)`
 
   Execute `callback(`{value}, {key}`)` for each value in {tbl} until {callback}
   returns a truthy value. When {callback} returns true, return {value} and
   {key}. When no item is found, return `nil`.
 
-  This function fails when {tbl} is not a table or when
-  {callback} is not callable.
+  {tbl} must be a table.
+  {callback} must be a function.
 
   `------------------------------------------------------------------------------`
   tbl_except                                              *carbon-util-tbl-except*
 
-  `require('carbon.util').tbl_except(`{tbl}, {keys}`)`
+  Signature: `require('carbon.util').tbl_except(`{tbl}, {keys}`)`
 
   Return a new table with all keys from {tbl} except
   those specified in {keys}.
 
-  This function fails when either {tbl} or {keys} is not a table.
+  {tbl} must be a table.
+  {keys} must be a table.
 
   `------------------------------------------------------------------------------`
   map                                                            *carbon-util-map*
 
-  `require('carbon.util').map(`{lhs}, {rhs}[, {options}]`)`
+  Signature: `require('carbon.util').map(`{lhs}, {rhs}[, {options}]`)`
 
   Wraps |nvim_set_keymap| and |nvim_buf_set_keymap|. Maps {lhs} to {rhs}.
   An optional {options} table can supplied. It accepts the same options
@@ -382,6 +455,7 @@ UTIL                                                                 *carbon-uti
 
   {lhs} must be a string containing the key for this mapping.
   {rhs} must be a vim command string or a function.
+  {options} must be a table if supplied.
 
   When a function is passed to {rhs}, it is pushed to a table local to the
   util module. The {rhs} is then replaced with a sequence which calls
@@ -393,15 +467,28 @@ UTIL                                                                 *carbon-uti
 
   `:<c-u>lua require("carbon.util").indexed_callback(1)<cr>`
 
-  To create a |Visual| mapping pass `mode = 'v'`, to create a buffer-local
+  To create a |visual-mode| mapping pass `mode = 'v'`, to create a buffer-local
   mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
 
-  The `mode` and `buffer` options are not passed to |nvim_set_keymap|
+  An arbitrary prefix string may be supplied via the option `rhs_prefix`. This
+  string will be prepended to {rhs}. This allows lua functions to be used in
+  more places, such as |insert-mode|, because you can prepend `'<esc>'` to leave
+  insert mode before the bound callback is executed. For example:
+
+
+  `require('carbon.util').map(`
+    "i",
+    function() print("hello") end,
+    { rhs_prefix = '<esc>' }
+  `)`
+
+  Will map the key `"n"` to:
+
+  `<esc>:<c-u>lua require("carbon.util").indexed_callback(1)<cr>`
+
+  The `mode`, `buffer` and `rhs_prefix` options are not passed to |nvim_set_keymap|
   functions because they are explicitly filtered out for internal use by the
   map utility function. All other {options} keys will be passed through.
-
-  This function fails when {lhs} is not a string or {rhs} is not a string or
-  function or if {options} is provided but not a table.
 
   `------------------------------------------------------------------------------`
   indexed_callback                                  *carbon-util-indexed-callback*
@@ -414,29 +501,48 @@ UTIL                                                                 *carbon-uti
   `------------------------------------------------------------------------------`
   command                                                    *carbon-util-command*
 
-  `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
+  Signature: `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
 
-  Wraps |nvim_add_user_command|. The only difference between this
+  Wraps |nvim_add_user_command| if possible. The only difference between this
   function and |nvim_add_user_command| is that the {options} argument is
   optional, when not passed it will default to an empty table.
 
+  When |nvim_add_user_command| is not available this method falls back
+  to |vim.cmd| to create the command. The {options} argument is ignored when
+  this happens. It is still possible to pass functions even when
+  |nvim_add_user_command| is not available.
+
   {lhs} must be a string containing the key name for this |user-command|.
   {rhs} must be a vim command string or a function.
-
-  This function fails when {lhs} is not a string or {rhs} is not a string or
-  function or if {options} is provided but not a table.
+  {options} must be a table if supplied.
 
   `------------------------------------------------------------------------------`
   highlight                                                *carbon-util-highlight*
 
-  `require('carbon.util').highlight(`{group}, {properties}`)`
+  Signature: `require('carbon.util').highlight(`{group}, {properties}`)`
 
-  Builds a |highlight| command for {group} using provided {properties} and
-  executes that command. {group} will be the highlight group name. {properties}
-  is a table accepting any properties that can be passed to |highlight|.
+  Defines a |highlight|for {group} using provided {properties} and executes that
+  command. {group} will be the highlight group name. {properties} is a table
+  accepting any properties that can be passed to |highlight|.
 
-  This function fails when {group} is not a string or when {properties}
-  is not a table.
+  {group} must be a string containing the group name.
+  {properties} must be a table.
+
+  `------------------------------------------------------------------------------`
+  autocmd                                                    *carbon-util-autocmd*
+
+  Signature: `require('carbon.util').autocmd(`{group}, {event}, {aupat}, {rhs}`)`
+
+  Defines an |autocmd| for {event} and {aupat} which executes {rhs}. The
+  autocommand is wrapped in an |augroup| named {group}.
+
+  {group} must be a string containing the name of the augroup.
+  {event} must be a string containing the name of the autocommand.
+  {aupat} must be a string |autocmd-pattern|.
+  {rhs} must be a vim command string or a function.
+
+  For more information about which autocommands Carbon uses,
+  see |carbon-autocmds|.
 
 ================================================================================
 ENTRY                                                               *carbon-entry*
@@ -588,7 +694,29 @@ ENTRY                                                               *carbon-entr
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| method.
 
-  Returns `true`, `false`, `nil`, or otherwise the value set by |carbon-entry-set-open|.
+  Returns `true` or `false` depending on the value set by |carbon-entry-set-open|.
+
+  `------------------------------------------------------------------------------`
+  set_compressible                                 *carbon-entry-set-compressible*
+
+  Signature: `entry:set_compressible(`{value}`)`
+
+  Any truthy value will be treated as if the `entry` is compressible, any
+  falsy value will be treated as if the `entry` is not compressible.
+
+  This method is used by |carbon-buffer-create| to control the rendered
+  structure while a new path is being created.
+
+  `------------------------------------------------------------------------------`
+  is_compressible                                   *carbon-entry-is-compressible*
+
+  Signature: `entry:is_compressible()`
+
+  The variable `entry` in this section refers to an entry object as returned by
+  the |carbon-entry-new| method.
+
+  Returns `true` by default or otherwise `true` or `false` depending on the value
+  set by |carbon-entry-set-compressible|.
 
   `------------------------------------------------------------------------------`
   children                                                 *carbon-entry-children*
@@ -680,6 +808,37 @@ BUFFER                                                             *carbon-buffe
   the previous timer will be cancelled and a new one will be started.
 
   `------------------------------------------------------------------------------`
+  process_enter                                      *carbon-buffer-process-enter*
+
+  Signature: `require('carbon.buffer').process_enter()`
+  Autocmd:   |carbon-autocmd-bufenter|
+
+  This method sets |fillchars| `eob` to a space to hide the tilde characters after
+  the end of the buffer and disables |wrap|.
+
+  `------------------------------------------------------------------------------`
+  process_hidden                                    *carbon-buffer-process-hidden*
+
+  Signature: `require('carbon.buffer').process_hidden()`
+  Autocmd:   |carbon-autocmd-bufhidden|
+
+  This method restores |fillchars| and |wrap| back to their original values
+  before |carbon-buffer-process-enter| was called.
+
+  It also `nils` out both `vim.w.carbon_lexplore_window` and
+  `vim.w.carbon_fexplore_window` window-local variables which are used internally
+  by |Lcarbon| and |Fcarbon| respectively.
+
+  `------------------------------------------------------------------------------`
+  process_insert_move                          *carbon-buffer-process-insert-move*
+
+  Signature: `require('carbon.buffer').process_insert_move()`
+  Autocmd:   |carbon-autocmd-cursormovedi|
+
+  This method ensures that the cursor stays within bounds determined by
+  |carbon-buffer-create|.
+
+  `------------------------------------------------------------------------------`
   is_loaded                                              *carbon-buffer-is-loaded*
 
   Signature: `require('carbon.buffer').is_loaded()`
@@ -713,6 +872,7 @@ BUFFER                                                             *carbon-buffe
   |bufhidden|   =>  `'hide'`
   |buftype|     =>  `'nofile'`
   |modifiable|  =>  `false`
+  |modified|    =>  `false`
 
   Finally, if there are actions to map in |carbon-setting-actions| then they
   will be mapped locally to this buffer to a |<Plug>| mapping with the
@@ -760,20 +920,31 @@ BUFFER                                                             *carbon-buffe
   following data layout:
 
   `{`
-  `  entry = `{entry}`,`
+  `  entry = <entry>,`
   `  line = <string>,`
-  `  highlights = <table<table<string, number, number>>>,`
+  `  lnum = <number>,`
+  `  depth = <number>,`
   `  path = <table<entry>>,`
+  `  highlights = <table<table<string, number, number>>>,`
   `}`
 
   Property: `entry`
 
-  The {entry} which was used to generate the `line`, `highlights`,
-  and `path` property values.
+  One of the children of {entry}.
 
   Property: `line`
 
   This property is set to the text that should be rendered to the buffer.
+
+  Property: `lnum`
+
+  The line number of the entry. Used by |carbon-buffer-create| to determine
+  the line number to move to for editing.
+
+  Property: `depth`
+
+  The indent depth of the entry. Used by |carbon-buffer-create| to determine
+  the start column to move to for editing.
 
   Property: `highlights`
 
@@ -870,6 +1041,60 @@ BUFFER                                                             *carbon-buffe
   Signature: `require('carbon.buffer').reset()`
 
   Set |carbon-buffer-data-root| to the original |pwd| using |carbon-buffer-cd|.
+
+  `------------------------------------------------------------------------------`
+  set                                                          *carbon-buffer-set*
+
+  Signature: `require('carbon.buffer').set(`{key}, {value}`)`
+
+  Sets {key} to {value} in the Carbon buffer. When {key} is `'name'` then
+  |nvim_buf_set_name| is called like this:
+
+  `vim.api.nvim_buf_set_name(`<handle>, {value}`)`
+
+  Otherwise, |nvim_buf_set_option| is called like this:
+
+  `vim.api.nvim_buf_set_option(`<handle>, {key}, {value}`)`
+
+  <handle> refers to the current Carbon buffer handle.
+
+  `------------------------------------------------------------------------------`
+  set_lines                                              *carbon-buffer-set-lines*
+
+  Signature: `require('carbon.buffer').set_lines(`{...,}`)`
+
+  Makes the Carbon buffer |modifiable| and calls |nvim_buf_set_lines| like this:
+
+  `vim.api.nvim_buf_set_lines(`<handle>, {...,}`)`
+
+  After lines have been inserted, Carbon makes the buffer |nomodifiable| and
+  sets |modified| to `false`.
+
+  <handle> refers to the current Carbon buffer handle.
+
+  `------------------------------------------------------------------------------`
+  add_highlight                                      *carbon-buffer-add-highlight*
+
+  Signature: `require('carbon.buffer').add_highlight(`{...,}`)`
+
+  Calls |nvim_buf_add_highlight| like this:
+
+  `vim.api.nvim_buf_add_highlight(`<handle>, <namespace_id>, {...,}`)`
+
+  <handle> refers to the current Carbon buffer handle.
+  <namespace_id> refers to the namespace stored internally by Carbon.
+
+  `------------------------------------------------------------------------------`
+  clear_namespace                                    *carbon-buffer-add-highlight*
+
+  Signature: `require('carbon.buffer').clear_namespace(`{...,}`)`
+
+  Calls |nvim_buf_clear_namespace| like this:
+
+  `vim.api.nvim_buf_clear_namespace(`<handle>, <namespace_id>, {...,}`)`
+
+  <handle> refers to the current Carbon buffer handle.
+  <namespace_id> refers to the namespace stored internally by Carbon.
 
 ================================================================================
 WATCHER                                                           *carbon-watcher*
@@ -1016,6 +1241,7 @@ SETTINGS                                                         *carbon-setting
   `    split  = `|carbon-setting-actions-split|`,`
   `    vsplit = `|carbon-setting-actions-vsplit|`,`
   `    quit   = `|carbon-setting-actions-quit|`,`
+  `    create = `|carbon-setting-actions-create|`,`
   `  },`
 
   `  highlights = {`
@@ -1036,7 +1262,8 @@ SETTINGS                                                         *carbon-setting
   Default: `true`
 
   When enabled, allows Carbon to compress deeply nested children as long as
-  they only contain a single child. For example, take the following structure:
+  they only contain a single child and |carbon-entry-is-compressible| is `true`.
+  For example, take the following structure:
 
   `pwd`
   `|-- a/`
@@ -1051,7 +1278,7 @@ SETTINGS                                                         *carbon-setting
   `|-- |-- |-- y/`
   `|-- |-- |-- |-- z.txt`
 
-  We can see here that `a/` contains a single child `b/` which contains a
+  We see here that `a/` contains a single child `b/` which contains a
   single child `c/` which contains a single child `d.txt`. We can also see
   that `t/` contains two children, `u/` which contains `v.txt` and `w.txt`, and `x/`
   which contains a single child `y` which contains a single child `z.txt`. When
@@ -1207,7 +1434,8 @@ SETTINGS                                                         *carbon-setting
     `  reset = '.',`                                  *carbon-setting-actions-reset*
     `  split = '<c-x>',`                              *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
-    `  quit = 'q',`                                    *carbon-setting-actions-quit*
+    `  create = 'c',`                                *carbon-setting-actions-create*
+    `  quit = { 'q' '<esc>' },`                        *carbon-setting-actions-quit*
     `}`
 
   Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
@@ -1228,6 +1456,7 @@ SETTINGS                                                         *carbon-setting
   `reset`   =>  |carbon-plug-reset|
   `split`   =>  |carbon-plug-split|
   `vsplit`  =>  |carbon-plug-vsplit|
+  `create`  =>  |carbon-plug-create|
   `quit`    =>  |carbon-plug-quit|
 
   `------------------------------------------------------------------------------`
