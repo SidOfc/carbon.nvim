@@ -38,7 +38,7 @@ function buffer.handle()
   buffer.set('modified', false)
 
   local action_options = { buffer = data.handle, nowait = true, silent = true }
-  local insert_options = util.tbl_extend(action_options, {
+  local insert_options = vim.tbl_extend('force', {}, action_options, {
     rhs_prefix = '<esc>',
     noremap = true,
     mode = 'i',

@@ -32,10 +32,6 @@ function util.tbl_except(tbl, keys)
   return settings
 end
 
-function util.tbl_extend(...)
-  return vim.tbl_extend('force', {}, ...)
-end
-
 function util.indexed_callback(index, ...)
   if type(data.indexed_callbacks[index]) == 'function' then
     return data.indexed_callbacks[index](...)
