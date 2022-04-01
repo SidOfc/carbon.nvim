@@ -12,18 +12,6 @@ local data = {
   resync_paths = {},
 }
 
-function buffer.process_event(_, path)
-  vim.fn.timer_stop(data.sync_timer)
-
-  data.resync_paths[path] = true
-
-  data.sync_timer = vim.fn.timer_start(settings.sync_delay, function()
-    buffer.synchronize()
-
-    data.resync_paths = {}
-  end)
-end
-
 function buffer.is_loaded()
   return vim.api.nvim_buf_is_loaded(data.handle)
 end
@@ -41,12 +29,24 @@ function buffer.handle()
 
   data.handle = vim.api.nvim_create_buf(false, true)
 
-  vim.api.nvim_buf_set_name(data.handle, 'carbon')
-  vim.api.nvim_buf_set_option(data.handle, 'swapfile', false)
-  vim.api.nvim_buf_set_option(data.handle, 'filetype', 'carbon')
-  vim.api.nvim_buf_set_option(data.handle, 'bufhidden', 'hide')
-  vim.api.nvim_buf_set_option(data.handle, 'buftype', 'nofile')
-  vim.api.nvim_buf_set_option(data.handle, 'modifiable', false)
+  buffer.set('name', 'carbon')
+  buffer.set('swapfile', false)
+  buffer.set('filetype', 'carbon')
+  buffer.set('bufhidden', 'hide')
+  buffer.set('buftype', 'nofile')
+  buffer.set('modifiable', false)
+  buffer.set('modified', false)
+
+  local action_options = { buffer = data.handle, nowait = true, silent = true }
+  local insert_options = vim.tbl_extend('force', {}, action_options, {
+    rhs_prefix = '<esc>',
+    noremap = true,
+    mode = 'i',
+  })
+
+  util.map('i', '<nop>', action_options)
+  util.map('<cr>', buffer.create_confirm, insert_options)
+  util.map('<esc>', buffer.create_cancel, insert_options)
 
   if type(settings.actions) == 'table' then
     for action, mapping in pairs(settings.actions) do
@@ -58,11 +58,7 @@ function buffer.handle()
         end
 
         for _, key in ipairs(keys) do
-          util.map(
-            key,
-            util.plug(action),
-            { buffer = data.handle, nowait = true, silent = true }
-          )
+          util.map(key, util.plug(action), action_options)
         end
       end
     end
@@ -82,7 +78,6 @@ function buffer.render()
     return
   end
 
-  local handle = buffer.handle()
   local lines = {}
   local hls = {}
 
@@ -94,13 +89,11 @@ function buffer.render()
     end
   end
 
-  vim.api.nvim_buf_set_option(handle, 'modifiable', true)
-  vim.api.nvim_buf_set_lines(handle, 0, -1, 1, lines)
-  vim.api.nvim_buf_set_option(handle, 'modifiable', false)
-  vim.api.nvim_buf_clear_namespace(handle, data.namespace, 0, -1)
+  buffer.clear_namespace(0, -1)
+  buffer.set_lines(0, -1, 1, lines)
 
   for _, hl in ipairs(hls) do
-    vim.api.nvim_buf_add_highlight(handle, data.namespace, unpack(hl))
+    buffer.add_highlight(unpack(hl))
   end
 end
 
@@ -108,10 +101,10 @@ function buffer.cursor()
   return buffer.lines()[vim.fn.line('.')]
 end
 
-function buffer.lines(target, lines, depth)
-  target = target or data.root
+function buffer.lines(input_target, lines, depth)
   lines = lines or {}
   depth = depth or 0
+  local target = input_target or data.root
   local expand_indicator = ' '
   local collapse_indicator = ' '
 
@@ -120,8 +113,10 @@ function buffer.lines(target, lines, depth)
     collapse_indicator = settings.indicators.collapse or collapse_indicator
   end
 
-  if #lines == 0 then
+  if not input_target and #lines == 0 then
     lines[#lines + 1] = {
+      lnum = 1,
+      depth = -1,
       entry = data.root,
       line = data.root.name .. '/',
       highlights = { { 'CarbonDir', 0, -1 } },
@@ -133,13 +128,18 @@ function buffer.lines(target, lines, depth)
     local tmp = child
     local hls = {}
     local path = {}
+    local lnum = 1 + #lines
     local indent = string.rep('  ', depth)
     local is_empty = true
     local indicator = ' '
     local path_suffix = ''
 
     if settings.compress then
-      while tmp.is_directory and #tmp:children() == 1 do
+      while
+        tmp.is_directory
+        and #tmp:children() == 1
+        and tmp:is_compressible()
+      do
         path[#path + 1] = tmp
         tmp = tmp:children()[1]
       end
@@ -195,6 +195,8 @@ function buffer.lines(target, lines, depth)
     end
 
     lines[#lines + 1] = {
+      lnum = lnum,
+      depth = depth,
       entry = tmp,
       line = indent .. indicator .. ' ' .. full_path,
       highlights = hls,
@@ -306,6 +308,194 @@ function buffer.cd(path)
 
     return true
   end
+end
+
+function buffer.entry_line(target_entry)
+  for _, current_line in ipairs(buffer.lines()) do
+    if current_line.entry.path == target_entry.path then
+      return current_line
+    end
+
+    for _, parent in ipairs(current_line.path) do
+      if parent.path == target_entry.path then
+        return current_line
+      end
+    end
+  end
+end
+
+function buffer.create()
+  local line = buffer.cursor()
+  local handle = buffer.handle()
+  local line_entry = line.entry
+  local line_lnum = line.lnum
+  local line_depth = line.depth + 2
+
+  if not line_entry.is_directory then
+    line_entry = line.path[#line.path] or line_entry.parent
+  end
+
+  if vim.v.count > 0 and #line.path > 0 then
+    line_entry = line.path[math.min(vim.v.count, #line.path)]
+  end
+
+  data.line_entry = line_entry
+  data.prev_open = line_entry:is_open()
+  data.prev_compressible = line_entry:is_compressible()
+
+  line_entry:set_open(true)
+  line_entry:set_compressible(false)
+
+  if line_entry ~= line.entry then
+    line = buffer.entry_line(line_entry)
+    line_lnum = line.lnum
+    line_depth = line.depth + 2
+  end
+
+  local edit_lnum = line_lnum + #buffer.lines(line_entry)
+  local edit_indent = string.rep('  ', line_depth)
+
+  buffer.render()
+  buffer.set_lines(edit_lnum, edit_lnum, 1, { edit_indent })
+
+  data.reset_jump = { lnum = line.lnum, col = 1 }
+  data.cursor_bounds = { lnum = edit_lnum + 1, col = #edit_indent + 1 }
+
+  vim.fn.cursor(edit_lnum + 1, #edit_indent)
+  vim.api.nvim_buf_set_option(handle, 'modifiable', true)
+  vim.cmd('startinsert!')
+end
+
+function buffer.create_confirm()
+  local text = vim.fn.trim(vim.fn.getline('.'))
+  local name = vim.fn.fnamemodify(text, ':t')
+  local parent_directory = data.line_entry.path
+    .. '/'
+    .. vim.fn.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
+
+  vim.fn.mkdir(parent_directory, 'p')
+
+  if name ~= '' then
+    vim.fn.writefile({}, parent_directory .. '/' .. name)
+  end
+
+  data.line_entry:synchronize()
+  buffer.cancel_synchronization()
+  buffer.create_reset()
+end
+
+function buffer.create_cancel()
+  data.line_entry:set_open(data.prev_open)
+  buffer.create_reset()
+end
+
+function buffer.create_reset()
+  local handle = buffer.handle()
+  local lnum = vim.fn.line('.')
+
+  vim.api.nvim_buf_set_lines(handle, lnum - 1, lnum, 1, {})
+  vim.api.nvim_buf_set_option(handle, 'modifiable', false)
+  vim.api.nvim_buf_set_option(handle, 'modified', false)
+  vim.fn.cursor(data.reset_jump.lnum, data.reset_jump.col)
+  data.line_entry:set_compressible(data.prev_compressible)
+
+  data.prev_open = nil
+  data.line_entry = nil
+  data.reset_jump = nil
+  data.cursor_bounds = nil
+  data.prev_compressible = nil
+
+  buffer.render()
+end
+
+function buffer.clear_extmarks(...)
+  local extmarks = vim.api.nvim_buf_get_extmarks(
+    data.handle,
+    data.namespace,
+    ...
+  )
+
+  for _, extmark in ipairs(extmarks) do
+    vim.api.nvim_buf_del_extmark(data.handle, data.namespace, extmark[1])
+  end
+end
+
+function buffer.clear_namespace(...)
+  vim.api.nvim_buf_clear_namespace(data.handle, data.namespace, ...)
+end
+
+function buffer.add_highlight(...)
+  vim.api.nvim_buf_add_highlight(data.handle, data.namespace, ...)
+end
+
+function buffer.set_lines(...)
+  vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
+  vim.api.nvim_buf_set_lines(data.handle, ...)
+  vim.api.nvim_buf_set_option(data.handle, 'modifiable', false)
+  vim.api.nvim_buf_set_option(data.handle, 'modified', false)
+end
+
+function buffer.set(key, value)
+  if key == 'name' then
+    vim.api.nvim_buf_set_name(data.handle, value)
+  else
+    vim.api.nvim_buf_set_option(data.handle, key, value)
+  end
+end
+
+function buffer.process_event(_, path)
+  vim.fn.timer_stop(data.sync_timer)
+
+  data.resync_paths[path] = true
+
+  data.sync_timer = vim.fn.timer_start(settings.sync_delay, function()
+    buffer.synchronize()
+
+    data.resync_paths = {}
+  end)
+end
+
+function buffer.process_enter()
+  vim.cmd('setlocal fillchars& fillchars=eob:\\  nowrap& nowrap')
+end
+
+function buffer.process_hidden()
+  vim.cmd('setlocal fillchars& nowrap&')
+
+  vim.w.carbon_lexplore_window = nil
+  vim.w.carbon_fexplore_window = nil
+end
+
+function buffer.process_insert_move()
+  local start_lnum = data.cursor_bounds.lnum - 1
+  local start_col = data.cursor_bounds.col - 1
+  local split_col = start_col
+  local text = string.rep(' ', start_col)
+    .. vim.fn.trim(vim.fn.getline('.'), ' ', 1)
+
+  for col = 1, #text do
+    if string.sub(text, col, col) == '/' then
+      split_col = col
+    end
+  end
+
+  vim.api.nvim_buf_set_lines(0, start_lnum, start_lnum + 1, 1, { text })
+  buffer.clear_extmarks({ start_lnum, 0 }, { start_lnum, -1 }, {})
+  buffer.add_highlight('CarbonDir', start_lnum, 0, split_col)
+  buffer.add_highlight('CarbonFile', start_lnum, split_col, -1)
+
+  vim.fn.cursor(
+    data.cursor_bounds.lnum,
+    math.max(data.cursor_bounds.col, vim.fn.col('.'))
+  )
+end
+
+function buffer.cancel_synchronization()
+  vim.fn.timer_start(settings.sync_delay / 2, function()
+    vim.fn.timer_stop(data.sync_timer)
+
+    data.resync_paths = {}
+  end)
 end
 
 return buffer
