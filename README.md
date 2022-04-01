@@ -226,7 +226,8 @@ opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 Enters an interactive mode in which a path can be entered. When
 done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
-to cancel. See `:h carbon-buffer-create` for more details.
+to cancel. Prepending <kbd>c</kbd> with a `count` will select the `count`_nth_
+directory from the left as base. See `:h carbon-buffer-create` for more details.
 
 ![Create files and directories example](/doc/assets/carbon-create-action.gif)
 
