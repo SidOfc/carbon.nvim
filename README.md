@@ -243,7 +243,7 @@ list of relevant differences:
 Some main features that NetRW offers which Carbon.nvim does not:
 
 - Remote file system support
-- The ability to handle renaming/moving, creating, or deleting files or folders
+- The ability to handle renaming/moving, <strike>creating</strike>, or deleting files or folders (work-in-progress)
 - A ton of commands and mappings I haven't bothered looking into supporting
 
 Some main features that Carbon.nvim offers which NetRW does not:
