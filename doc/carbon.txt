@@ -1124,8 +1124,8 @@ BUFFER                                                             *carbon-buffe
   in the buffer this function returns `nil`.
 
   An entry is visible when it is shown in the buffer. This is also true for
-  compressed entries. While they are not displayed on their "own" line they
-  are visible "somewhere" in the buffer.
+  compressed path entries. While they are not displayed on their "own" line
+  they are visible "somewhere" in the buffer.
 
   In those cases, Carbon returns the line info of the rendered entry which
   will then have {entry} in its `line.path`.
@@ -1136,6 +1136,115 @@ BUFFER                                                             *carbon-buffe
   create                                                    *carbon-buffer-create*
 
   Signature: `require('carbon.buffer').create()`
+
+  When called, puts the Carbon buffer in a context-aware insert mode which
+  allows a path to be typed. Pressing <cr> will confirm creation by calling
+  |carbon-buffer-create-confirm| and pressing <esc> will cancel creation by
+  calling |carbon-buffer-create-cancel|.
+
+  Paths ending in slash (`/`) will create directories, otherwise regular files
+  are created.
+
+  The following section will show how this works on regular paths as well as
+  compressed paths. It is recommended to familiarize yourself with
+  |carbon-setting-compress| before reading on as most of the different
+  scenarios involve compressed paths.
+
+  There are a few different cases that can occur. Imagine the following
+  directory structure with Neovim opened in a `/home/me/project` directory:
+
+  1 `project/`
+  2 `  deeply/nested/file.txt`
+  3   `folder/`
+  4 `  other/nested/folder/`
+  5   `file.txt`
+
+  When called with the cursor on a regular file it will use the parent
+  directory of this file as a base for the path to create. If the cursor is
+  on line 5, calling this method shows the following:
+
+  1 `project/`
+  2 `  deeply/nested/file.txt`
+  3   `folder/`
+  4 `  other/nested/folder/`
+  5   `file.txt`
+  6   |
+
+  The parent directory of line 5 is actually `/home/me/project` so you enter
+  path creation after all its children in the Carbon buffer (line 6 in this
+  contrived case). Typing for example `/new/nested/file.txt` and pressing <cr>
+  will create `/home/me/project/new/nested/file.txt`.
+
+  When called with the cursor on a directory, that directory is used as a base
+  for the path to create. If the cursor is on line 3, the following will show:
+
+  1 `project/`
+  2 `  deeply/nested/file.txt`
+  3   `folder/`
+  4     |
+  5 `  other/nested/folder/`
+  6   `file.txt`
+
+  The cursor is placed on line 4 and nested "inside" this folder. Typing
+  `/new/nested/file.txt` and pressing <cr> will create
+  `/home/me/project/folder/new/nested/file.txt`.
+
+  Finally, when the cursor is on the compressed path on line 2, by default
+  the same rules apply as for regular file entries. In this case the base
+  will be `/home/me/project/deeply/nested`:
+
+  1 `project/`
+  2 `+  deeply/nested/`
+  3 `    file.txt`
+  4     |
+  5   `folder/`
+  6 `  other/nested/folder/`
+  7   `file.txt`
+
+  Typing `/new/nested/file.txt` and pressing <cr> will create
+  `/home/me/project/deeply/nested/new/nested/file.txt`.
+
+  If the cursor was on line 4 instead of line 2, the base path would be
+  `/home/me/project/other/nested/folder`:
+
+  1 `project/`
+  2 `  deeply/nested/file.txt`
+  3   `folder/`
+  4 `  other/nested/folder/`
+  5     |
+  6   `file.txt`
+
+  Typing `/new/nested/file.txt` and pressing <cr> will create
+  `/home/me/project/other/nested/folder/new/nested/file.txt`.
+
+  This leaves us with one unresolved scenario, which is how to create files
+  or directories at arbitrary parent directories of compressed paths.
+
+  Support for this is implemented via `vim.v.count`. When a count is supplied to
+  the mapping executing this function, if this count is greater than `0` then
+  Carbon will count directories on compressed paths from left to right, and
+  will create a file in the `vim.v.count` nth directory.
+
+  Given the default |carbon-setting-actions-create| mapping of `c`, imagine we
+  were on line 2 and pressed `1c`. This would show the following:
+
+  1 `project/`
+  2 `  deeply/`
+  3 `    nested/file.txt`
+  4     |
+  3   `folder/`
+  4 `  other/nested/folder/`
+  5   `file.txt`
+
+  Typing `/new/nested/file.txt` and pressing <cr> will create
+  `/home/me/project/deeply/new/nested/file.txt`.
+
+  For compressed paths which end in a directory the same rules apply except
+  that by default, the current directory will be used as a base instead of the
+  parent directory.
+
+  Finally, when `vim.v.count` does not resolve to a directory, the default
+  behaviour as if no count was supplied will be executed.
 
   `------------------------------------------------------------------------------`
   create_confirm                                    *carbon-buffer-create-confirm*
