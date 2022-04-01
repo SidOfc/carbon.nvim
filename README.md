@@ -15,7 +15,7 @@ Carbon.nvim
 Carbon.nvim uses Neovim's fantastic Lua API to provide an optimal tree view
 of the parent working directory and synchronizes changes to the file system
 automatically. It does not handle renaming/moving, <strike>creating</strike>, or deleting
-files or folders (Yet, [file / folder creation is already there](#creating-files-and-directories)).
+files or folders (yet, [file / folder creation is already there](#creating-files-and-directories)).
 
 ## CHANGELOG
 
@@ -226,7 +226,7 @@ opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 Enters an interactive mode in which a path can be entered. When
 done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
-to cancel.
+to cancel. See `:h carbon-buffer-create` for more details.
 
 ![Create files and directories example](/doc/assets/carbon-create-action.gif)
 
