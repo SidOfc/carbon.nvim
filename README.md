@@ -14,8 +14,8 @@ Carbon.nvim
 
 Carbon.nvim uses Neovim's fantastic Lua API to provide an optimal tree view
 of the parent working directory and synchronizes changes to the file system
-automatically. It does not handle renaming/moving, creating, or deleting
-files or folders.
+automatically. It does not handle renaming/moving, <strike>creating</strike>, or deleting
+files or folders (Yet, [file / folder creation is already there](#creating-files-and-directories)).
 
 ## CHANGELOG
 
@@ -216,6 +216,19 @@ Close a Carbon buffer, useful for closing Carbon buffers which were
 opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
+
+### Creating files and directories
+
+| Mapping      |
+|:-------------|
+| <kbd>c</kbd> |
+
+
+Enters an interactive mode in which a path can be entered. When
+done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
+to cancel.
+
+![Create files and directories example](/doc/assets/carbon-create-action.gif)
 
 ## Why use Carbon.nvim instead of NetRW
 
