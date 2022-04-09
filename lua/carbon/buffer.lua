@@ -324,6 +324,69 @@ function buffer.entry_line(target_entry)
   end
 end
 
+function buffer.delete()
+  local line = buffer.cursor()
+  local targets = util.tbl_concat(line.path, { line.entry })
+
+  local lnum_idx = line.lnum - 1
+  local count = vim.v.count == 0 and #targets or vim.v.count1
+  local path_idx = math.min(count, #targets)
+  local target = targets[path_idx]
+  local highlight = { 'CarbonFile', 2 + line.depth * 2, lnum_idx }
+
+  if targets[path_idx].path == data.root.path then
+    return
+  end
+
+  if target.is_directory then
+    highlight[1] = 'CarbonDir'
+  end
+
+  for idx = 1, path_idx - 1 do
+    highlight[2] = highlight[2] + #line.path[idx].name + 1
+  end
+
+  buffer.clear_extmarks({ lnum_idx, highlight[2] }, { lnum_idx, -1 }, {})
+  buffer.add_highlight('CarbonDanger', lnum_idx, highlight[2], -1)
+  util.confirm_action({
+    row = line.lnum,
+    col = highlight[2],
+    highlight = 'CarbonDanger',
+    actions = {
+      {
+        name = 'delete',
+        execute = function()
+          local result = vim.fn.delete(
+            target.path,
+            target.is_directory and 'rf' or ''
+          )
+
+          if result == -1 then
+            vim.api.nvim_err_writeln(
+              'Failed to delete: "' .. target.path .. '"'
+            )
+          else
+            target.parent:synchronize()
+            buffer.cancel_synchronization()
+          end
+        end,
+      },
+      {
+        name = 'cancel',
+        execute = function()
+          buffer.clear_extmarks({ lnum_idx, 0 }, { lnum_idx, -1 }, {})
+
+          for _, lhl in ipairs(line.highlights) do
+            buffer.add_highlight(lhl[1], lnum_idx, lhl[2], lhl[3])
+          end
+
+          buffer.render()
+        end,
+      },
+    },
+  })
+end
+
 function buffer.create()
   local line = buffer.cursor()
   local handle = buffer.handle()

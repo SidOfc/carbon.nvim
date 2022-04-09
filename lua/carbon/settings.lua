@@ -48,6 +48,7 @@ return {
     split = '<c-x>',
     vsplit = '<c-v>',
     create = 'c',
+    delete = 'd',
     quit = { 'q', '<esc>' },
   },
   highlights = {
@@ -84,6 +85,12 @@ return {
     CarbonIndicator = {
       ctermfg = 'DarkGray',
       guifg = 'Gray',
+      cterm = 'bold',
+      gui = 'bold',
+    },
+    CarbonDanger = {
+      ctermfg = 'Red',
+      guifg = '#ff3333',
       cterm = 'bold',
       gui = 'bold',
     },
