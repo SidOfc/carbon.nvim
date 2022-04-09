@@ -12,6 +12,22 @@ function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'
 end
 
+function util.tbl_concat(...)
+  local result = {}
+
+  for idx = 1, select('#', ...) do
+    for key, value in pairs(select(idx, ...)) do
+      if type(key) == 'number' then
+        result[#result + 1] = value
+      else
+        result[key] = value
+      end
+    end
+  end
+
+  return result
+end
+
 function util.tbl_find(tbl, callback)
   for key, value in pairs(tbl) do
     if callback(value, key) then
@@ -94,6 +110,142 @@ function util.highlight(group, properties)
 
     vim.cmd(command)
   end
+end
+
+function util.confirm_action(options)
+  options = options or {}
+  local keep = { 'j', 'k' }
+  local bound = {}
+  local width = 0
+  local height = 1
+  local actions = {}
+  local highlight = options.highlight or 'Normal'
+  local guicursor = vim.o.guicursor
+
+  for _, action in ipairs(options.actions) do
+    for _, char in ipairs(vim.fn.split(action.name, '\\zs')) do
+      if
+        not bound[char]
+        and char ~= 'c'
+        and action.name ~= 'cancel'
+        and type(action.execute) == 'function'
+      then
+        bound[char] = true
+        width = math.max(width, #action.name)
+        height = height + 1
+        actions[#actions + 1] = {
+          key = char,
+          name = action.name,
+          execute = action.execute,
+        }
+
+        break
+      end
+    end
+  end
+
+  local buf = vim.api.nvim_create_buf(false, true)
+  local win = vim.api.nvim_open_win(buf, true, {
+    relative = 'editor',
+    anchor = 'NW',
+    border = 'single',
+    style = 'minimal',
+    width = width + 6,
+    height = height,
+    row = options.row or vim.fn.line('.'),
+    col = options.col or vim.fn.col('.'),
+  })
+
+  local function exit()
+    if vim.fn.win_getid() == win then
+      for _, action in ipairs(options.actions) do
+        if action.name == 'cancel' then
+          action.execute({ win = win, buf = buf })
+
+          break
+        end
+      end
+
+      vim.cmd('set guicursor=' .. guicursor)
+      vim.cmd('close')
+    end
+  end
+
+  width = math.max(width, 6)
+  actions[#actions + 1] = { key = 'c', name = 'cancel', execute = exit }
+
+  vim.api.nvim_buf_set_lines(
+    buf,
+    0,
+    -1,
+    1,
+    vim.tbl_map(function(action)
+      return ' [' .. action.key .. '] ' .. action.name
+    end, actions)
+  )
+
+  vim.api.nvim_buf_set_option(buf, 'bufhidden', 'wipe')
+  vim.api.nvim_buf_set_option(buf, 'readonly', true)
+  vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+  vim.api.nvim_buf_set_option(buf, 'modified', false)
+  vim.api.nvim_win_set_option(win, 'cursorline', true)
+  vim.api.nvim_win_set_option(
+    win,
+    'winhl',
+    'Normal:CarbonIndicator,FloatBorder:'
+      .. highlight
+      .. ',CursorLine:'
+      .. highlight
+  )
+
+  for ascii = 32, 127 do
+    local key = vim.fn.nr2char(ascii)
+
+    if not vim.tbl_contains(keep, key) then
+      util.map(
+        key,
+        '<nop>',
+        { buffer = buf, silent = true, nowait = true, noremap = true }
+      )
+    end
+  end
+
+  for _, action in ipairs(actions) do
+    util.map(action.key, function()
+      action.execute()
+      exit()
+    end, { buffer = buf, silent = true, nowait = true, noremap = true })
+  end
+
+  util.map(
+    '<esc>',
+    exit,
+    { buffer = buf, silent = true, nowait = true, noremap = true }
+  )
+
+  util.map('<cr>', function()
+    local action_key = string.sub(vim.fn.getline('.'), 3, 3)
+
+    for _, action in ipairs(actions) do
+      if action.key == action_key then
+        action.execute()
+        exit()
+
+        break
+      end
+    end
+  end, { buffer = buf, silent = true, nowait = true, noremap = true })
+
+  util.autocmd('CarbonDelete', 'ExitPre', '<buffer>', exit)
+  util.autocmd('CarbonDelete', 'WinClosed', '<buffer>', exit)
+  util.autocmd('CarbonDelete', 'BufLeave', '<buffer>', exit)
+  util.autocmd('CarbonDelete', 'CursorMoved', '<buffer>', function()
+    vim.fn.cursor(vim.fn.line('.'), 3)
+  end)
+
+  vim.cmd('set guicursor=n-v-c:hor10')
+
+  return { actions, width, height }
 end
 
 return util
