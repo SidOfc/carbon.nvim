@@ -27,42 +27,27 @@ function buffer.handle()
     return data.handle
   end
 
-  data.handle = vim.api.nvim_create_buf(false, true)
+  local mappings = {
+    { 'i', '<nop>' },
+    { '<cr>', buffer.create_confirm, { mode = 'i', rhs_prefix = '<esc>' } },
+    { '<esc>', buffer.create_cancel, { mode = 'i', rhs_prefix = '<esc>' } },
+  }
 
-  buffer.set('name', 'carbon')
-  buffer.set('swapfile', false)
-  buffer.set('filetype', 'carbon')
-  buffer.set('bufhidden', 'hide')
-  buffer.set('buftype', 'nofile')
-  buffer.set('modifiable', false)
-  buffer.set('modified', false)
+  for action, mapping in pairs(settings.actions or {}) do
+    mapping = type(mapping) == 'string' and { mapping } or mapping or {}
 
-  local action_options = { buffer = data.handle, nowait = true, silent = true }
-  local insert_options = vim.tbl_extend('force', {}, action_options, {
-    rhs_prefix = '<esc>',
-    noremap = true,
-    mode = 'i',
-  })
-
-  util.map('i', '<nop>', action_options)
-  util.map('<cr>', buffer.create_confirm, insert_options)
-  util.map('<esc>', buffer.create_cancel, insert_options)
-
-  if type(settings.actions) == 'table' then
-    for action, mapping in pairs(settings.actions) do
-      if mapping then
-        local keys = mapping
-
-        if type(keys) == 'string' then
-          keys = { keys }
-        end
-
-        for _, key in ipairs(keys) do
-          util.map(key, util.plug(action), action_options)
-        end
-      end
+    for _, key in ipairs(mapping) do
+      mappings[#mappings + 1] = { key, util.plug(action) }
     end
   end
+
+  data.handle = util.create_scratch_buf({
+    name = 'carbon',
+    filetype = 'carbon',
+    modifiable = false,
+    modified = false,
+    mappings = mappings,
+  })
 
   return data.handle
 end
@@ -352,37 +337,31 @@ function buffer.delete()
     row = line.lnum,
     col = highlight[2],
     highlight = 'CarbonDanger',
+    order = { 'delete', 'cancel' },
     actions = {
-      {
-        name = 'delete',
-        execute = function()
-          local result = vim.fn.delete(
-            target.path,
-            target.is_directory and 'rf' or ''
-          )
+      delete = function()
+        local result = vim.fn.delete(
+          target.path,
+          target.is_directory and 'rf' or ''
+        )
 
-          if result == -1 then
-            vim.api.nvim_err_writeln(
-              'Failed to delete: "' .. target.path .. '"'
-            )
-          else
-            target.parent:synchronize()
-            buffer.cancel_synchronization()
-          end
-        end,
-      },
-      {
-        name = 'cancel',
-        execute = function()
-          buffer.clear_extmarks({ lnum_idx, 0 }, { lnum_idx, -1 }, {})
+        if result == -1 then
+          vim.api.nvim_err_writeln('Failed to delete: "' .. target.path .. '"')
+        else
+          target.parent:synchronize()
+          buffer.cancel_synchronization()
+        end
+      end,
 
-          for _, lhl in ipairs(line.highlights) do
-            buffer.add_highlight(lhl[1], lnum_idx, lhl[2], lhl[3])
-          end
+      cancel = function()
+        buffer.clear_extmarks({ lnum_idx, 0 }, { lnum_idx, -1 }, {})
 
-          buffer.render()
-        end,
-      },
+        for _, lhl in ipairs(line.highlights) do
+          buffer.add_highlight(lhl[1], lnum_idx, lhl[2], lhl[3])
+        end
+
+        buffer.render()
+      end,
     },
   })
 end
@@ -498,14 +477,6 @@ function buffer.set_lines(...)
   vim.api.nvim_buf_set_option(data.handle, 'modified', false)
 end
 
-function buffer.set(key, value)
-  if key == 'name' then
-    vim.api.nvim_buf_set_name(data.handle, value)
-  else
-    vim.api.nvim_buf_set_option(data.handle, key, value)
-  end
-end
-
 function buffer.process_event(_, path)
   vim.fn.timer_stop(data.sync_timer)
 
@@ -534,7 +505,7 @@ function buffer.process_insert_move()
   local start_col = data.cursor_bounds.col - 1
   local split_col = start_col
   local text = string.rep(' ', start_col)
-    .. vim.fn.trim(vim.fn.getline('.'), ' ', 1)
+    .. vim.fn.trim(vim.fn.getline(data.cursor_bounds.lnum), ' ', 1)
 
   for col = 1, #text do
     if string.sub(text, col, col) == '/' then
