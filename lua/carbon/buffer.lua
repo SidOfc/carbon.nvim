@@ -46,6 +46,7 @@ function buffer.handle()
     filetype = 'carbon',
     modifiable = false,
     modified = false,
+    bufhidden = 'hide',
     mappings = mappings,
   })
 
