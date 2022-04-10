@@ -159,7 +159,7 @@ function util.confirm_action(options)
   for ascii = 32, 127 do
     local key = vim.fn.nr2char(ascii)
 
-    if key ~= 'j' and key ~= 'k' and key ~= ':' then
+    if key ~= 'j' and key ~= 'k' then
       mappings[#mappings + 1] = { key, '<nop>' }
     end
   end
