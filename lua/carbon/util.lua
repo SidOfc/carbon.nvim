@@ -159,20 +159,27 @@ function util.confirm_action(options)
   for ascii = 32, 127 do
     local key = vim.fn.nr2char(ascii)
 
-    if key ~= 'j' and key ~= 'k' then
+    if key ~= 'j' and key ~= 'k' and ascii ~= 38 and ascii ~= 40 then
       mappings[#mappings + 1] = { key, '<nop>' }
     end
   end
 
   for _, action in ipairs(ordered_actions) do
+    local found = false
+
     for _, char in ipairs(vim.fn.split(action, '\\zs')) do
       if not keys[char] then
+        found = true
         keys[char] = action
         lines[#lines + 1] = ' [' .. char .. '] ' .. action
         mappings[#mappings + 1] = { char, finish(action) }
 
         break
       end
+    end
+
+    if not found then
+      lines[#lines + 1] = '     ' .. action
     end
   end
 
