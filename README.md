@@ -15,7 +15,8 @@ Carbon.nvim
 Carbon.nvim uses Neovim's fantastic Lua API to provide an optimal tree view
 of the parent working directory and synchronizes changes to the file system
 automatically. It does not handle renaming/moving, <strike>creating</strike>, or deleting
-files or folders (yet, [file / folder creation is already there](#creating-files-and-directories)).
+files or folders (yet, [file / folder creation is already there](#creating-files-and-directories)
+ as well as [file / folder deletion](#deleting-files-and-directories)).
 
 ## CHANGELOG
 
@@ -223,13 +224,26 @@ opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 |:-------------|
 | <kbd>c</kbd> |
 
+![Creating files and directories example](/doc/assets/carbon-create-action.gif)
 
 Enters an interactive mode in which a path can be entered. When
 done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
 to cancel. Prepending a `count` to <kbd>c</kbd> will select the `count`_nth_
 directory from the left as base. See `:h carbon-buffer-create` for more details.
 
-![Create files and directories example](/doc/assets/carbon-create-action.gif)
+#### Deleting files and directories
+
+| Mapping      |
+|:-------------|
+| <kbd>d</kbd> |
+
+![Deleting files and directories example](/doc/assets/carbon-delete-action.gif)
+
+Prompts confirmation to delete the current entry under the cursor. Press <kbd>enter</kbd>
+to confirm the currently highlighted option, <kbd>d</kbd> to confirm deletion directly,
+or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
+the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
+for more details.
 
 ## Why use Carbon.nvim instead of NetRW
 
@@ -243,15 +257,12 @@ list of relevant differences:
 Some main features that NetRW offers which Carbon.nvim does not:
 
 - Remote file system support
-- The ability to handle renaming/moving, <strike>creating</strike>, or deleting files or folders (work-in-progress)
-- A ton of commands and mappings I haven't bothered looking into supporting
+- The ability to handle renaming/moving, <strike>creating</strike>, or <strike>deleting files or folders</strike> (work-in-progress)
+- A ton of commands and mappings I haven't bothered looking into yet
 
 Some main features that Carbon.nvim offers which NetRW does not:
 
 - Has a [floating window mode](#fcarbon)
 - Automatically reflects changes to the file system in the buffer
 - Compresses deeply nested child paths like GitHub does, but even better!
-  (See `:h carbon-setting-compress` for more information)
-
-If Carbon.nvim looks like it's for you then feel free to continue
-to the [Installation](#installation) section!
+  (See `:h carbon-setting-compress` for more informationk

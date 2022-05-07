@@ -27,42 +27,28 @@ function buffer.handle()
     return data.handle
   end
 
-  data.handle = vim.api.nvim_create_buf(false, true)
+  local mappings = {
+    { 'i', '<nop>' },
+    { '<cr>', buffer.create_confirm, { mode = 'i', rhs_prefix = '<esc>' } },
+    { '<esc>', buffer.create_cancel, { mode = 'i', rhs_prefix = '<esc>' } },
+  }
 
-  buffer.set('name', 'carbon')
-  buffer.set('swapfile', false)
-  buffer.set('filetype', 'carbon')
-  buffer.set('bufhidden', 'hide')
-  buffer.set('buftype', 'nofile')
-  buffer.set('modifiable', false)
-  buffer.set('modified', false)
+  for action, mapping in pairs(settings.actions or {}) do
+    mapping = type(mapping) == 'string' and { mapping } or mapping or {}
 
-  local action_options = { buffer = data.handle, nowait = true, silent = true }
-  local insert_options = vim.tbl_extend('force', {}, action_options, {
-    rhs_prefix = '<esc>',
-    noremap = true,
-    mode = 'i',
-  })
-
-  util.map('i', '<nop>', action_options)
-  util.map('<cr>', buffer.create_confirm, insert_options)
-  util.map('<esc>', buffer.create_cancel, insert_options)
-
-  if type(settings.actions) == 'table' then
-    for action, mapping in pairs(settings.actions) do
-      if mapping then
-        local keys = mapping
-
-        if type(keys) == 'string' then
-          keys = { keys }
-        end
-
-        for _, key in ipairs(keys) do
-          util.map(key, util.plug(action), action_options)
-        end
-      end
+    for _, key in ipairs(mapping) do
+      mappings[#mappings + 1] = { key, util.plug(action) }
     end
   end
+
+  data.handle = util.create_scratch_buf({
+    name = 'carbon',
+    filetype = 'carbon',
+    modifiable = false,
+    modified = false,
+    bufhidden = 'hide',
+    mappings = mappings,
+  })
 
   return data.handle
 end
@@ -324,6 +310,63 @@ function buffer.entry_line(target_entry)
   end
 end
 
+function buffer.delete()
+  local line = buffer.cursor()
+  local targets = util.tbl_concat(line.path, { line.entry })
+
+  local lnum_idx = line.lnum - 1
+  local count = vim.v.count == 0 and #targets or vim.v.count1
+  local path_idx = math.min(count, #targets)
+  local target = targets[path_idx]
+  local highlight = { 'CarbonFile', 2 + line.depth * 2, lnum_idx }
+
+  if targets[path_idx].path == data.root.path then
+    return
+  end
+
+  if target.is_directory then
+    highlight[1] = 'CarbonDir'
+  end
+
+  for idx = 1, path_idx - 1 do
+    highlight[2] = highlight[2] + #line.path[idx].name + 1
+  end
+
+  buffer.clear_extmarks({ lnum_idx, highlight[2] }, { lnum_idx, -1 }, {})
+  buffer.add_highlight('CarbonDanger', lnum_idx, highlight[2], -1)
+  util.confirm_action({
+    row = line.lnum,
+    col = highlight[2],
+    highlight = 'CarbonDanger',
+    order = { 'delete', 'cancel' },
+    actions = {
+      delete = function()
+        local result = vim.fn.delete(
+          target.path,
+          target.is_directory and 'rf' or ''
+        )
+
+        if result == -1 then
+          vim.api.nvim_err_writeln('Failed to delete: "' .. target.path .. '"')
+        else
+          target.parent:synchronize()
+          buffer.cancel_synchronization()
+        end
+      end,
+
+      cancel = function()
+        buffer.clear_extmarks({ lnum_idx, 0 }, { lnum_idx, -1 }, {})
+
+        for _, lhl in ipairs(line.highlights) do
+          buffer.add_highlight(lhl[1], lnum_idx, lhl[2], lhl[3])
+        end
+
+        buffer.render()
+      end,
+    },
+  })
+end
+
 function buffer.create()
   local line = buffer.cursor()
   local handle = buffer.handle()
@@ -435,14 +478,6 @@ function buffer.set_lines(...)
   vim.api.nvim_buf_set_option(data.handle, 'modified', false)
 end
 
-function buffer.set(key, value)
-  if key == 'name' then
-    vim.api.nvim_buf_set_name(data.handle, value)
-  else
-    vim.api.nvim_buf_set_option(data.handle, key, value)
-  end
-end
-
 function buffer.process_event(_, path)
   vim.fn.timer_stop(data.sync_timer)
 
@@ -471,7 +506,7 @@ function buffer.process_insert_move()
   local start_col = data.cursor_bounds.col - 1
   local split_col = start_col
   local text = string.rep(' ', start_col)
-    .. vim.fn.trim(vim.fn.getline('.'), ' ', 1)
+    .. vim.fn.trim(vim.fn.getline(data.cursor_bounds.lnum), ' ', 1)
 
   for col = 1, #text do
     if string.sub(text, col, col) == '/' then

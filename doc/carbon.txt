@@ -249,6 +249,19 @@ PLUGS                                                               *carbon-plug
   For more information see |carbon-buffer-create|.
 
   `------------------------------------------------------------------------------`
+  <Plug>(carbon-delete)                                       *carbon-plug-delete*
+
+  Implementation: `:<c-u>lua require('carbon').delete()<cr>`
+  Mapping:        |carbon-setting-actions-delete|
+
+  Opens a confirmation popup to confirm whether you want to delete the entry
+  under the cursor. Accepts a [count] to allow deleting directories "from left
+  to right" when the cursor is on a compressed path
+  (more at |carbon-settings-compress|).
+
+  For more information see |carbon-buffer-delete|.
+
+  `------------------------------------------------------------------------------`
   <Plug>(carbon-quit)                                           *carbon-plug-quit*
 
   Implementation: `:<c-u>lua require('carbon').quit()<cr>`
@@ -377,6 +390,13 @@ CARBON                                                             *carbon-carbo
   Calls |carbon-buffer-create|.
 
   `------------------------------------------------------------------------------`
+  delete                                                    *carbon-carbon-delete*
+
+  Signature: `require('carbon').delete()`
+
+  Calls |carbon-buffer-delete|.
+
+  `------------------------------------------------------------------------------`
   cd                                                            *carbon-carbon-cd*
 
   Signature: `require('carbon').cd(`[{path}]`)`
@@ -444,6 +464,34 @@ UTIL                                                                 *carbon-uti
   {keys} must be a table.
 
   `------------------------------------------------------------------------------`
+  tbl_merge                                                *carbon-util-tbl-merge*
+
+  Signature: `require('carbon.util').tbl_merge(`{...varargs}`)`
+
+  Wraps |vim.tbl_extend|, each {...varargs} argument must be a table. Tables
+  are merged using `force` into a new table.
+
+  `------------------------------------------------------------------------------`
+  tbl_concat                                              *carbon-util-tbl-concat*
+
+  Signature: `require('carbon.util').tbl_concat(`{...varargs}`)`
+
+  Concatenates all tables.
+
+  String keys will overwrite previously set string keys if they exist.
+
+  Numeric keys are reindexed which means that concatenating tables will change
+  the numeric keys of all table values except the first argument.
+
+  For example:
+
+  `util.tbl_concat(`{1, 2, a = 3}, {4, 5, b = 6, a = 7}`)`
+
+  will result in:
+
+  `{1, 2, 4, 5, b = 6, a = 7}`
+
+  `------------------------------------------------------------------------------`
   map                                                            *carbon-util-map*
 
   Signature: `require('carbon.util').map(`{lhs}, {rhs}[, {options}]`)`
@@ -452,6 +500,9 @@ UTIL                                                                 *carbon-uti
   An optional {options} table can supplied. It accepts the same options
   as |nvim_set_keymap| does and also supports two extra options: `mode` which
   defaults to `'n'` and `buffer` which defaults to `nil`.
+
+  Mappings are |map-silent|, |map-nowait|, and |noremap| by default unless specified
+  otherwise in {options}.
 
   {lhs} must be a string containing the key for this mapping.
   {rhs} must be a vim command string or a function.
@@ -474,7 +525,6 @@ UTIL                                                                 *carbon-uti
   string will be prepended to {rhs}. This allows lua functions to be used in
   more places, such as |insert-mode|, because you can prepend `'<esc>'` to leave
   insert mode before the bound callback is executed. For example:
-
 
   `require('carbon.util').map(`
     "i",
@@ -543,6 +593,195 @@ UTIL                                                                 *carbon-uti
 
   For more information about which autocommands Carbon uses,
   see |carbon-autocmds|.
+
+  `------------------------------------------------------------------------------`
+  push_guicursor                                      *carbon-util-push-guicursor*
+
+  Signature: `require('carbon.util').push_guicursor(`{guicursor}`)`
+
+  Stores the previous cursor and changes the cursor to {guicursor}.
+  See |guicursor| for more information about the format of {guicursor}.
+
+  To revert the cursor, see |carbon-util-pop-guicursor|
+
+  {guicursor} must be a string.
+
+  `------------------------------------------------------------------------------`
+  pop_guicursor                                        *carbon-util-pop-guicursor*
+
+  Signature: `require('carbon.util').pop_guicursor()`
+
+  Revert the last cursor change applied by |carbon-util-push-guicursor|. When
+  there are no more changes to revert calling this method results in a no-op.
+
+  `------------------------------------------------------------------------------`
+  set_winhl                                                *carbon-util-set-winhl*
+
+  Signature: `require('carbon.util').set_winhl(`{win}, {highlights}`)`
+
+  Overwrite highlights for {win}. The {highlights} table is expected to
+  contain "source" group names as keys and "target" group names as values.
+
+  For example:
+
+  `util.set_winhl(`..., {Normal = 'CarbonIndicator', FloatBorder = 'Normal'}`)`
+
+  Will result in the following command being executed:
+
+  `winhl=Normal:CarbonIndicator,FloatBorder:Normal`
+
+  {win} must be a valid |winnr|.
+  {highlights} must be a table.
+
+  `------------------------------------------------------------------------------`
+  set_buf_autocmds                                  *carbon-util-set-buf-autocmds*
+
+  Signature: `require('carbon.util').set_buf_autocmds(`{buf}, {autocmds}`)`
+
+  Set {autocmds} for {buf}. The {autocmds} table is expected to contain
+  {event} keys and their values being a {rhs}.
+
+  Each {event} = {rhs} key-value pair must be valid in |carbon-util-autocmd|.
+  The remaining arguments of |carbon-util-autocmd| are automatically set to:
+
+  {group} => `'CarbonBuffer'`
+  {aupat} => `'<buffer=' ..` {buf} `.. '>'`
+
+  {buf} must be a valid |bufnr|.
+  {autocmds} must be a table.
+
+  `------------------------------------------------------------------------------`
+  set_buf_mappings                                  *carbon-util-set-buf-mappings*
+
+  Signature: `require('carbon.util').set_buf_mappings(`{buf}, {mappings}`)`
+
+  Set {mappings} for {buf}. The {mappings} table is expected to be a table
+  array of tables where each table has the following layout:
+
+  `{`{lhs}, {rhs}[, {options}]`}`
+
+  The {lhs}, {rhs}, and optional {options} are passed to |carbon-util-map|.
+
+  When {options} is not specified, an empty table is used.
+  The `buffer` option in {options} will always be set to {buf} in the call
+  to |carbon-util-map|.
+
+  {buf} must be a valid |bufnr|.
+  {mappings} must be a table.
+
+  `------------------------------------------------------------------------------`
+  create_scratch_buf                              *carbon-util-create-scratch-buf*
+
+  Signature: `require('carbon.util').create_scratch_buf(`[{options}]`)`
+
+  Create a new |unlisted-buffer| which is also a |scratch-buffer|.
+  Some buffer options are set by default:
+
+  |bufhidden|  =>  `'wipe'`
+  |buftype|    =>  `'nofile'`
+  |swapfile|   =>  `false`
+
+  The optional {options} argument is a table which is expected to contain
+  buffer "option" names as keys and buffer option values as values.
+
+  Each key-value pair in {options} calls |nvim_buf_set_option| with the
+  created buffer's |bufnr| as first argument, the key as second argument, and the
+  value as the third argument.
+
+  There are a few special keys which will NOT be passed through to
+  |nvim_buf_set_option|. These are:
+
+  - `name`
+  - `lines`
+  - `mappings`
+  - `autocmds`
+
+  When `options.name` is present, the name of the scratch buffer is set to
+  the name specified using |nvim_buf_set_name|.
+
+  The `options.lines` setting allows you to specify the initial contents of
+  the buffer. The |modified| option will be set to `false` as well.
+
+  When `options.mappings` is specified |carbon-util-set-buf-mappings| is
+  called with the created buffer's |bufnr| as first argument and
+  `options.mappings` as second argument.
+
+  When `options.autocmds` is specified |carbon-util-set-buf-autocmds| is
+  called with the created buffer's |bufnr| as first argument and
+  `options.autocmds` as second argument.
+
+  `------------------------------------------------------------------------------`
+  confirm_action                                      *carbon-util-confirm-action*
+
+  Signature: `require('carbon.util').confirm_action(`{options}`)`
+
+  Creates a confirmation popup using |nvim_open_win|. This popup is intended
+  to be used as a means to confirm user actions via a mapping or up/down
+  navigation and pressing <enter> to confirm or using <esc> to cancel.
+
+  All default mappings in the popup are unmapped with exception of <k>, <j>,
+  <up>, and <down>.
+
+  The {options} argument supports the following keys:
+
+  `{`
+  `  row = <number>,`
+  `  col = <number>,`
+  `  highlight = <string>,`
+    `order = <table<string>>,`
+  `  actions = <table<string = function>>,`
+  `}`
+
+  Property: `row`
+  Default:  `vim.fn.line('.')`
+
+  The "top" offset in lines at which to anchor the popup.
+
+  Property: `col`
+  Default:  `vim.fn.col('.')`
+
+  The "left" offset in lines at which to anchor the popup.
+
+  Property: `highlight`
+  Default:  `'Normal'`
+
+  The highlight group used to highlight |FloatBorder| and |CursorLine|
+  in the popup.
+
+  Property: `order`
+  Default:  `{}`
+
+  Specify the order in which actions defined in `actions` should be listed in
+  the popup.
+
+  Property: `actions`
+  Default:  `nil`
+
+  A table whose keys will be displayed in the popup as "actions" to execute.
+  The value of each key must be a Lua function. When an action is selected its
+  function will be executed.
+
+  Popups have a `cancel` action by default but a custom `cancel` action
+  can still be specified in `actions` as well. This allows for writing custom
+  logic which can "hook" into popups that are being closed.
+
+  Despite a default `cancel` action being present, `actions` must be set to a
+  table without exception. This is to prevent "accidentally" showing just
+  the default "cancel" action as that would not be very useful :)
+
+  Each key will have its first unmapped character mapped directly to that
+  action, e.g. if we have the following actions in this order:
+
+  `{'delete', 'duplicate', 'rename'}`
+
+  Then `delete` will be mapped to `d`. `duplicate` will be mapped to `u`
+  because `d` is already taken, and `rename` will be `r` since `r` hasn't been
+  taken yet.
+
+  Actions that could not be mapped due to all their characters already being
+  taken are simply "not mapped". They will still be visible in the confirm
+  popup and can still be selected using <enter>. The only downside is that
+  there will be no "direct" way to interact with that option.
 
 ================================================================================
 ENTRY                                                               *carbon-entry*
@@ -1043,22 +1282,6 @@ BUFFER                                                             *carbon-buffe
   Set |carbon-buffer-data-root| to the original |pwd| using |carbon-buffer-cd|.
 
   `------------------------------------------------------------------------------`
-  set                                                          *carbon-buffer-set*
-
-  Signature: `require('carbon.buffer').set(`{key}, {value}`)`
-
-  Sets {key} to {value} in the Carbon buffer. When {key} is `'name'` then
-  |nvim_buf_set_name| is called like this:
-
-  `vim.api.nvim_buf_set_name(`<bufnr>, {value}`)`
-
-  Otherwise, |nvim_buf_set_option| is called like this:
-
-  `vim.api.nvim_buf_set_option(`<bufnr>, {key}, {value}`)`
-
-  <bufnr> will be set to the current Carbon buffer handle.
-
-  `------------------------------------------------------------------------------`
   set_lines                                              *carbon-buffer-set-lines*
 
   Signature: `require('carbon.buffer').set_lines(`{from}, {to}, {strict}, {lines}`)`
@@ -1307,6 +1530,67 @@ BUFFER                                                             *carbon-buffe
   which are only set when |carbon-buffer-create| is called.
 
   `------------------------------------------------------------------------------`
+  delete                                                    *carbon-buffer-delete*
+
+  Signature: `require('carbon.buffer').delete()`
+
+  Prompts confirmation to delete the current entry under the cursor.
+  When the current entry is a regular file or executable the file itself will be
+  removed. When it is a directory, the directory and all its contents will be
+  removed recursively. Finally, when it is a symlink, just the symlink will be
+  removed.
+
+  A [count] can be specified to start deleting from left-to-right. This is
+  useful when the cursor is currently positioned on a compressed path.
+  It is recommended to familiarize yourself with |carbon-setting-compress| before
+  reading on as most of the different scenarios involve compressed paths.
+
+  Imagine the following directory structure with Neovim opened in
+  a `/home/me/project` directory:
+
+  1 `project/`
+  2 `  deeply/nested/file.txt`
+  3   `folder/`
+  4 `  other/nested/folder/`
+  5   `file.txt`
+
+  If we want to delete the file on line 5 then we can by pressing the mapping
+  for |carbon-action-delete|. After doing so the buffer will automatically
+  update to reflect the changes:
+
+  1 `project/`
+  2 `  deeply/nested/file.txt`
+  3   `folder/`
+  4 `  other/nested/folder/`
+
+  If we want to delete the `folder/` directory on line 4, we can once again do
+  so by pressing the delete mapping. By default, Carbon deletes from right to
+  left. The rationale here is based on an assumption that most of the time
+  you'll likely find yourself wanting to delete single files so the behaviour
+  is streamlined for this use-case.
+
+  Specifying a [count] will reverse the direction so it will delete from left
+  to right instead, allowing for deletion of folders at any level of nesting
+  in a compressed path. If instead of `folder/` on line 4 we wanted to delete
+  `nested` we would prefix the mapping with the number `2` e.g. pressing `2d`
+  and confirming deletion on line 4 would result in:
+
+  1 `project/`
+  2 `  deeply/nested/file.txt`
+  3   `folder/`
+  4 `  other/`
+
+  If we wanted to delete the `deeply/` folder on line 2, we would press `1d`
+  and confirm deletion, this would leave:
+
+  1 `project/`
+  2   `folder/`
+  3 `  other/`
+
+  The [count] is clamped. If it exceeds the amount of "components" in the path
+  then it will select the last component (the actual entry of that line).
+
+  `------------------------------------------------------------------------------`
   cancel_synchronization                    *carbon-buffer-cancel-synchronization*
 
   Signature: `require('carbon.buffer').cancel_synchronization()`
@@ -1474,6 +1758,7 @@ SETTINGS                                                         *carbon-setting
   `    vsplit = `|carbon-setting-actions-vsplit|`,`
   `    quit   = `|carbon-setting-actions-quit|`,`
   `    create = `|carbon-setting-actions-create|`,`
+  `    delete = `|carbon-setting-actions-delete|`,`
   `  },`
 
   `  highlights = {`
@@ -1483,6 +1768,7 @@ SETTINGS                                                         *carbon-setting
   `    CarbonSymlink       = `|carbon-setting-highlights-CarbonSymlink|`,`
   `    CarbonBrokenSymlink = `|carbon-setting-highlights-CarbonBrokenSymlink|`,`
   `    CarbonIndicator     = `|carbon-setting-highlights-CarbonIndicator|`,`
+  `    CarbonDanger        = `|carbon-setting-highlights-CarbonDanger|`,`
   `  },`
   `}`
 
@@ -1667,6 +1953,7 @@ SETTINGS                                                         *carbon-setting
     `  split = '<c-x>',`                              *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
     `  create = 'c',`                                *carbon-setting-actions-create*
+    `  delete = 'd',`                                *carbon-setting-actions-delete*
     `  quit = { 'q' '<esc>' },`                        *carbon-setting-actions-quit*
     `}`
 
@@ -1689,6 +1976,7 @@ SETTINGS                                                         *carbon-setting
   `split`   =>  |carbon-plug-split|
   `vsplit`  =>  |carbon-plug-vsplit|
   `create`  =>  |carbon-plug-create|
+  `delete`  =>  |carbon-plug-delete|
   `quit`    =>  |carbon-plug-quit|
 
   `------------------------------------------------------------------------------`
@@ -1729,6 +2017,12 @@ SETTINGS                                                         *carbon-setting
     `  CarbonIndicator = {`              *carbon-setting-highlights-CarbonIndicator*
     `    ctermfg = 'DarkGray',`
     `    guifg = 'Gray',`
+    `    cterm = 'bold',`
+    `    gui = 'bold',`
+    `  },`
+    `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
+    `    ctermfg = 'Red',`
+    `    guifg = '#ff3333',`
     `    cterm = 'bold',`
     `    gui = 'bold',`
     `  },`

@@ -32,6 +32,7 @@ function carbon.initialize()
   util.map(util.plug('split'), carbon.split)
   util.map(util.plug('vsplit'), carbon.vsplit)
   util.map(util.plug('create'), carbon.create)
+  util.map(util.plug('delete'), carbon.delete)
   util.map(util.plug('quit'), carbon.quit)
 
   util.autocmd('Carbon', 'BufEnter', 'carbon', buffer.process_enter)
@@ -188,6 +189,10 @@ end
 
 function carbon.create()
   buffer.create()
+end
+
+function carbon.delete()
+  buffer.delete()
 end
 
 return carbon
