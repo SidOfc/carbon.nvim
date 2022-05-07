@@ -229,7 +229,19 @@ done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
 to cancel. Prepending a `count` to <kbd>c</kbd> will select the `count`_nth_
 directory from the left as base. See `:h carbon-buffer-create` for more details.
 
-![Create files and directories example](/doc/assets/carbon-create-action.gif)
+### Deleting files and directories
+
+| Mapping      |
+|:-------------|
+| <kbd>d</kbd> |
+
+![Deleting files and directories example](/doc/assets/carbon-delete-action.gif)
+
+Prompts confirmation to delete the current entry under the cursor. Press <kbd>enter</kbd>
+to confirm the currently highlighted option, <kbd>d</kbd> to confirm deletion directly,
+or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
+the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
+for more details.
 
 ## Why use Carbon.nvim instead of NetRW
 
