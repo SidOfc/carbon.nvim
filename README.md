@@ -14,7 +14,7 @@ Carbon.nvim
 
 Carbon.nvim uses Neovim's fantastic Lua API to provide an optimal tree view
 of the parent working directory and synchronizes changes to the file system
-automatically. It does not handle renaming/moving, <strike>creating</strike>, or deleting
+automatically. It does not handle renaming/moving, <strike>creating</strike>, or <strike>deleting</strike>
 files or folders (yet, [file / folder creation is already there](#creating-files-and-directories)
  as well as [file / folder deletion](#deleting-files-and-directories)).
 
