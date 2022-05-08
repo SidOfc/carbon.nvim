@@ -1034,6 +1034,19 @@ BUFFER                                                             *carbon-buffe
   directory Neovim was opened with, or set to an arbitrary path.
 
   `------------------------------------------------------------------------------`
+  set_root                                                *carbon-buffer-set-root*
+
+  Signature: `require('carbon.buffer').set_root(`{new_root}`)`
+
+  The {new_root} argument can be an absolute path to a directory or a
+  |carbon-entry-new| entry. When passed as an absolute path it is converted to
+  an entry. |carbon-buffer-data-root| is then set to this entry.
+
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+
+  Returns the updated |carbon-buffer-data-root|.
+
+  `------------------------------------------------------------------------------`
   process_event                                      *carbon-buffer-process-event*
 
   Signature: `require('carbon.buffer').process_event()`
@@ -1238,6 +1251,8 @@ BUFFER                                                             *carbon-buffe
   After doing all this, the `data.root` is finally set to the actual parent.
   This routine then is repeated {count} `- 1` more times.
 
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+
   Returns `true` if the root is replaced at least once. `nil` otherwise. This
   can happen when you are at your OS root directory and try to go up more.
 
@@ -1259,6 +1274,8 @@ BUFFER                                                             *carbon-buffe
   {count} you will navigate "past" `c/` directly into `d/`. You will now only
   see `e.txt`.
 
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+
   Returns `true` when the root is replaced, `nil` when the `new_root` path is the
   same as the current `data.root` path in which case the root is not replaced.
 
@@ -1274,12 +1291,15 @@ BUFFER                                                             *carbon-buffe
   having to perform additional file system reads. In any other case, Carbon
   navigates to the {path} entry object.
 
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+
   `------------------------------------------------------------------------------`
   reset                                                      *carbon-buffer-reset*
 
   Signature: `require('carbon.buffer').reset()`
 
   Set |carbon-buffer-data-root| to the original |pwd| using |carbon-buffer-cd|.
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
 
   `------------------------------------------------------------------------------`
   set_lines                                              *carbon-buffer-set-lines*
@@ -1736,6 +1756,7 @@ SETTINGS                                                         *carbon-setting
                                                            *carbon-settings-table*
 
   `{`
+    `sync_pwd      = `|carbon-setting-sync-pwd|`,`
   `  compress      = `|carbon-setting-compress|`,`
   `  auto_open     = `|carbon-setting-auto-open|`,`
   `  keep_netrw    = `|carbon-setting-keep-netrw|`,`
@@ -1773,6 +1794,14 @@ SETTINGS                                                         *carbon-setting
   `}`
 
   Each specific setting is detailed in this module's documentation.
+
+  `------------------------------------------------------------------------------`
+  sync_pwd                                               *carbon-setting-sync-pwd*
+
+  Default: `false`
+
+  When enabled, Carbon updates Vim's |pwd| to match the new root path whenever
+  the buffer root changes.
 
   `------------------------------------------------------------------------------`
   compress                                               *carbon-setting-compress*

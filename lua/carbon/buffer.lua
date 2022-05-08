@@ -233,6 +233,9 @@ function buffer.up(count)
     local new_root = entry.new(vim.fn.fnamemodify(data.root.path, ':h'))
 
     if new_root.path ~= data.root.path then
+      rerender = true
+
+      buffer.set_root(new_root)
       new_root:set_children(vim.tbl_map(function(child)
         if child.path == data.root.path then
           child:set_open(true)
@@ -241,9 +244,6 @@ function buffer.up(count)
 
         return child
       end, new_root:get_children()))
-
-      rerender = true
-      data.root = new_root
     end
   end
 
@@ -260,13 +260,25 @@ function buffer.down(count)
 
   if new_root.path ~= data.root.path then
     data.root:set_open(true)
-
-    data.root = new_root
-
-    entry.clean(data.root.path)
+    buffer.set_root(new_root)
 
     return true
   end
+end
+
+function buffer.set_root(target)
+  if type(target) == 'string' then
+    target = entry.new(target)
+  end
+
+  data.root = target
+  entry.clean(data.root.path)
+
+  if settings.sync_pwd then
+    vim.fn.chdir(data.root.path)
+  end
+
+  return data.root
 end
 
 function buffer.reset()
@@ -288,9 +300,7 @@ function buffer.cd(path)
       return true
     end
   else
-    data.root = entry.find(new_root.path) or new_root
-
-    entry.clean(data.root.path)
+    buffer.set_root(entry.find(new_root.path) or new_root)
 
     return true
   end

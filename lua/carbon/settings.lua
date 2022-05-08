@@ -1,4 +1,5 @@
 return {
+  sync_pwd = false,
   compress = true,
   auto_open = true,
   keep_netrw = false,
