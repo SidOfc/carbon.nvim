@@ -257,7 +257,7 @@ PLUGS                                                               *carbon-plug
   Opens a confirmation popup to confirm whether you want to delete the entry
   under the cursor. Accepts a [count] to allow deleting directories "from left
   to right" when the cursor is on a compressed path
-  (more at |carbon-settings-compress|).
+  (more at |carbon-setting-compress|).
 
   For more information see |carbon-buffer-delete|.
 
@@ -1043,7 +1043,7 @@ BUFFER                                                             *carbon-buffe
 
   When this method is called, it will start a timer for
   |carbon-setting-sync-delay| milliseconds after which |carbon-buffer-synchronize|
-  is called. When called twice within a single |carbon-settings-sync-delay|
+  is called. When called twice within a single |carbon-setting-sync-delay|
   the previous timer will be cancelled and a new one will be started.
 
   `------------------------------------------------------------------------------`
