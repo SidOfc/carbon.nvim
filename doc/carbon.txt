@@ -518,14 +518,6 @@ UTIL                                                                 *carbon-uti
   mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
 
   `------------------------------------------------------------------------------`
-  indexed_callback                                  *carbon-util-indexed-callback*
-
-  Signature: `require('carbon.util').indexed_callback(`{index}`)`
-
-  Calls the function stored at {index}. The |carbon-util-map| method uses this
-  method to be able to accept callback functions.
-
-  `------------------------------------------------------------------------------`
   command                                                    *carbon-util-command*
 
   Signature: `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`

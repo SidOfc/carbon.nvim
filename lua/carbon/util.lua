@@ -1,19 +1,5 @@
 local util = {}
-
-local function index_callback(callback)
-  local found, index = util.tbl_find(data.indexed_callbacks, function(other)
-    return other == callback
-  end)
-
-  if not found then
-    index = #data.indexed_callbacks + 1
-    data.indexed_callbacks[index] = callback
-  end
-
-  return index
-end
 local data = {
-  indexed_callbacks = {},
   guicursors = {},
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
@@ -60,12 +46,6 @@ function util.tbl_except(tbl, keys)
   end
 
   return settings
-end
-
-function util.indexed_callback(index, ...)
-  if type(data.indexed_callbacks[index]) == 'function' then
-    return data.indexed_callbacks[index](...)
-  end
 end
 
 function util.map(lhs, rhs, settings_param)
