@@ -24,7 +24,7 @@ See the [releases](https://github.com/SidOfc/carbon.nvim/releases) page for more
 
 ## Installation
 
-Install on Neovim using your favorite plugin manager:
+Install on Neovim 0.7.0 and up (latest nightly recommended) using your favorite plugin manager:
 
 [vim-plug](https://github.com/junegunn/vim-plug)
 
@@ -32,10 +32,34 @@ Install on Neovim using your favorite plugin manager:
 Plug 'SidOfc/carbon.nvim'
 ```
 
-[packer.nvim](https://github.com/wbthomason/packer.nvim)
+[Vundle.vim](https://github.com/VundleVim/Vundle.vim)
 
 ```viml
+Plugin 'SidOfc/carbon.nvim'
+```
+
+[dein.vim](https://github.com/Shougo/dein.vim)
+
+```viml
+call dein#add('SidOfc/carbon.nvim')
+```
+
+[minpac](https://github.com/k-takata/minpac)
+
+```viml
+call minpac#add('SidOfc/carbon.nvim')
+```
+
+[packer.nvim](https://github.com/wbthomason/packer.nvim)
+
+```lua
 use 'SidOfc/carbon.nvim'
+```
+
+[paq-nvim](https://github.com/savq/paq-nvim)
+
+```lua
+require 'paq' { 'SidOfc/carbon.nvim', ... }
 ```
 
 ## Configuration
