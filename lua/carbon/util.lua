@@ -1,18 +1,8 @@
 local util = {}
-local data = { indexed_callbacks = {}, guicursors = {} }
-
-local function index_callback(callback)
-  local found, index = util.tbl_find(data.indexed_callbacks, function(other)
-    return other == callback
-  end)
-
-  if not found then
-    index = #data.indexed_callbacks + 1
-    data.indexed_callbacks[index] = callback
-  end
-
-  return index
-end
+local data = {
+  guicursors = {},
+  augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
+}
 
 function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'
@@ -58,24 +48,16 @@ function util.tbl_except(tbl, keys)
   return settings
 end
 
-function util.indexed_callback(index, ...)
-  if type(data.indexed_callbacks[index]) == 'function' then
-    return data.indexed_callbacks[index](...)
-  end
-end
-
 function util.map(lhs, rhs, settings_param)
   local settings = settings_param or {}
-  local options = util.tbl_except(settings, { 'mode', 'buffer', 'rhs_prefix' })
+  local options = util.tbl_except(settings, { 'mode', 'buffer' })
   local mode = settings.mode or 'n'
 
   if type(rhs) == 'function' then
-    rhs = ':<c-u>lua require("carbon.util").indexed_callback('
-      .. index_callback(rhs)
-      .. ')<cr>'
+    options.callback = rhs
+    rhs = ''
   end
 
-  rhs = (settings.rhs_prefix or '') .. rhs
   options = util.tbl_merge(
     { silent = true, nowait = true, noremap = true },
     options
@@ -88,30 +70,18 @@ function util.map(lhs, rhs, settings_param)
   end
 end
 
-function util.autocmd(group, event, aupat, rhs)
-  if type(rhs) == 'function' then
-    rhs = 'lua require("carbon.util").indexed_callback('
-      .. index_callback(rhs)
-      .. ')'
-  end
-
-  local autocmd = vim.fn.join({ 'autocmd!', event, aupat, rhs }, ' ')
-
-  vim.cmd(vim.fn.join({ 'augroup ' .. group, autocmd, 'augroup END' }, '\n'))
+function util.autocmd(event, cmd_or_callback, opts)
+  return vim.api.nvim_create_autocmd(
+    event,
+    util.tbl_merge({
+      group = data.augroup,
+      callback = cmd_or_callback,
+    }, opts or {})
+  )
 end
 
 function util.command(lhs, rhs, options)
-  if not vim.api.nvim_add_user_command then
-    if type(rhs) == 'function' then
-      rhs = ':lua require("carbon.util").indexed_callback('
-        .. index_callback(rhs)
-        .. ')'
-    end
-
-    vim.cmd('command! ' .. lhs .. ' ' .. rhs)
-  else
-    vim.api.nvim_add_user_command(lhs, rhs, options or {})
-  end
+  return vim.api.nvim_create_user_command(lhs, rhs, options or {})
 end
 
 function util.highlight(group, properties)
@@ -279,7 +249,7 @@ end
 
 function util.set_buf_autocmds(buf, autocmds)
   for autocmd, rhs in pairs(autocmds) do
-    util.autocmd('CarbonBuffer', autocmd, '<buffer=' .. buf .. '>', rhs)
+    util.autocmd(autocmd, rhs, { buffer = buf })
   end
 end
 

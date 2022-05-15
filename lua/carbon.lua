@@ -35,12 +35,8 @@ function carbon.initialize()
   util.map(util.plug('delete'), carbon.delete)
   util.map(util.plug('quit'), carbon.quit)
 
-  util.autocmd('Carbon', 'BufEnter', 'carbon', buffer.process_enter)
-  util.autocmd('Carbon', 'BufHidden', 'carbon', buffer.process_hidden)
-  util.autocmd('Carbon', 'CursorMovedI', 'carbon', buffer.process_insert_move)
-
   if settings.sync_on_cd then
-    util.autocmd('Carbon', 'DirChanged', 'global', carbon.cd)
+    util.autocmd('DirChanged', carbon.cd, { pattern = 'global' })
   end
 
   if type(settings.highlights) == 'table' then
@@ -173,7 +169,9 @@ function carbon.down()
 end
 
 function carbon.cd(path)
-  if buffer.cd(path or vim.v.event.cwd) then
+  local destination = path and path.file or path or vim.v.event.cwd
+
+  if buffer.cd(destination) then
     vim.fn.cursor(1, 1)
     buffer.render()
   end

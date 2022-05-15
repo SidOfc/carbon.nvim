@@ -131,9 +131,10 @@ AUTOCMDS                                                         *carbon-autocmd
 
   Group:          `Carbon`
   Event:          `BufEnter`
-  Pattern:        `carbon`
+  Pattern:
   Implementation: `lua require('carbon.buffer').process_enter()`
 
+  Local to Carbon buffers.
   Calls |carbon-buffer-process-enter| when entering a Carbon buffer.
 
   `------------------------------------------------------------------------------`
@@ -141,9 +142,10 @@ AUTOCMDS                                                         *carbon-autocmd
 
   Group:          `Carbon`
   Event:          `BufHidden`
-  Pattern:        `carbon`
+  Pattern:
   Implementation: `lua require('carbon.buffer').process_hidden()`
 
+  Local to Carbon buffers.
   Calls |carbon-buffer-process-hidden| when the Carbon buffer is hidden.
 
   `------------------------------------------------------------------------------`
@@ -151,9 +153,10 @@ AUTOCMDS                                                         *carbon-autocmd
 
   Group:          `Carbon`
   Event:          `CursorMovedI`
-  Pattern:        `carbon`
+  Pattern:
   Implementation: `lua require('carbon.buffer').process_insert_move()`
 
+  Local to Carbon buffers.
   Calls |carbon-buffer-process-insert-move| when moving the cursor in insert mode.
   Used during |carbon-buffer-create| to control the line and minimul column
   offset of the cursor.
@@ -505,65 +508,26 @@ UTIL                                                                 *carbon-uti
   otherwise in {options}.
 
   {lhs} must be a string containing the key for this mapping.
-  {rhs} must be a vim command string or a function.
+  {rhs} must be a vim command string or a lua callback.
   {options} must be a table if supplied.
 
-  When a function is passed to {rhs}, it is pushed to a table local to the
-  util module. The {rhs} is then replaced with a sequence which calls
-  |carbon-util-indexed-callback| with the correct index. For example:
-
-  `require('carbon.util').map(`"n", function() print("hello") end`)`
-
-  Will map the key `"n"` to:
-
-  `:<c-u>lua require("carbon.util").indexed_callback(1)<cr>`
+  When a function is passed to {rhs} `options.callback` will be set to
+  {rhs} and {rhs} will be set to an empty string.
 
   To create a |visual-mode| mapping pass `mode = 'v'`, to create a buffer-local
   mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
-
-  An arbitrary prefix string may be supplied via the option `rhs_prefix`. This
-  string will be prepended to {rhs}. This allows lua functions to be used in
-  more places, such as |insert-mode|, because you can prepend `'<esc>'` to leave
-  insert mode before the bound callback is executed. For example:
-
-  `require('carbon.util').map(`
-    "i",
-    function() print("hello") end,
-    { rhs_prefix = '<esc>' }
-  `)`
-
-  Will map the key `"n"` to:
-
-  `<esc>:<c-u>lua require("carbon.util").indexed_callback(1)<cr>`
-
-  The `mode`, `buffer` and `rhs_prefix` options are not passed to |nvim_set_keymap|
-  functions because they are explicitly filtered out for internal use by the
-  map utility function. All other {options} keys will be passed through.
-
-  `------------------------------------------------------------------------------`
-  indexed_callback                                  *carbon-util-indexed-callback*
-
-  Signature: `require('carbon.util').indexed_callback(`{index}`)`
-
-  Calls the function stored at {index}. The |carbon-util-map| method uses this
-  method to be able to accept callback functions.
 
   `------------------------------------------------------------------------------`
   command                                                    *carbon-util-command*
 
   Signature: `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
 
-  Wraps |nvim_add_user_command| if possible. The only difference between this
+  Wraps |nvim_add_user_command|. The only difference between this
   function and |nvim_add_user_command| is that the {options} argument is
   optional, when not passed it will default to an empty table.
 
-  When |nvim_add_user_command| is not available this method falls back
-  to |vim.cmd| to create the command. The {options} argument is ignored when
-  this happens. It is still possible to pass functions even when
-  |nvim_add_user_command| is not available.
-
   {lhs} must be a string containing the key name for this |user-command|.
-  {rhs} must be a vim command string or a function.
+  {rhs} must be a vim command string or a lua callback.
   {options} must be a table if supplied.
 
   `------------------------------------------------------------------------------`
@@ -571,7 +535,7 @@ UTIL                                                                 *carbon-uti
 
   Signature: `require('carbon.util').highlight(`{group}, {properties}`)`
 
-  Defines a |highlight|for {group} using provided {properties} and executes that
+  Defines a |highlight| for {group} using provided {properties} and executes that
   command. {group} will be the highlight group name. {properties} is a table
   accepting any properties that can be passed to |highlight|.
 
@@ -581,15 +545,14 @@ UTIL                                                                 *carbon-uti
   `------------------------------------------------------------------------------`
   autocmd                                                    *carbon-util-autocmd*
 
-  Signature: `require('carbon.util').autocmd(`{group}, {event}, {aupat}, {rhs}`)`
+  Signature: `require('carbon.util').autocmd(`{event}, {cmd_or_cb}[, {opts}]`)`
 
-  Defines an |autocmd| for {event} and {aupat} which executes {rhs}. The
-  autocommand is wrapped in an |augroup| named {group}.
+  Wraps |nvim_create_autocmd|. Sets {opts}`.callback` to {cmd_or_cb} before
+  being passed to |nvim_create_autocmd|.
 
-  {group} must be a string containing the name of the augroup.
-  {event} must be a string containing the name of the autocommand.
-  {aupat} must be a string |autocmd-pattern|.
-  {rhs} must be a vim command string or a function.
+  The {opts}.`group` option will default to `'Carbon'` if not specified.
+
+  Returns the `id` returned by |nvim_create_autocmd|.
 
   For more information about which autocommands Carbon uses,
   see |carbon-autocmds|.
@@ -643,9 +606,6 @@ UTIL                                                                 *carbon-uti
 
   Each {event} = {rhs} key-value pair must be valid in |carbon-util-autocmd|.
   The remaining arguments of |carbon-util-autocmd| are automatically set to:
-
-  {group} => `'CarbonBuffer'`
-  {aupat} => `'<buffer=' ..` {buf} `.. '>'`
 
   {buf} must be a valid |bufnr|.
   {autocmds} must be a table.

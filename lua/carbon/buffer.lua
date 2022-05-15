@@ -29,8 +29,8 @@ function buffer.handle()
 
   local mappings = {
     { 'i', '<nop>' },
-    { '<cr>', buffer.create_confirm, { mode = 'i', rhs_prefix = '<esc>' } },
-    { '<esc>', buffer.create_cancel, { mode = 'i', rhs_prefix = '<esc>' } },
+    { '<cr>', buffer.create_confirm, { mode = 'i' } },
+    { '<esc>', buffer.create_cancel, { mode = 'i' } },
   }
 
   for action, mapping in pairs(settings.actions or {}) do
@@ -48,6 +48,10 @@ function buffer.handle()
     modified = false,
     bufhidden = 'hide',
     mappings = mappings,
+    autocmds = {
+      BufEnter = buffer.process_enter,
+      BufHidden = buffer.process_hidden,
+    },
   })
 
   return data.handle
@@ -413,6 +417,11 @@ function buffer.create()
 
   data.reset_jump = { lnum = line.lnum, col = 1 }
   data.cursor_bounds = { lnum = edit_lnum + 1, col = #edit_indent + 1 }
+  data.insert_move_autocmd = util.autocmd(
+    'CursorMovedI',
+    buffer.process_insert_move,
+    { buffer = handle }
+  )
 
   vim.fn.cursor(edit_lnum + 1, #edit_indent)
   vim.api.nvim_buf_set_option(handle, 'modifiable', true)
@@ -420,6 +429,7 @@ function buffer.create()
 end
 
 function buffer.create_confirm()
+  vim.cmd('stopinsert')
   local text = vim.fn.trim(vim.fn.getline('.'))
   local name = vim.fn.fnamemodify(text, ':t')
   local parent_directory = data.line_entry.path
@@ -438,6 +448,7 @@ function buffer.create_confirm()
 end
 
 function buffer.create_cancel()
+  vim.cmd('stopinsert')
   data.line_entry:set_open(data.prev_open)
   buffer.create_reset()
 end
@@ -446,6 +457,7 @@ function buffer.create_reset()
   local handle = buffer.handle()
   local lnum = vim.fn.line('.')
 
+  vim.api.nvim_del_autocmd(data.insert_move_autocmd)
   vim.api.nvim_buf_set_lines(handle, lnum - 1, lnum, 1, {})
   vim.api.nvim_buf_set_option(handle, 'modifiable', false)
   vim.api.nvim_buf_set_option(handle, 'modified', false)
@@ -457,6 +469,7 @@ function buffer.create_reset()
   data.reset_jump = nil
   data.cursor_bounds = nil
   data.prev_compressible = nil
+  data.insert_move_autocmd = nil
 
   buffer.render()
 end
