@@ -569,7 +569,7 @@ UTIL                                                                 *carbon-uti
 
   Signature: `require('carbon.util').highlight(`{group}, {properties}`)`
 
-  Defines a |highlight|for {group} using provided {properties} and executes that
+  Defines a |highlight| for {group} using provided {properties} and executes that
   command. {group} will be the highlight group name. {properties} is a table
   accepting any properties that can be passed to |highlight|.
 
