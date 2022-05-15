@@ -50,7 +50,7 @@ return {
     vsplit = '<c-v>',
     create = 'c',
     delete = 'd',
-    quit = { 'q', '<esc>' },
+    quit = 'q',
   },
   highlights = {
     CarbonDir = {
