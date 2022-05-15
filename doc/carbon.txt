@@ -131,9 +131,10 @@ AUTOCMDS                                                         *carbon-autocmd
 
   Group:          `Carbon`
   Event:          `BufEnter`
-  Pattern:        `carbon`
+  Pattern:
   Implementation: `lua require('carbon.buffer').process_enter()`
 
+  Local to Carbon buffers.
   Calls |carbon-buffer-process-enter| when entering a Carbon buffer.
 
   `------------------------------------------------------------------------------`
@@ -141,9 +142,10 @@ AUTOCMDS                                                         *carbon-autocmd
 
   Group:          `Carbon`
   Event:          `BufHidden`
-  Pattern:        `carbon`
+  Pattern:
   Implementation: `lua require('carbon.buffer').process_hidden()`
 
+  Local to Carbon buffers.
   Calls |carbon-buffer-process-hidden| when the Carbon buffer is hidden.
 
   `------------------------------------------------------------------------------`
@@ -151,9 +153,10 @@ AUTOCMDS                                                         *carbon-autocmd
 
   Group:          `Carbon`
   Event:          `CursorMovedI`
-  Pattern:        `carbon`
+  Pattern:
   Implementation: `lua require('carbon.buffer').process_insert_move()`
 
+  Local to Carbon buffers.
   Calls |carbon-buffer-process-insert-move| when moving the cursor in insert mode.
   Used during |carbon-buffer-create| to control the line and minimul column
   offset of the cursor.
@@ -581,15 +584,14 @@ UTIL                                                                 *carbon-uti
   `------------------------------------------------------------------------------`
   autocmd                                                    *carbon-util-autocmd*
 
-  Signature: `require('carbon.util').autocmd(`{group}, {event}, {aupat}, {rhs}`)`
+  Signature: `require('carbon.util').autocmd(`{event}, {cmd_or_cb}[, {opts}]`)`
 
-  Defines an |autocmd| for {event} and {aupat} which executes {rhs}. The
-  autocommand is wrapped in an |augroup| named {group}.
+  Wraps |nvim_create_autocmd|. Sets {opts}`.callback` to {cmd_or_cb} before
+  being passed to |nvim_create_autocmd|.
 
-  {group} must be a string containing the name of the augroup.
-  {event} must be a string containing the name of the autocommand.
-  {aupat} must be a string |autocmd-pattern|.
-  {rhs} must be a vim command string or a function.
+  The {opts}.`group` option will default to `'Carbon'` if not specified.
+
+  Returns the `id` returned by |nvim_create_autocmd|.
 
   For more information about which autocommands Carbon uses,
   see |carbon-autocmds|.
@@ -643,9 +645,6 @@ UTIL                                                                 *carbon-uti
 
   Each {event} = {rhs} key-value pair must be valid in |carbon-util-autocmd|.
   The remaining arguments of |carbon-util-autocmd| are automatically set to:
-
-  {group} => `'CarbonBuffer'`
-  {aupat} => `'<buffer=' ..` {buf} `.. '>'`
 
   {buf} must be a valid |bufnr|.
   {autocmds} must be a table.
