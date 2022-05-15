@@ -103,17 +103,7 @@ function util.autocmd(event, cmd_or_callback, opts)
 end
 
 function util.command(lhs, rhs, options)
-  if not vim.api.nvim_add_user_command then
-    if type(rhs) == 'function' then
-      rhs = ':lua require("carbon.util").indexed_callback('
-        .. index_callback(rhs)
-        .. ')'
-    end
-
-    vim.cmd('command! ' .. lhs .. ' ' .. rhs)
-  else
-    vim.api.nvim_add_user_command(lhs, rhs, options or {})
-  end
+  return vim.api.nvim_create_user_command(lhs, rhs, options or {})
 end
 
 function util.highlight(group, properties)

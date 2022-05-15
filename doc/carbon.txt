@@ -556,17 +556,12 @@ UTIL                                                                 *carbon-uti
 
   Signature: `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
 
-  Wraps |nvim_add_user_command| if possible. The only difference between this
+  Wraps |nvim_add_user_command|. The only difference between this
   function and |nvim_add_user_command| is that the {options} argument is
   optional, when not passed it will default to an empty table.
 
-  When |nvim_add_user_command| is not available this method falls back
-  to |vim.cmd| to create the command. The {options} argument is ignored when
-  this happens. It is still possible to pass functions even when
-  |nvim_add_user_command| is not available.
-
   {lhs} must be a string containing the key name for this |user-command|.
-  {rhs} must be a vim command string or a function.
+  {rhs} must be a vim command string or a lua callback.
   {options} must be a table if supplied.
 
   `------------------------------------------------------------------------------`
