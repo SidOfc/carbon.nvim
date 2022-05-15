@@ -70,16 +70,14 @@ end
 
 function util.map(lhs, rhs, settings_param)
   local settings = settings_param or {}
-  local options = util.tbl_except(settings, { 'mode', 'buffer', 'rhs_prefix' })
+  local options = util.tbl_except(settings, { 'mode', 'buffer' })
   local mode = settings.mode or 'n'
 
   if type(rhs) == 'function' then
-    rhs = ':<c-u>lua require("carbon.util").indexed_callback('
-      .. index_callback(rhs)
-      .. ')<cr>'
+    options.callback = rhs
+    rhs = ''
   end
 
-  rhs = (settings.rhs_prefix or '') .. rhs
   options = util.tbl_merge(
     { silent = true, nowait = true, noremap = true },
     options

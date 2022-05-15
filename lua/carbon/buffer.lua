@@ -29,8 +29,8 @@ function buffer.handle()
 
   local mappings = {
     { 'i', '<nop>' },
-    { '<cr>', buffer.create_confirm, { mode = 'i', rhs_prefix = '<esc>' } },
-    { '<esc>', buffer.create_cancel, { mode = 'i', rhs_prefix = '<esc>' } },
+    { '<cr>', buffer.create_confirm, { mode = 'i' } },
+    { '<esc>', buffer.create_cancel, { mode = 'i' } },
   }
 
   for action, mapping in pairs(settings.actions or {}) do
@@ -429,6 +429,7 @@ function buffer.create()
 end
 
 function buffer.create_confirm()
+  vim.cmd('stopinsert')
   local text = vim.fn.trim(vim.fn.getline('.'))
   local name = vim.fn.fnamemodify(text, ':t')
   local parent_directory = data.line_entry.path
@@ -447,6 +448,7 @@ function buffer.create_confirm()
 end
 
 function buffer.create_cancel()
+  vim.cmd('stopinsert')
   data.line_entry:set_open(data.prev_open)
   buffer.create_reset()
 end

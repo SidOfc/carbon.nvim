@@ -508,40 +508,14 @@ UTIL                                                                 *carbon-uti
   otherwise in {options}.
 
   {lhs} must be a string containing the key for this mapping.
-  {rhs} must be a vim command string or a function.
+  {rhs} must be a vim command string or a lua callback.
   {options} must be a table if supplied.
 
-  When a function is passed to {rhs}, it is pushed to a table local to the
-  util module. The {rhs} is then replaced with a sequence which calls
-  |carbon-util-indexed-callback| with the correct index. For example:
-
-  `require('carbon.util').map(`"n", function() print("hello") end`)`
-
-  Will map the key `"n"` to:
-
-  `:<c-u>lua require("carbon.util").indexed_callback(1)<cr>`
+  When a function is passed to {rhs} `options.callback` will be set to
+  {rhs} and {rhs} will be set to an empty string.
 
   To create a |visual-mode| mapping pass `mode = 'v'`, to create a buffer-local
   mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
-
-  An arbitrary prefix string may be supplied via the option `rhs_prefix`. This
-  string will be prepended to {rhs}. This allows lua functions to be used in
-  more places, such as |insert-mode|, because you can prepend `'<esc>'` to leave
-  insert mode before the bound callback is executed. For example:
-
-  `require('carbon.util').map(`
-    "i",
-    function() print("hello") end,
-    { rhs_prefix = '<esc>' }
-  `)`
-
-  Will map the key `"n"` to:
-
-  `<esc>:<c-u>lua require("carbon.util").indexed_callback(1)<cr>`
-
-  The `mode`, `buffer` and `rhs_prefix` options are not passed to |nvim_set_keymap|
-  functions because they are explicitly filtered out for internal use by the
-  map utility function. All other {options} keys will be passed through.
 
   `------------------------------------------------------------------------------`
   indexed_callback                                  *carbon-util-indexed-callback*
