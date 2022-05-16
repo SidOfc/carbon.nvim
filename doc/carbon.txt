@@ -1438,7 +1438,7 @@ BUFFER                                                             *carbon-buffe
   parent directory.
 
   Finally, when `vim.v.count` does not resolve to a directory, the default
-  behaviour as if no count was supplied will be executed.
+  behavior as if no count was supplied will be executed.
 
   `------------------------------------------------------------------------------`
   create_confirm                                    *carbon-buffer-create-confirm*
