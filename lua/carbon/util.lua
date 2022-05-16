@@ -4,6 +4,12 @@ local data = {
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
 
+-- stylua: ignore
+data.allowed_keys = {
+  38, 40, 48, 49, 50, 51, 52,  53,
+  54, 55, 56, 57, 74, 75, 106, 107
+}
+
 function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'
 end
@@ -96,17 +102,23 @@ function util.highlight(group, properties)
   end
 end
 
-function util.confirm_action(options)
-  local actions = util.tbl_merge({ cancel = function() end }, options.actions)
-  local ordered_actions = { unpack(options.order or {}) }
+function util.confirm(options)
+  local finished = false
+  local actions = {}
   local mappings = {}
   local lines = {}
-  local keys = {}
 
-  local function finish(name, immediate)
+  local function finish(label, immediate)
     local function handler()
-      if actions[name] then
-        actions[name]()
+      if finished then
+        return nil
+      end
+
+      finished = true
+      local callback = actions[label] and actions[label].callback
+
+      if type(callback) == 'function' then
+        callback()
       end
 
       util.pop_guicursor()
@@ -120,36 +132,20 @@ function util.confirm_action(options)
     handler()
   end
 
-  for _, action in ipairs(vim.tbl_keys(actions)) do
-    if not vim.tbl_contains(ordered_actions, action) then
-      ordered_actions[#ordered_actions + 1] = action
-    end
-  end
-
   for ascii = 32, 127 do
-    local key = vim.fn.nr2char(ascii)
-
-    if key ~= 'j' and key ~= 'k' and ascii ~= 38 and ascii ~= 40 then
-      mappings[#mappings + 1] = { key, '<nop>' }
+    if not vim.tbl_contains(data.allowed_keys, ascii) then
+      mappings[#mappings + 1] = { vim.fn.nr2char(ascii), '<nop>' }
     end
   end
 
-  for _, action in ipairs(ordered_actions) do
-    local found = false
+  for idx, action in ipairs(options.actions) do
+    actions[action.label] = action
 
-    for _, char in ipairs(vim.fn.split(action, '\\zs')) do
-      if not keys[char] then
-        found = true
-        keys[char] = action
-        lines[#lines + 1] = ' [' .. char .. '] ' .. action
-        mappings[#mappings + 1] = { char, finish(action) }
-
-        break
-      end
-    end
-
-    if not found then
-      lines[#lines + 1] = '     ' .. action
+    if action.shortcut then
+      mappings[#mappings + 1] = { action.shortcut, finish(action.label) }
+      lines[#lines + 1] = ' [' .. action.shortcut .. '] ' .. action.label
+    else
+      lines[#lines + 1] = '     ' .. action.label
     end
   end
 

@@ -671,16 +671,16 @@ UTIL                                                                 *carbon-uti
   `options.autocmds` as second argument.
 
   `------------------------------------------------------------------------------`
-  confirm_action                                      *carbon-util-confirm-action*
+  confirm                                                    *carbon-util-confirm*
 
-  Signature: `require('carbon.util').confirm_action(`{options}`)`
+  Signature: `require('carbon.util').confirm(`{options}`)`
 
   Creates a confirmation popup using |nvim_open_win|. This popup is intended
-  to be used as a means to confirm user actions via a mapping or up/down
+  to be used to confirm specified actions via provided shortcuts or up/down
   navigation and pressing <enter> to confirm or using <esc> to cancel.
 
   All default mappings in the popup are unmapped with exception of <k>, <j>,
-  <up>, and <down>.
+  <shift-k>, <shift-j>, <up>, <down>, and digits <0> through <9>.
 
   The {options} argument supports the following keys:
 
@@ -688,60 +688,51 @@ UTIL                                                                 *carbon-uti
   `  row = <number>,`
   `  col = <number>,`
   `  highlight = <string>,`
-    `order = <table<string>>,`
-  `  actions = <table<string = function>>,`
+  `  actions = <table<action>>,`
   `}`
 
   Property: `row`
   Default:  `vim.fn.line('.')`
+  Required: `false`
 
   The "top" offset in lines at which to anchor the popup.
 
   Property: `col`
   Default:  `vim.fn.col('.')`
+  Required: `false`
 
-  The "left" offset in lines at which to anchor the popup.
+  The "left" offset in columns at which to anchor the popup.
 
   Property: `highlight`
   Default:  `'Normal'`
+  Required: `false`
 
   The highlight group used to highlight |FloatBorder| and |CursorLine|
   in the popup.
 
-  Property: `order`
-  Default:  `{}`
-
-  Specify the order in which actions defined in `actions` should be listed in
-  the popup.
-
   Property: `actions`
   Default:  `nil`
+  Required: `true`
 
-  A table whose keys will be displayed in the popup as "actions" to execute.
-  The value of each key must be a Lua function. When an action is selected its
-  function will be executed.
+  Specify popup actions via a table containing `<action>` entries.
+  An `<action>` is a table with the following keys:
 
-  Popups have a `cancel` action by default but a custom `cancel` action
-  can still be specified in `actions` as well. This allows for writing custom
-  logic which can "hook" into popups that are being closed.
+  `{`
+  `  label = <string>,`
+  `  shortcut = <char>,`
+  `  callback = <function>,`
+  `}`
 
-  Despite a default `cancel` action being present, `actions` must be set to a
-  table without exception. This is to prevent "accidentally" showing just
-  the default "cancel" action as that would not be very useful :)
+  Each action specified in `actions` will be shown in the popup. The position of
+  each action will be based on its index in the `actions` table. The `label` will be
+  the visible text shown in the popup and the `shortcut` key will be shown before
+  the `label` between `[` and `]` characters. The `callback` function will be called
+  when the action is executed.
 
-  Each key will have its first unmapped character mapped directly to that
-  action, e.g. if we have the following actions in this order:
+  When an `<action>` does not include a `shortcut` it can only be triggered
+  using keyboard navigation + <enter>.
 
-  `{'delete', 'duplicate', 'rename'}`
-
-  Then `delete` will be mapped to `d`. `duplicate` will be mapped to `u`
-  because `d` is already taken, and `rename` will be `r` since `r` hasn't been
-  taken yet.
-
-  Actions that could not be mapped due to all their characters already being
-  taken are simply "not mapped". They will still be visible in the confirm
-  popup and can still be selected using <enter>. The only downside is that
-  there will be no "direct" way to interact with that option.
+  The `label` and `shortcut` properties must be unique within the table of `actions`.
 
 ================================================================================
 ENTRY                                                               *carbon-entry*
