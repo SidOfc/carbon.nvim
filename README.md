@@ -93,7 +93,7 @@ alternative option of calling this method also exists:
 ```viml
 lua << EOF
   require('carbon').setup(function(settings)
-    settings.setting = 'value';
+    settings.setting = 'value'
   end)
 EOF
 ```
@@ -102,7 +102,7 @@ EOF
 
 ```lua
 require('carbon').setup(function(settings)
-  settings.setting = 'value';
+  settings.setting = 'value'
 end)
 ```
 
