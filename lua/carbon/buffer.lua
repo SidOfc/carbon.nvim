@@ -239,7 +239,6 @@ function buffer.up(count)
     if new_root.path ~= data.root.path then
       rerender = true
 
-      buffer.set_root(new_root)
       new_root:set_children(vim.tbl_map(function(child)
         if child.path == data.root.path then
           child:set_open(true)
@@ -248,6 +247,8 @@ function buffer.up(count)
 
         return child
       end, new_root:get_children()))
+
+      buffer.set_root(new_root)
     end
   end
 
