@@ -180,7 +180,7 @@ end
 function carbon.quit()
   if #vim.api.nvim_list_wins() > 1 then
     vim.api.nvim_win_close(0, 1)
-  elseif #vim.fn.getbufinfo() > 1 then
+  elseif #vim.api.nvim_list_bufs() > 1 then
     vim.cmd('try | b# | catch | endtry')
   end
 end
