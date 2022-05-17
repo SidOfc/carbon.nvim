@@ -178,7 +178,7 @@ function carbon.cd(path)
 end
 
 function carbon.quit()
-  if #vim.fn.getwininfo() > 1 then
+  if #vim.api.nvim_list_wins() > 1 then
     vim.api.nvim_win_close(0, 1)
   elseif #vim.fn.getbufinfo() > 1 then
     vim.cmd('try | b# | catch | endtry')

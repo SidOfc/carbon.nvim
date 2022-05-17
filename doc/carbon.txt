@@ -414,7 +414,7 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').quit()`
 
-  This method calls |getwininfo| to check if there is more than one window, if
+  This method calls |nvim_list_wins| to check if there is more than one window, if
   this is the case |nvim_win_close| is called to close the current window.
 
   When there is only one window this method calls |getbufinfo| to check if
