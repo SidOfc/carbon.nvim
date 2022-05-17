@@ -1,5 +1,6 @@
 local util = {}
 local data = {
+  timers = {},
   guicursors = {},
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
@@ -9,6 +10,34 @@ data.allowed_keys = {
   38, 40, 48, 49, 50, 51, 52,  53,
   54, 55, 56, 57, 74, 75, 106, 107
 }
+
+function util.cancel(identifier)
+  local timer = data.timers[identifier]
+
+  if timer then
+    timer:stop()
+    timer:close()
+
+    data.timers[identifier] = nil
+  end
+end
+
+function util.defer(identifier, ms, callback)
+  local timer = data.timers[identifier] or vim.loop.new_timer()
+
+  if data.timers[identifier] then
+    timer:stop()
+  end
+
+  timer:start(
+    ms,
+    0,
+    vim.schedule_wrap(function()
+      util.cancel(timer)
+      callback()
+    end)
+  )
+end
 
 function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'

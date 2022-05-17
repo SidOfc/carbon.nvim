@@ -8,7 +8,6 @@ local data = {
   handle = -1,
   open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
-  sync_timer = -1,
   resync_paths = {},
 }
 
@@ -512,11 +511,9 @@ function buffer.set_lines(...)
 end
 
 function buffer.process_event(_, path)
-  vim.fn.timer_stop(data.sync_timer)
-
   data.resync_paths[path] = true
 
-  data.sync_timer = vim.fn.timer_start(settings.sync_delay, function()
+  util.defer('sync:perform', settings.sync_delay, function()
     buffer.synchronize()
 
     data.resync_paths = {}
@@ -559,8 +556,8 @@ function buffer.process_insert_move()
 end
 
 function buffer.cancel_synchronization()
-  vim.fn.timer_start(settings.sync_delay / 2, function()
-    vim.fn.timer_stop(data.sync_timer)
+  util.defer('sync:cancel', settings.sync_delay / 2, function()
+    util.cancel('sync:perform')
 
     data.resync_paths = {}
   end)

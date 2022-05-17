@@ -434,6 +434,24 @@ UTIL                                                                 *carbon-uti
   external to Carbon.
 
   `------------------------------------------------------------------------------`
+  defer                                                        *carbon-util-defer*
+
+  Signature: `require('carbon.util').defer(`{identifier}, {ms}, {callback}`)`
+
+  Creates a timer for {identifier} which calls {callback} in {ms} milliseconds.
+  The {identifier} is a unique string which represents this specific timer.
+
+  See |carbon-util-cancel| to learn more about cancelling deferred callbacks.
+
+  `------------------------------------------------------------------------------`
+  cancel                                                      *carbon-util-cancel*
+
+  Signature: `require('carbon.util').cancel(`{identifier}`)`
+
+  Cancels a timer created by |carbon-util-defer|. Results in a no-op if
+  {identifier} is not an existing timer.
+
+  `------------------------------------------------------------------------------`
   plug                                                          *carbon-util-plug*
 
   Signature: `require('carbon.util').plug(`{name}`)`
