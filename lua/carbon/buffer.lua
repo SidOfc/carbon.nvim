@@ -348,35 +348,44 @@ function buffer.delete()
 
   buffer.clear_extmarks({ lnum_idx, highlight[2] }, { lnum_idx, -1 }, {})
   buffer.add_highlight('CarbonDanger', lnum_idx, highlight[2], -1)
-  util.confirm_action({
+  util.confirm({
     row = line.lnum,
     col = highlight[2],
     highlight = 'CarbonDanger',
-    order = { 'delete', 'cancel' },
     actions = {
-      delete = function()
-        local result = vim.fn.delete(
-          target.path,
-          target.is_directory and 'rf' or ''
-        )
+      {
+        label = 'delete',
+        shortcut = 'D',
+        callback = function()
+          local result = vim.fn.delete(
+            target.path,
+            target.is_directory and 'rf' or ''
+          )
 
-        if result == -1 then
-          vim.api.nvim_err_writeln('Failed to delete: "' .. target.path .. '"')
-        else
-          target.parent:synchronize()
-          buffer.cancel_synchronization()
-        end
-      end,
+          if result == -1 then
+            vim.api.nvim_err_writeln(
+              'Failed to delete: "' .. target.path .. '"'
+            )
+          else
+            target.parent:synchronize()
+            buffer.cancel_synchronization()
+            buffer.render()
+          end
+        end,
+      },
+      {
+        label = 'cancel',
+        shortcut = 'q',
+        callback = function()
+          buffer.clear_extmarks({ lnum_idx, 0 }, { lnum_idx, -1 }, {})
 
-      cancel = function()
-        buffer.clear_extmarks({ lnum_idx, 0 }, { lnum_idx, -1 }, {})
+          for _, lhl in ipairs(line.highlights) do
+            buffer.add_highlight(lhl[1], lnum_idx, lhl[2], lhl[3])
+          end
 
-        for _, lhl in ipairs(line.highlights) do
-          buffer.add_highlight(lhl[1], lnum_idx, lhl[2], lhl[3])
-        end
-
-        buffer.render()
-      end,
+          buffer.render()
+        end,
+      },
     },
   })
 end
