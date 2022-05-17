@@ -2,7 +2,7 @@ local util = require('carbon.util')
 local entry = require('carbon.entry')
 local settings = require('carbon.settings')
 local buffer = {}
-local open_cwd = vim.fn.getcwd()
+local open_cwd = vim.loop.cwd()
 local data = {
   root = entry.new(open_cwd),
   handle = -1,
@@ -280,7 +280,7 @@ function buffer.set_root(target)
   entry.clean(data.root.path)
 
   if settings.sync_pwd then
-    vim.fn.chdir(data.root.path)
+    vim.api.nvim_set_current_dir(data.root.path)
   end
 
   return data.root
