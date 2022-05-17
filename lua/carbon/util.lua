@@ -134,7 +134,7 @@ function util.confirm(options)
 
   for ascii = 32, 127 do
     if not vim.tbl_contains(data.allowed_keys, ascii) then
-      mappings[#mappings + 1] = { vim.fn.nr2char(ascii), '<nop>' }
+      mappings[#mappings + 1] = { string.char(ascii), '<nop>' }
     end
   end
 
@@ -256,7 +256,7 @@ function util.set_winhl(win, highlights)
     winhls[#winhls + 1] = source .. ':' .. target
   end
 
-  vim.api.nvim_win_set_option(win, 'winhl', vim.fn.join(winhls, ','))
+  vim.api.nvim_win_set_option(win, 'winhl', table.concat(winhls, ','))
 end
 
 return util
