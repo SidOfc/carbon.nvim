@@ -440,11 +440,11 @@ end
 
 function buffer.create_confirm()
   vim.cmd('stopinsert')
-  local text = vim.fn.trim(vim.fn.getline('.'))
+  local text = vim.trim(vim.fn.getline('.'))
   local name = vim.fn.fnamemodify(text, ':t')
   local parent_directory = data.line_entry.path
     .. '/'
-    .. vim.fn.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
+    .. vim.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
 
   vim.fn.mkdir(parent_directory, 'p')
 
@@ -539,7 +539,7 @@ function buffer.process_insert_move()
   local start_col = data.cursor_bounds.col - 1
   local split_col = start_col
   local text = string.rep(' ', start_col)
-    .. vim.fn.trim(vim.fn.getline(data.cursor_bounds.lnum), ' ', 1)
+    .. vim.trim(vim.fn.getline(data.cursor_bounds.lnum), ' ', 1)
 
   for col = 1, #text do
     if string.sub(text, col, col) == '/' then
