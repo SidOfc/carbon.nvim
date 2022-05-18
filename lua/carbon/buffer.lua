@@ -16,9 +16,7 @@ function buffer.is_loaded()
 end
 
 function buffer.is_hidden()
-  local properties = vim.fn.getbufinfo(data.handle)[1]
-
-  return properties and properties.hidden == 1
+  return not util.bufwinid(data.handle)
 end
 
 function buffer.handle()
