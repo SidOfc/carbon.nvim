@@ -434,6 +434,17 @@ UTIL                                                                 *carbon-uti
   external to Carbon.
 
   `------------------------------------------------------------------------------`
+  bufwinid                                                  *carbon-util-bufwinid*
+
+  Signature: `require('carbon.util').bufwinid(`{buf}`)`
+
+  Returns the |winid| of buffer {buf}. This method works across all tab pages
+  unlike |bufwinid|.
+
+  NOTE: This method will become redundant once implemented in Neovim. See:
+  https://github.com/neovim/neovim/issues/18393 for more information.
+
+  `------------------------------------------------------------------------------`
   defer                                                        *carbon-util-defer*
 
   Signature: `require('carbon.util').defer(`{identifier}, {ms}, {callback}`)`
@@ -1072,9 +1083,9 @@ BUFFER                                                             *carbon-buffe
 
   Signature: `require('carbon.buffer').is_hidden()`
 
-  Returns `nil` if there is no Carbon buffer handle, `true` if the current
-  buffer handle is hidden, and `false` if the current buffer handle is not
-  hidden. Uses the `hidden` attribute from |getbufinfo| internally.
+  Returns `nil` if there is no Carbon buffer handle, `true` if the current buffer
+  handle is hidden, and `false` if the current buffer handle is not hidden.
+  A buffer is deemed to be hidden when |carbon-util-bufwinid| returns `nil`.
 
   `------------------------------------------------------------------------------`
   handle                                                    *carbon-buffer-handle*

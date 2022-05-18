@@ -229,6 +229,14 @@ function util.push_guicursor(guicursor)
   vim.cmd('set guicursor=' .. guicursor)
 end
 
+function util.bufwinid(buf)
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_get_buf(win) == buf then
+      return win
+    end
+  end
+end
+
 function util.create_scratch_buf(options)
   options = options or {}
   local buf = vim.api.nvim_create_buf(false, true)
