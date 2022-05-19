@@ -261,7 +261,7 @@ directory from the left as base. See `:h carbon-buffer-create` for more details.
 |:-------------|
 | <kbd>d</kbd> |
 
-![Deleting files and directories example](/doc/assets/carbon-delete-action.gif)
+![Deleting files and directories example](/doc/assets/carbon-delete-action-2.gif)
 
 Prompts confirmation to delete the current entry under the cursor. Press <kbd>enter</kbd>
 to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion directly,
