@@ -437,7 +437,7 @@ end
 
 function buffer.create_confirm()
   vim.cmd('stopinsert')
-  local text = vim.trim(vim.fn.getline('.'))
+  local text = vim.trim(util.get_line())
   local name = vim.fn.fnamemodify(text, ':t')
   local parent_directory = data.line_entry.path
     .. '/'
@@ -534,7 +534,7 @@ function buffer.process_insert_move()
   local start_col = data.cursor_bounds.col - 1
   local split_col = start_col
   local text = string.rep(' ', start_col)
-    .. vim.trim(vim.fn.getline(data.cursor_bounds.lnum), ' ', 1)
+    .. vim.trim(util.get_line(data.cursor_bounds.lnum), ' ', 1)
 
   for col = 1, #text do
     if string.sub(text, col, col) == '/' then
@@ -546,11 +546,7 @@ function buffer.process_insert_move()
   buffer.clear_extmarks({ start_lnum, 0 }, { start_lnum, -1 }, {})
   buffer.add_highlight('CarbonDir', start_lnum, 0, split_col)
   buffer.add_highlight('CarbonFile', start_lnum, split_col, -1)
-
-  util.cursor(
-    data.cursor_bounds.lnum,
-    math.max(data.cursor_bounds.col, vim.fn.col('.') - 1)
-  )
+  util.cursor(start_lnum + 1, math.max(start_col, vim.fn.col('.') - 1))
 end
 
 function buffer.cancel_synchronization()

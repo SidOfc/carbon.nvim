@@ -11,6 +11,12 @@ data.allowed_keys = {
   54, 55, 56, 57, 74, 75, 106, 107
 }
 
+function util.get_line(lnum)
+  lnum = lnum or vim.api.nvim_win_get_cursor(0)[1]
+
+  return vim.api.nvim_buf_get_lines(0, lnum - 1, lnum, 1)[1]
+end
+
 function util.cursor(row, col)
   return vim.api.nvim_win_set_cursor(0, { row, col })
 end
@@ -192,7 +198,7 @@ function util.confirm(options)
   mappings[#mappings + 1] = {
     '<cr>',
     function()
-      finish(string.sub(vim.fn.getline('.'), 6), true)
+      finish(string.sub(util.get_line(), 6), true)
     end,
   }
 
