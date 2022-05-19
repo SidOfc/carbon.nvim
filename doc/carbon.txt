@@ -414,10 +414,10 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').quit()`
 
-  This method calls |getwininfo| to check if there is more than one window, if
+  This method calls |nvim_list_wins| to check if there is more than one window, if
   this is the case |nvim_win_close| is called to close the current window.
 
-  When there is only one window this method calls |getbufinfo| to check if
+  When there is only one window this method calls |nvim_list_bufs| to check if
   there is more than one buffer, if this is the case the |alternate-file| is
   shown in the current window if it exists.
 
@@ -432,6 +432,60 @@ UTIL                                                                 *carbon-uti
   This section describes the internal utilities used by Carbon itself. These
   methods must always be considered unstable and should not be used in code
   external to Carbon.
+
+  `------------------------------------------------------------------------------`
+  get_line                                                  *carbon-util-get-line*
+
+  Signature: `require('carbon.util').get_line(`[{lnum}]`)`
+
+  Replacement for |getline|. Returns the content of line {lnum} in the current
+  buffer. The cursor line number will be used if {lnum} is not supplied.
+
+  `------------------------------------------------------------------------------`
+  cursor                                                      *carbon-util-cursor*
+
+  Signature: `require('carbon.util').cursor(`{row}, {col}`)`
+
+  Wrapper for |nvim_win_set_cursor| which functions more like |cursor| except
+  that {col} is zero-based instead of one based.
+
+  `------------------------------------------------------------------------------`
+  is_directory                                          *carbon-util-is-directory*
+
+  Signature: `require('carbon.util').is_directory(`{path}`)`
+
+  Uses the `type` attribute returned by `fs_stat` from `vim.loop` to determine
+  whether given {path} is a directory. Returns a boolean value or `nil` if the
+  call to `fs_stat` failed.
+
+  `------------------------------------------------------------------------------`
+  bufwinid                                                  *carbon-util-bufwinid*
+
+  Signature: `require('carbon.util').bufwinid(`{buf}`)`
+
+  Returns the |winid| of buffer {buf}. This method works across all tab pages
+  unlike |bufwinid|.
+
+  NOTE: This method will become redundant once implemented in Neovim. See:
+  https://github.com/neovim/neovim/issues/18393 for more information.
+
+  `------------------------------------------------------------------------------`
+  defer                                                        *carbon-util-defer*
+
+  Signature: `require('carbon.util').defer(`{identifier}, {ms}, {callback}`)`
+
+  Creates a timer for {identifier} which calls {callback} in {ms} milliseconds.
+  The {identifier} is a unique string which represents this specific timer.
+
+  See |carbon-util-cancel| to learn more about cancelling deferred callbacks.
+
+  `------------------------------------------------------------------------------`
+  cancel                                                      *carbon-util-cancel*
+
+  Signature: `require('carbon.util').cancel(`{identifier}`)`
+
+  Cancels a timer created by |carbon-util-defer|. Results in a no-op if
+  {identifier} is not an existing timer.
 
   `------------------------------------------------------------------------------`
   plug                                                          *carbon-util-plug*
@@ -1054,9 +1108,9 @@ BUFFER                                                             *carbon-buffe
 
   Signature: `require('carbon.buffer').is_hidden()`
 
-  Returns `nil` if there is no Carbon buffer handle, `true` if the current
-  buffer handle is hidden, and `false` if the current buffer handle is not
-  hidden. Uses the `hidden` attribute from |getbufinfo| internally.
+  Returns `nil` if there is no Carbon buffer handle, `true` if the current buffer
+  handle is hidden, and `false` if the current buffer handle is not hidden.
+  A buffer is deemed to be hidden when |carbon-util-bufwinid| returns `nil`.
 
   `------------------------------------------------------------------------------`
   handle                                                    *carbon-buffer-handle*

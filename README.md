@@ -93,7 +93,7 @@ alternative option of calling this method also exists:
 ```viml
 lua << EOF
   require('carbon').setup(function(settings)
-    settings.setting = 'value';
+    settings.setting = 'value'
   end)
 EOF
 ```
@@ -102,7 +102,7 @@ EOF
 
 ```lua
 require('carbon').setup(function(settings)
-  settings.setting = 'value';
+  settings.setting = 'value'
 end)
 ```
 
@@ -264,7 +264,7 @@ directory from the left as base. See `:h carbon-buffer-create` for more details.
 ![Deleting files and directories example](/doc/assets/carbon-delete-action.gif)
 
 Prompts confirmation to delete the current entry under the cursor. Press <kbd>enter</kbd>
-to confirm the currently highlighted option, <kbd>d</kbd> to confirm deletion directly,
+to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion directly,
 or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.

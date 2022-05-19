@@ -53,7 +53,7 @@ function carbon.initialize()
     util.command('Lexplore', 'Lcarbon')
   end
 
-  if settings.auto_open and vim.fn.isdirectory(vim.fn.expand('%:p')) == 1 then
+  if settings.auto_open and util.is_directory(vim.fn.expand('%:p')) then
     local current_buffer = vim.api.nvim_win_get_buf(0)
 
     buffer.show()
@@ -149,21 +149,21 @@ end
 
 function carbon.up()
   if buffer.up() then
-    vim.fn.cursor(1, 1)
+    util.cursor(1, 0)
     buffer.render()
   end
 end
 
 function carbon.reset()
   if buffer.reset() then
-    vim.fn.cursor(1, 1)
+    util.cursor(1, 0)
     buffer.render()
   end
 end
 
 function carbon.down()
   if buffer.down() then
-    vim.fn.cursor(1, 1)
+    util.cursor(1, 0)
     buffer.render()
   end
 end
@@ -172,15 +172,15 @@ function carbon.cd(path)
   local destination = path and path.file or path or vim.v.event.cwd
 
   if buffer.cd(destination) then
-    vim.fn.cursor(1, 1)
+    util.cursor(1, 0)
     buffer.render()
   end
 end
 
 function carbon.quit()
-  if #vim.fn.getwininfo() > 1 then
+  if #vim.api.nvim_list_wins() > 1 then
     vim.api.nvim_win_close(0, 1)
-  elseif #vim.fn.getbufinfo() > 1 then
+  elseif #vim.api.nvim_list_bufs() > 1 then
     vim.cmd('try | b# | catch | endtry')
   end
 end

@@ -1,5 +1,6 @@
 local util = {}
 local data = {
+  timers = {},
   guicursors = {},
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
@@ -9,6 +10,50 @@ data.allowed_keys = {
   38, 40, 48, 49, 50, 51, 52,  53,
   54, 55, 56, 57, 74, 75, 106, 107
 }
+
+function util.get_line(lnum)
+  lnum = lnum or vim.api.nvim_win_get_cursor(0)[1]
+
+  return vim.api.nvim_buf_get_lines(0, lnum - 1, lnum, 1)[1]
+end
+
+function util.cursor(row, col)
+  return vim.api.nvim_win_set_cursor(0, { row, col })
+end
+
+function util.is_directory(path)
+  local stat = vim.loop.fs_stat(path)
+
+  return stat and stat.type == 'directory'
+end
+
+function util.cancel(identifier)
+  local timer = data.timers[identifier]
+
+  if timer then
+    timer:stop()
+    timer:close()
+
+    data.timers[identifier] = nil
+  end
+end
+
+function util.defer(identifier, ms, callback)
+  local timer = data.timers[identifier] or vim.loop.new_timer()
+
+  if data.timers[identifier] then
+    timer:stop()
+  end
+
+  timer:start(
+    ms,
+    0,
+    vim.schedule_wrap(function()
+      util.cancel(timer)
+      callback()
+    end)
+  )
+end
 
 function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'
@@ -134,7 +179,7 @@ function util.confirm(options)
 
   for ascii = 32, 127 do
     if not vim.tbl_contains(data.allowed_keys, ascii) then
-      mappings[#mappings + 1] = { vim.fn.nr2char(ascii), '<nop>' }
+      mappings[#mappings + 1] = { string.char(ascii), '<nop>' }
     end
   end
 
@@ -153,7 +198,7 @@ function util.confirm(options)
   mappings[#mappings + 1] = {
     '<cr>',
     function()
-      finish(string.sub(vim.fn.getline('.'), 6), true)
+      finish(string.sub(util.get_line(), 6), true)
     end,
   }
 
@@ -175,7 +220,7 @@ function util.confirm(options)
   util.set_buf_autocmds(buf, {
     BufLeave = finish('cancel'),
     CursorMoved = function()
-      vim.fn.cursor(vim.fn.line('.'), 3)
+      util.cursor(vim.fn.line('.'), 2)
     end,
   })
 
@@ -198,6 +243,14 @@ end
 function util.push_guicursor(guicursor)
   data.guicursors[#data.guicursors + 1] = vim.o.guicursor
   vim.cmd('set guicursor=' .. guicursor)
+end
+
+function util.bufwinid(buf)
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_get_buf(win) == buf then
+      return win
+    end
+  end
 end
 
 function util.create_scratch_buf(options)
@@ -256,7 +309,7 @@ function util.set_winhl(win, highlights)
     winhls[#winhls + 1] = source .. ':' .. target
   end
 
-  vim.api.nvim_win_set_option(win, 'winhl', vim.fn.join(winhls, ','))
+  vim.api.nvim_win_set_option(win, 'winhl', table.concat(winhls, ','))
 end
 
 return util

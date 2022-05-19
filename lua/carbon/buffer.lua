@@ -2,13 +2,12 @@ local util = require('carbon.util')
 local entry = require('carbon.entry')
 local settings = require('carbon.settings')
 local buffer = {}
-local open_cwd = vim.fn.getcwd()
+local open_cwd = vim.loop.cwd()
 local data = {
   root = entry.new(open_cwd),
   handle = -1,
   open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
-  sync_timer = -1,
   resync_paths = {},
 }
 
@@ -17,9 +16,7 @@ function buffer.is_loaded()
 end
 
 function buffer.is_hidden()
-  local properties = vim.fn.getbufinfo(data.handle)[1]
-
-  return properties and properties.hidden == 1
+  return not util.bufwinid(data.handle)
 end
 
 function buffer.handle()
@@ -161,12 +158,12 @@ function buffer.lines(input_target, lines, depth)
       full_path = dir_path .. '/' .. full_path
     end
 
-    if tmp.is_executable then
-      file_group = 'CarbonExe'
-    elseif tmp.is_symlink == 1 then
+    if tmp.is_symlink == 1 then
       file_group = 'CarbonSymlink'
     elseif tmp.is_symlink == 2 then
       file_group = 'CarbonBrokenSymlink'
+    elseif tmp.is_executable then
+      file_group = 'CarbonExe'
     end
 
     if not is_empty then
@@ -280,7 +277,7 @@ function buffer.set_root(target)
   entry.clean(data.root.path)
 
   if settings.sync_pwd then
-    vim.fn.chdir(data.root.path)
+    vim.api.nvim_set_current_dir(data.root.path)
   end
 
   return data.root
@@ -425,7 +422,7 @@ function buffer.create()
   buffer.render()
   buffer.set_lines(edit_lnum, edit_lnum, 1, { edit_indent })
 
-  data.reset_jump = { lnum = line.lnum, col = 1 }
+  data.reset_jump = { lnum = line.lnum, col = 0 }
   data.cursor_bounds = { lnum = edit_lnum + 1, col = #edit_indent + 1 }
   data.insert_move_autocmd = util.autocmd(
     'CursorMovedI',
@@ -433,18 +430,18 @@ function buffer.create()
     { buffer = handle }
   )
 
-  vim.fn.cursor(edit_lnum + 1, #edit_indent)
+  util.cursor(edit_lnum + 1, #edit_indent - 1)
   vim.api.nvim_buf_set_option(handle, 'modifiable', true)
   vim.cmd('startinsert!')
 end
 
 function buffer.create_confirm()
   vim.cmd('stopinsert')
-  local text = vim.fn.trim(vim.fn.getline('.'))
+  local text = vim.trim(util.get_line())
   local name = vim.fn.fnamemodify(text, ':t')
   local parent_directory = data.line_entry.path
     .. '/'
-    .. vim.fn.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
+    .. vim.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
 
   vim.fn.mkdir(parent_directory, 'p')
 
@@ -471,7 +468,7 @@ function buffer.create_reset()
   vim.api.nvim_buf_set_lines(handle, lnum - 1, lnum, 1, {})
   vim.api.nvim_buf_set_option(handle, 'modifiable', false)
   vim.api.nvim_buf_set_option(handle, 'modified', false)
-  vim.fn.cursor(data.reset_jump.lnum, data.reset_jump.col)
+  util.cursor(data.reset_jump.lnum, data.reset_jump.col)
   data.line_entry:set_compressible(data.prev_compressible)
 
   data.prev_open = nil
@@ -512,11 +509,9 @@ function buffer.set_lines(...)
 end
 
 function buffer.process_event(_, path)
-  vim.fn.timer_stop(data.sync_timer)
-
   data.resync_paths[path] = true
 
-  data.sync_timer = vim.fn.timer_start(settings.sync_delay, function()
+  util.defer('sync:perform', settings.sync_delay, function()
     buffer.synchronize()
 
     data.resync_paths = {}
@@ -539,7 +534,7 @@ function buffer.process_insert_move()
   local start_col = data.cursor_bounds.col - 1
   local split_col = start_col
   local text = string.rep(' ', start_col)
-    .. vim.fn.trim(vim.fn.getline(data.cursor_bounds.lnum), ' ', 1)
+    .. vim.trim(util.get_line(data.cursor_bounds.lnum), ' ', 1)
 
   for col = 1, #text do
     if string.sub(text, col, col) == '/' then
@@ -551,16 +546,12 @@ function buffer.process_insert_move()
   buffer.clear_extmarks({ start_lnum, 0 }, { start_lnum, -1 }, {})
   buffer.add_highlight('CarbonDir', start_lnum, 0, split_col)
   buffer.add_highlight('CarbonFile', start_lnum, split_col, -1)
-
-  vim.fn.cursor(
-    data.cursor_bounds.lnum,
-    math.max(data.cursor_bounds.col, vim.fn.col('.'))
-  )
+  util.cursor(start_lnum + 1, math.max(start_col, vim.fn.col('.') - 1))
 end
 
 function buffer.cancel_synchronization()
-  vim.fn.timer_start(settings.sync_delay / 2, function()
-    vim.fn.timer_stop(data.sync_timer)
+  util.defer('sync:cancel', settings.sync_delay / 2, function()
+    util.cancel('sync:perform')
 
     data.resync_paths = {}
   end)
