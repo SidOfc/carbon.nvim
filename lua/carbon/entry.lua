@@ -18,27 +18,24 @@ entry.__lt = function(a, b)
 end
 
 function entry.new(path, parent)
-  local is_directory = vim.fn.isdirectory(path) == 1
-  local resolved = select(
-    2,
-    pcall(function()
-      return vim.fn.resolve(path)
-    end)
-  )
+  local lstat = vim.loop.fs_lstat(path)
+  local is_executable = bit.band(lstat.mode, 33261) == 33261
+  local is_directory = lstat.type == 'directory'
+  local is_symlink = lstat.type == 'link' and 1
 
-  if is_directory then
+  if is_symlink then
+    is_symlink = vim.loop.fs_stat(path) and is_symlink or 2
+  elseif is_directory then
     watcher.register(path)
   end
 
   return setmetatable({
-    path = resolved,
+    path = path,
     name = vim.fn.fnamemodify(path, ':t'),
     parent = parent,
     is_directory = is_directory,
-    is_executable = not is_directory and vim.fn.executable(path) == 1,
-    is_symlink = resolved ~= path and vim.fn.getftime(resolved) == -1 and 2
-      or resolved ~= path and 1
-      or nil,
+    is_executable = is_executable,
+    is_symlink = is_symlink,
   }, entry)
 end
 
@@ -73,7 +70,7 @@ function entry:synchronize()
     return
   end
 
-  if vim.fn.isdirectory(self.path) == 1 then
+  if util.is_directory(self.path) then
     local current_paths = {}
     local previous_children = data.children[self.path] or {}
     data.children[self.path] = nil

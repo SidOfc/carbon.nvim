@@ -11,6 +11,16 @@ data.allowed_keys = {
   54, 55, 56, 57, 74, 75, 106, 107
 }
 
+function util.cursor(row, col)
+  return vim.api.nvim_win_set_cursor(0, { row, col })
+end
+
+function util.is_directory(path)
+  local stat = vim.loop.fs_stat(path)
+
+  return stat and stat.type == 'directory'
+end
+
 function util.cancel(identifier)
   local timer = data.timers[identifier]
 
@@ -204,7 +214,7 @@ function util.confirm(options)
   util.set_buf_autocmds(buf, {
     BufLeave = finish('cancel'),
     CursorMoved = function()
-      vim.fn.cursor(vim.fn.line('.'), 3)
+      util.cursor(vim.fn.line('.'), 2)
     end,
   })
 

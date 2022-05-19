@@ -158,12 +158,12 @@ function buffer.lines(input_target, lines, depth)
       full_path = dir_path .. '/' .. full_path
     end
 
-    if tmp.is_executable then
-      file_group = 'CarbonExe'
-    elseif tmp.is_symlink == 1 then
+    if tmp.is_symlink == 1 then
       file_group = 'CarbonSymlink'
     elseif tmp.is_symlink == 2 then
       file_group = 'CarbonBrokenSymlink'
+    elseif tmp.is_executable then
+      file_group = 'CarbonExe'
     end
 
     if not is_empty then
@@ -422,7 +422,7 @@ function buffer.create()
   buffer.render()
   buffer.set_lines(edit_lnum, edit_lnum, 1, { edit_indent })
 
-  data.reset_jump = { lnum = line.lnum, col = 1 }
+  data.reset_jump = { lnum = line.lnum, col = 0 }
   data.cursor_bounds = { lnum = edit_lnum + 1, col = #edit_indent + 1 }
   data.insert_move_autocmd = util.autocmd(
     'CursorMovedI',
@@ -430,7 +430,7 @@ function buffer.create()
     { buffer = handle }
   )
 
-  vim.fn.cursor(edit_lnum + 1, #edit_indent)
+  util.cursor(edit_lnum + 1, #edit_indent - 1)
   vim.api.nvim_buf_set_option(handle, 'modifiable', true)
   vim.cmd('startinsert!')
 end
@@ -468,7 +468,7 @@ function buffer.create_reset()
   vim.api.nvim_buf_set_lines(handle, lnum - 1, lnum, 1, {})
   vim.api.nvim_buf_set_option(handle, 'modifiable', false)
   vim.api.nvim_buf_set_option(handle, 'modified', false)
-  vim.fn.cursor(data.reset_jump.lnum, data.reset_jump.col)
+  util.cursor(data.reset_jump.lnum, data.reset_jump.col)
   data.line_entry:set_compressible(data.prev_compressible)
 
   data.prev_open = nil
@@ -547,9 +547,9 @@ function buffer.process_insert_move()
   buffer.add_highlight('CarbonDir', start_lnum, 0, split_col)
   buffer.add_highlight('CarbonFile', start_lnum, split_col, -1)
 
-  vim.fn.cursor(
+  util.cursor(
     data.cursor_bounds.lnum,
-    math.max(data.cursor_bounds.col, vim.fn.col('.'))
+    math.max(data.cursor_bounds.col, vim.fn.col('.') - 1)
   )
 end
 
