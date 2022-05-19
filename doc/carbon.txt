@@ -434,6 +434,31 @@ UTIL                                                                 *carbon-uti
   external to Carbon.
 
   `------------------------------------------------------------------------------`
+  get_line                                                  *carbon-util-get-line*
+
+  Signature: `require('carbon.util').get_line(`[{lnum}]`)`
+
+  Replacement for |getline|. Returns the content of line {lnum} in the current
+  buffer. The cursor line number will be used if {lnum} is not supplied.
+
+  `------------------------------------------------------------------------------`
+  cursor                                                      *carbon-util-cursor*
+
+  Signature: `require('carbon.util').cursor(`{row}, {col}`)`
+
+  Wrapper for |nvim_win_set_cursor| which functions more like |cursor| except
+  that {col} is zero-based instead of one based.
+
+  `------------------------------------------------------------------------------`
+  is_directory                                          *carbon-util-is-directory*
+
+  Signature: `require('carbon.util').is_directory(`{path}`)`
+
+  Uses the `type` attribute returned by `fs_stat` from `vim.loop` to determine
+  whether given {path} is a directory. Returns a boolean value or `nil` if the
+  call to `fs_stat` failed.
+
+  `------------------------------------------------------------------------------`
   bufwinid                                                  *carbon-util-bufwinid*
 
   Signature: `require('carbon.util').bufwinid(`{buf}`)`
