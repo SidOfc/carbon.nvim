@@ -1345,10 +1345,12 @@ BUFFER                                                             *carbon-buffe
 
   Makes the Carbon buffer |modifiable| and calls |nvim_buf_set_lines| like this:
 
-  `vim.api.nvim_buf_set_lines(`0, {from}, {to}, 1, {lines}`)`
+  `vim.api.nvim_buf_set_lines(`<bufnr>, {from}, {to}, 1, {lines}`)`
 
   After lines have been inserted Carbon sets |modified| to `false`.
   Will also set |nomodifiable| to `true` except when called in |insert-mode|.
+
+  <bufnr> will be set to the |bufnr| of the Carbon buffer.
 
   `------------------------------------------------------------------------------`
   add_highlight                                      *carbon-buffer-add-highlight*
@@ -1357,8 +1359,9 @@ BUFFER                                                             *carbon-buffe
 
   Calls |nvim_buf_add_highlight| like this:
 
-  `vim.api.nvim_buf_add_highlight(`0, <ns_id>, {hl}, {lnum}, {from}, {to}`)`
+  `vim.api.nvim_buf_add_highlight(`<bufnr>, <ns_id>, {hl}, {lnum}, {from}, {to}`)`
 
+  <bufnr> will be set to the |bufnr| of the Carbon buffer.
   <ns_id> will be set to the namespace stored internally by Carbon.
 
   `------------------------------------------------------------------------------`
@@ -1368,8 +1371,9 @@ BUFFER                                                             *carbon-buffe
 
   Calls |nvim_buf_clear_namespace| like this:
 
-  `vim.api.nvim_buf_clear_namespace(`0, <ns_id>, {from}, {to}`)`
+  `vim.api.nvim_buf_clear_namespace(`<bufnr>, <ns_id>, {from}, {to}`)`
 
+  <bufnr> will be set to the |bufnr| of the Carbon buffer.
   <ns_id> will be set to the namespace stored internally by Carbon.
 
   `------------------------------------------------------------------------------`
@@ -1380,13 +1384,14 @@ BUFFER                                                             *carbon-buffe
   Wraps |nvim_buf_get_extmarks| and |nvim_buf_del_extmark|. This function
   first calls |nvim_buf_get_extmarks| like this:
 
-  `vim.api.nvim_buf_get_extmarks(`0, <ns_id>, {from}, {to}, {opts}`)`
+  `vim.api.nvim_buf_get_extmarks(`<bufnr>, <ns_id>, {from}, {to}, {opts}`)`
 
   The resulting list of |extmarks| will all be cleared by calling
   |nvim_buf_del_extmark| like this:
 
-  `vim.api.nvim_buf_del_extmark(`0, <ns_id>, <extmark_id>`)`
+  `vim.api.nvim_buf_del_extmark(`<bufnr>, <ns_id>, <extmark_id>`)`
 
+  <bufnr> will be set to the |bufnr| of the Carbon buffer.
   <ns_id> will be set to the namespace stored internally by Carbon.
 
   `------------------------------------------------------------------------------`

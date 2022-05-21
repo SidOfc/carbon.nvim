@@ -412,35 +412,39 @@ function buffer.create()
   util.map('<cr>', handle_create_confirm(ctx), { buffer = 0, mode = 'i' })
   util.map('<esc>', handle_create_cancel(ctx), { buffer = 0, mode = 'i' })
   util.cursor(ctx.edit_lnum + 1, #ctx.edit_indent - 1)
-  vim.api.nvim_buf_set_option(0, 'modifiable', true)
+  vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
   vim.cmd('startinsert!')
 end
 
 function buffer.clear_extmarks(...)
-  local extmarks = vim.api.nvim_buf_get_extmarks(0, data.namespace, ...)
+  local extmarks = vim.api.nvim_buf_get_extmarks(
+    data.handle,
+    data.namespace,
+    ...
+  )
 
   for _, extmark in ipairs(extmarks) do
-    vim.api.nvim_buf_del_extmark(0, data.namespace, extmark[1])
+    vim.api.nvim_buf_del_extmark(data.handle, data.namespace, extmark[1])
   end
 end
 
 function buffer.clear_namespace(...)
-  vim.api.nvim_buf_clear_namespace(0, data.namespace, ...)
+  vim.api.nvim_buf_clear_namespace(data.handle, data.namespace, ...)
 end
 
 function buffer.add_highlight(...)
-  vim.api.nvim_buf_add_highlight(0, data.namespace, ...)
+  vim.api.nvim_buf_add_highlight(data.handle, data.namespace, ...)
 end
 
 function buffer.set_lines(start_lnum, end_lnum, lines)
   local current_mode = string.lower(vim.api.nvim_get_mode().mode)
 
-  vim.api.nvim_buf_set_option(0, 'modifiable', true)
-  vim.api.nvim_buf_set_lines(0, start_lnum, end_lnum, 1, lines)
-  vim.api.nvim_buf_set_option(0, 'modified', false)
+  vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
+  vim.api.nvim_buf_set_lines(data.handle, start_lnum, end_lnum, 1, lines)
+  vim.api.nvim_buf_set_option(data.handle, 'modified', false)
 
   if not string.find(current_mode, 'i') then
-    vim.api.nvim_buf_set_option(0, 'modifiable', false)
+    vim.api.nvim_buf_set_option(data.handle, 'modifiable', false)
   end
 end
 
