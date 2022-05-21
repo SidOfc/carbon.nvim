@@ -11,6 +11,14 @@ data.allowed_keys = {
   54, 55, 56, 57, 74, 75, 106, 107
 }
 
+function util.last_index_of(char, str)
+  for index = #str, 1, -1 do
+    if string.sub(str, index, index) == char then
+      return index
+    end
+  end
+end
+
 function util.get_line(lnum)
   lnum = lnum or vim.api.nvim_win_get_cursor(0)[1]
 
@@ -121,6 +129,14 @@ function util.map(lhs, rhs, settings_param)
   end
 end
 
+function util.unmap(mode, lhs, settings)
+  if settings and settings.buffer then
+    vim.api.nvim_buf_del_keymap(settings.buffer, mode, lhs)
+  else
+    vim.api.nvim_del_keymap(mode, lhs)
+  end
+end
+
 function util.autocmd(event, cmd_or_callback, opts)
   return vim.api.nvim_create_autocmd(
     event,
@@ -129,6 +145,13 @@ function util.autocmd(event, cmd_or_callback, opts)
       callback = cmd_or_callback,
     }, opts or {})
   )
+end
+
+function util.clear_autocmd(event, opts)
+  return vim.api.nvim_clear_autocmds(util.tbl_merge({
+    event = event,
+    group = data.augroup,
+  }, opts or {}))
 end
 
 function util.command(lhs, rhs, options)

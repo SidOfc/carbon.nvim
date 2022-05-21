@@ -24,11 +24,7 @@ function buffer.handle()
     return data.handle
   end
 
-  local mappings = {
-    { 'i', '<nop>' },
-    { '<cr>', buffer.create_confirm, { mode = 'i' } },
-    { '<esc>', buffer.create_cancel, { mode = 'i' } },
-  }
+  local mappings = { { 'i', '<nop>' }, { 'o', '<nop>' }, { 'O', '<nop>' } }
 
   for action, mapping in pairs(settings.actions or {}) do
     mapping = type(mapping) == 'string' and { mapping } or mapping or {}
@@ -77,7 +73,7 @@ function buffer.render()
   end
 
   buffer.clear_namespace(0, -1)
-  buffer.set_lines(0, -1, 1, lines)
+  buffer.set_lines(0, -1, lines)
 
   for _, hl in ipairs(hls) do
     buffer.add_highlight(unpack(hl))
@@ -389,123 +385,67 @@ function buffer.delete()
 end
 
 function buffer.create()
-  local line = buffer.cursor()
-  local handle = buffer.handle()
-  local line_entry = line.entry
-  local line_lnum = line.lnum
-  local line_depth = line.depth + 2
+  local ctx = { line = buffer.cursor() }
+  local line_entry = ctx.line.entry
 
   if not line_entry.is_directory then
-    line_entry = line.path[#line.path] or line_entry.parent
+    line_entry = ctx.line.path[#ctx.line.path] or line_entry.parent
   end
 
-  if vim.v.count > 0 and #line.path > 0 then
-    line_entry = line.path[math.min(vim.v.count, #line.path)]
+  if vim.v.count > 0 and #ctx.line.path > 0 then
+    line_entry = ctx.line.path[math.min(vim.v.count, #ctx.line.path)]
   end
 
-  data.line_entry = line_entry
-  data.prev_open = line_entry:is_open()
-  data.prev_compressible = line_entry:is_compressible()
+  ctx.prev_open = line_entry:is_open()
+  ctx.prev_compressible = line_entry:is_compressible()
 
   line_entry:set_open(true)
   line_entry:set_compressible(false)
 
-  if line_entry ~= line.entry then
-    line = buffer.entry_line(line_entry)
-    line_lnum = line.lnum
-    line_depth = line.depth + 2
+  if line_entry ~= ctx.line.entry then
+    ctx.line = buffer.entry_line(line_entry)
   end
 
-  local edit_lnum = line_lnum + #buffer.lines(line_entry)
-  local edit_indent = string.rep('  ', line_depth)
+  ctx.edit_indent = string.rep('  ', ctx.line.depth + 2)
+  ctx.edit_lnum = ctx.line.lnum + #buffer.lines(ctx.line.entry)
+  ctx.edit_col = #ctx.edit_indent
 
   buffer.render()
-  buffer.set_lines(edit_lnum, edit_lnum, 1, { edit_indent })
-
-  data.reset_jump = { lnum = line.lnum, col = 0 }
-  data.cursor_bounds = { lnum = edit_lnum + 1, col = #edit_indent + 1 }
-  data.insert_move_autocmd = util.autocmd(
-    'CursorMovedI',
-    buffer.process_insert_move,
-    { buffer = handle }
-  )
-
-  util.cursor(edit_lnum + 1, #edit_indent - 1)
-  vim.api.nvim_buf_set_option(handle, 'modifiable', true)
+  buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum, { ctx.edit_indent })
+  util.autocmd('CursorMovedI', handle_create_insert_move(ctx), { buffer = 0 })
+  util.map('<cr>', handle_create_confirm(ctx), { buffer = 0, mode = 'i' })
+  util.map('<esc>', handle_create_cancel(ctx), { buffer = 0, mode = 'i' })
+  util.cursor(ctx.edit_lnum + 1, #ctx.edit_indent - 1)
+  vim.api.nvim_buf_set_option(0, 'modifiable', true)
   vim.cmd('startinsert!')
 end
 
-function buffer.create_confirm()
-  vim.cmd('stopinsert')
-  local text = vim.trim(util.get_line())
-  local name = vim.fn.fnamemodify(text, ':t')
-  local parent_directory = data.line_entry.path
-    .. '/'
-    .. vim.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
-
-  vim.fn.mkdir(parent_directory, 'p')
-
-  if name ~= '' then
-    vim.fn.writefile({}, parent_directory .. '/' .. name)
-  end
-
-  data.line_entry:synchronize()
-  buffer.cancel_synchronization()
-  buffer.create_reset()
-end
-
-function buffer.create_cancel()
-  vim.cmd('stopinsert')
-  data.line_entry:set_open(data.prev_open)
-  buffer.create_reset()
-end
-
-function buffer.create_reset()
-  local handle = buffer.handle()
-  local lnum = vim.fn.line('.')
-
-  vim.api.nvim_del_autocmd(data.insert_move_autocmd)
-  vim.api.nvim_buf_set_lines(handle, lnum - 1, lnum, 1, {})
-  vim.api.nvim_buf_set_option(handle, 'modifiable', false)
-  vim.api.nvim_buf_set_option(handle, 'modified', false)
-  util.cursor(data.reset_jump.lnum, data.reset_jump.col)
-  data.line_entry:set_compressible(data.prev_compressible)
-
-  data.prev_open = nil
-  data.line_entry = nil
-  data.reset_jump = nil
-  data.cursor_bounds = nil
-  data.prev_compressible = nil
-  data.insert_move_autocmd = nil
-
-  buffer.render()
-end
-
 function buffer.clear_extmarks(...)
-  local extmarks = vim.api.nvim_buf_get_extmarks(
-    data.handle,
-    data.namespace,
-    ...
-  )
+  local extmarks = vim.api.nvim_buf_get_extmarks(0, data.namespace, ...)
 
   for _, extmark in ipairs(extmarks) do
-    vim.api.nvim_buf_del_extmark(data.handle, data.namespace, extmark[1])
+    vim.api.nvim_buf_del_extmark(0, data.namespace, extmark[1])
   end
 end
 
 function buffer.clear_namespace(...)
-  vim.api.nvim_buf_clear_namespace(data.handle, data.namespace, ...)
+  vim.api.nvim_buf_clear_namespace(0, data.namespace, ...)
 end
 
 function buffer.add_highlight(...)
-  vim.api.nvim_buf_add_highlight(data.handle, data.namespace, ...)
+  vim.api.nvim_buf_add_highlight(0, data.namespace, ...)
 end
 
-function buffer.set_lines(...)
-  vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
-  vim.api.nvim_buf_set_lines(data.handle, ...)
-  vim.api.nvim_buf_set_option(data.handle, 'modifiable', false)
-  vim.api.nvim_buf_set_option(data.handle, 'modified', false)
+function buffer.set_lines(start_lnum, end_lnum, lines)
+  local current_mode = string.lower(vim.api.nvim_get_mode().mode)
+
+  vim.api.nvim_buf_set_option(0, 'modifiable', true)
+  vim.api.nvim_buf_set_lines(0, start_lnum, end_lnum, 1, lines)
+  vim.api.nvim_buf_set_option(0, 'modified', false)
+
+  if not string.find(current_mode, 'i') then
+    vim.api.nvim_buf_set_option(0, 'modifiable', false)
+  end
 end
 
 function buffer.process_event(_, path)
@@ -529,32 +469,64 @@ function buffer.process_hidden()
   vim.w.carbon_fexplore_window = nil
 end
 
-function buffer.process_insert_move()
-  local start_lnum = data.cursor_bounds.lnum - 1
-  local start_col = data.cursor_bounds.col - 1
-  local split_col = start_col
-  local text = string.rep(' ', start_col)
-    .. vim.trim(util.get_line(data.cursor_bounds.lnum), ' ', 1)
-
-  for col = 1, #text do
-    if string.sub(text, col, col) == '/' then
-      split_col = col
-    end
-  end
-
-  vim.api.nvim_buf_set_lines(0, start_lnum, start_lnum + 1, 1, { text })
-  buffer.clear_extmarks({ start_lnum, 0 }, { start_lnum, -1 }, {})
-  buffer.add_highlight('CarbonDir', start_lnum, 0, split_col)
-  buffer.add_highlight('CarbonFile', start_lnum, split_col, -1)
-  util.cursor(start_lnum + 1, math.max(start_col, vim.fn.col('.') - 1))
-end
-
 function buffer.cancel_synchronization()
   util.defer('sync:cancel', settings.sync_delay / 2, function()
     util.cancel('sync:perform')
 
     data.resync_paths = {}
   end)
+end
+
+function handle_create_insert_move(ctx)
+  return function()
+    local text = ctx.edit_indent .. vim.trim(util.get_line())
+    local last_slash_col = util.last_index_of('/', text) or 0
+
+    buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum + 1, { text })
+    buffer.clear_extmarks({ ctx.edit_lnum, 0 }, { ctx.edit_lnum, -1 }, {})
+    buffer.add_highlight('CarbonDir', ctx.edit_lnum, 0, last_slash_col)
+    buffer.add_highlight('CarbonFile', ctx.edit_lnum, last_slash_col, -1)
+    util.cursor(ctx.edit_lnum + 1, math.max(ctx.edit_col, vim.fn.col('.') - 1))
+  end
+end
+
+function handle_create_confirm(ctx)
+  return function()
+    vim.cmd('stopinsert')
+    local text = vim.trim(util.get_line())
+    local name = vim.fn.fnamemodify(text, ':t')
+    local parent_directory = ctx.line.entry.path
+      .. '/'
+      .. vim.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
+
+    vim.fn.mkdir(parent_directory, 'p')
+
+    if name ~= '' then
+      vim.fn.writefile({}, parent_directory .. '/' .. name)
+    end
+
+    ctx.line.entry:synchronize()
+    buffer.cancel_synchronization()
+    finalize_create(ctx)
+  end
+end
+
+function handle_create_cancel(ctx)
+  return function()
+    vim.cmd('stopinsert')
+    ctx.line.entry:set_open(ctx.prev_open)
+    finalize_create(ctx)
+  end
+end
+
+function finalize_create(ctx)
+  ctx.line.entry:set_compressible(ctx.prev_compressible)
+  util.cursor(ctx.line.lnum, 0)
+  util.unmap('i', '<cr>', { buffer = 0 })
+  util.unmap('i', '<esc>', { buffer = 0 })
+  util.clear_autocmd('CursorMovedI', { buffer = 0 })
+  buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum + 1, {})
+  buffer.render()
 end
 
 return buffer
