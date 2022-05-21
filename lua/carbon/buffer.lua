@@ -360,10 +360,6 @@ function buffer.delete()
             vim.api.nvim_err_writeln(
               'Failed to delete: "' .. target.path .. '"'
             )
-          else
-            target.parent:synchronize()
-            buffer.cancel_synchronization()
-            buffer.render()
           end
         end,
       },
@@ -469,14 +465,6 @@ function buffer.process_hidden()
   vim.w.carbon_fexplore_window = nil
 end
 
-function buffer.cancel_synchronization()
-  util.defer('sync:cancel', settings.sync_delay / 2, function()
-    util.cancel('sync:perform')
-
-    data.resync_paths = {}
-  end)
-end
-
 function handle_create_insert_move(ctx)
   return function()
     local text = ctx.edit_indent .. vim.trim(util.get_line())
@@ -506,7 +494,6 @@ function handle_create_confirm(ctx)
     end
 
     ctx.line.entry:synchronize()
-    buffer.cancel_synchronization()
     finalize_create(ctx)
   end
 end
