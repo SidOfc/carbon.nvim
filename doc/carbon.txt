@@ -1581,27 +1581,6 @@ BUFFER                                                             *carbon-buffe
   The [count] is clamped. If it exceeds the amount of "components" in the path
   then it will select the last component (the actual entry of that line).
 
-  `------------------------------------------------------------------------------`
-  cancel_synchronization                    *carbon-buffer-cancel-synchronization*
-
-  Signature: `require('carbon.buffer').cancel_synchronization()`
-
-  This method cancels the next |carbon-buffer-synchronize| which is planned
-  within the next |carbon-setting-sync-delay| time divided by 2.
-
-  File system events are deferred due to the fact that even a single
-  change, addition, or deletion of a file or directory will likely lead to
-  multiple events firing in quick succession.
-
-  For this reason, buffer synchronization is deferred by
-  |carbon-setting-sync-delay| milliseconds. This also means that after an
-  event occurs, it will take "some" time before synchronization happens.
-
-  To make sure synchronization skips "work" they themselves are also deferred,
-  but by |carbon-setting-sync-delay| time divided by 2 to make sure that
-  cancellation happens before the timer runs out. At the same time this also
-  removes the need to keep some "skip_next_sync" state which is nice.
-
 ================================================================================
 WATCHER                                                           *carbon-watcher*
 
