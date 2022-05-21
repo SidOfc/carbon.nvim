@@ -122,9 +122,6 @@ COMMANDS                                                         *carbon-command
 AUTOCMDS                                                         *carbon-autocmds*
 
   This section documents the default |autocmd| commands that Carbon uses.
-  |autocmd| commands are created unconditionally except for
-  |carbon-autocmd-dirchanged| which depends on the value of
-  |carbon-setting-sync-on-cd|.
 
   `------------------------------------------------------------------------------`
   BufEnter                                               *carbon-autocmd-bufenter*
@@ -154,10 +151,9 @@ AUTOCMDS                                                         *carbon-autocmd
   Group:          `Carbon`
   Event:          `CursorMovedI`
   Pattern:
-  Implementation: `lua require('carbon.buffer').process_insert_move()`
+  Implementation:
 
-  Local to Carbon buffers.
-  Calls |carbon-buffer-process-insert-move| when moving the cursor in insert mode.
+  Local to Carbon buffers. Called when moving the cursor in insert mode.
   Used during |carbon-buffer-create| to control the line and minimul column
   offset of the cursor.
 
@@ -434,6 +430,14 @@ UTIL                                                                 *carbon-uti
   external to Carbon.
 
   `------------------------------------------------------------------------------`
+  last_index_of                                        *carbon-util-last-index-of*
+
+  Signature: `require('carbon.util').last_index_of(`{char}, {str}`)`
+
+  Returns the 1-based last index of {char} in {str}.
+  Returns `nil` when {char} is not found in {str}.
+
+  `------------------------------------------------------------------------------`
   get_line                                                  *carbon-util-get-line*
 
   Signature: `require('carbon.util').get_line(`[{lnum}]`)`
@@ -572,6 +576,19 @@ UTIL                                                                 *carbon-uti
   mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
 
   `------------------------------------------------------------------------------`
+  unmap                                                        *carbon-util-unmap*
+
+  Signature: `require('carbon.util').unmap(`{mode}, {lhs}[, {options}]`)`
+
+  Wraps |nvim_del_keymap| and |nvim_buf_del_keymap|. Unmaps {lhs} in {mode}.
+  An optional {options} table can be supplied. When {options}`.buffer` is
+  supplied the mapping will be unmapped from the provided buffer only.
+
+  {mode} must be a valid |mode()|.
+  {lhs} must be the key to unmap.
+  {options} must be a table if supplied.
+
+  `------------------------------------------------------------------------------`
   command                                                    *carbon-util-command*
 
   Signature: `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
@@ -607,6 +624,19 @@ UTIL                                                                 *carbon-uti
   The {opts}.`group` option will default to `'Carbon'` if not specified.
 
   Returns the `id` returned by |nvim_create_autocmd|.
+
+  For more information about which autocommands Carbon uses,
+  see |carbon-autocmds|.
+
+  `------------------------------------------------------------------------------`
+  clear_autocmd                                        *carbon-util-clear-autocmd*
+
+  Signature: `require('carbon.util').clear_autocmd(`{event}, [, {opts}]`)`
+
+  Wraps |nvim_clear_autocmds|. Sets {opts}`.event` to {event} before being
+  passed to |nvim_clear_autocmds|.
+
+  The {opts}.`group` option will default to `'Carbon'` if not specified.
 
   For more information about which autocommands Carbon uses,
   see |carbon-autocmds|.
@@ -1087,15 +1117,6 @@ BUFFER                                                             *carbon-buffe
   by |Lcarbon| and |Fcarbon| respectively.
 
   `------------------------------------------------------------------------------`
-  process_insert_move                          *carbon-buffer-process-insert-move*
-
-  Signature: `require('carbon.buffer').process_insert_move()`
-  Autocmd:   |carbon-autocmd-cursormovedi|
-
-  This method ensures that the cursor stays within bounds determined by
-  |carbon-buffer-create|.
-
-  `------------------------------------------------------------------------------`
   is_loaded                                              *carbon-buffer-is-loaded*
 
   Signature: `require('carbon.buffer').is_loaded()`
@@ -1309,14 +1330,14 @@ BUFFER                                                             *carbon-buffe
   `------------------------------------------------------------------------------`
   set_lines                                              *carbon-buffer-set-lines*
 
-  Signature: `require('carbon.buffer').set_lines(`{from}, {to}, {strict}, {lines}`)`
+  Signature: `require('carbon.buffer').set_lines(`{from}, {to}, {lines}`)`
 
   Makes the Carbon buffer |modifiable| and calls |nvim_buf_set_lines| like this:
 
-  `vim.api.nvim_buf_set_lines(`<bufnr>, {from}, {to}, {strict}, {lines}`)`
+  `vim.api.nvim_buf_set_lines(`<bufnr>, {from}, {to}, 1, {lines}`)`
 
-  After lines have been inserted, Carbon makes the buffer |nomodifiable| and
-  sets |modified| to `false`.
+  After lines have been inserted Carbon sets |modified| to `false`.
+  Will also set |nomodifiable| to `true` except when called in |insert-mode|.
 
   <bufnr> will be set to the current Carbon buffer handle.
 
@@ -1386,9 +1407,8 @@ BUFFER                                                             *carbon-buffe
   Signature: `require('carbon.buffer').create()`
 
   When called, puts the Carbon buffer in a context-aware insert mode which
-  allows a path to be typed. Pressing <cr> will confirm creation by calling
-  |carbon-buffer-create-confirm| and pressing <esc> will cancel creation by
-  calling |carbon-buffer-create-cancel|.
+  allows a path to be typed. Pressing <cr> will confirm creation and pressing
+  <esc> will cancel creation.
 
   Paths ending in slash (`/`) will create directories, otherwise regular files
   are created.
@@ -1493,66 +1513,6 @@ BUFFER                                                             *carbon-buffe
 
   Finally, when `vim.v.count` does not resolve to a directory, the default
   behavior as if no count was supplied will be executed.
-
-  `------------------------------------------------------------------------------`
-  create_confirm                                    *carbon-buffer-create-confirm*
-
-  Signature: `require('carbon.buffer').create_confirm()`
-
-  This method is always mapped to <cr> in |insert-mode|. When <cr> is pressed
-  the typed path will be created. Any non-existing parent directories of the
-  supplied path will be created as well.
-
-  A path ending in a slash (`/`) will create a directory, otherwise a regular
-  file is created.
-
-  Pressing <cr> without typing anything will also not create anything. This is
-  effectively the same as pressing <esc> which triggers
-  |carbon-buffer-create-cancel|.
-
-  After confirming |carbon-buffer-create-reset| will be called to clean up and
-  exit path creation mode.
-
-  WARNING:
-  This method is used together with |carbon-buffer-create|. It is not intended
-  to be used as a standalone method! It depends on an internal variables
-  which are only set when |carbon-buffer-create| is called.
-
-  `------------------------------------------------------------------------------`
-  create_cancel                                      *carbon-buffer-create-cancel*
-
-  Signature: `require('carbon.buffer').create_cancel()`
-
-  This method is always mapped to <esc> in |insert-mode|. When <esc> is pressed
-  path creation will be cancelled and any typed path will be discarded.
-
-  After confirming |carbon-buffer-create-reset| will be called to clean up and
-  exit path creation mode.
-
-  WARNING:
-  This method is used together with |carbon-buffer-create|. It is not intended
-  to be used as a standalone method! It depends on an internal variables
-  which are only set when |carbon-buffer-create| is called.
-
-  `------------------------------------------------------------------------------`
-  create_reset                                        *carbon-buffer-create-reset*
-
-  Signature: `require('carbon.buffer').create_reset()`
-
-  Clean up the buffer by removing the temporarily inserted line used for
-  typing the path to create, setting both |modifiable| and |modified| to
-  `false`, restoring the cursor position, and restoring compressible state.
-
-  After all of the above is executed, all `data.*` variables which were
-  created and used in |carbon-buffer-create|, |carbon-buffer-create-confirm|, and
-  |carbon-buffer-create-cancel| will be reset to `nil`.
-
-  Finally, |carbon-buffer-render| is called to rerender the buffer.
-
-  WARNING:
-  This method is used together with |carbon-buffer-create|. It is not intended
-  to be used as a standalone method! It depends on an internal variables
-  which are only set when |carbon-buffer-create| is called.
 
   `------------------------------------------------------------------------------`
   delete                                                    *carbon-buffer-delete*
