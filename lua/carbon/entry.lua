@@ -158,7 +158,7 @@ end
 function entry:get_children()
   local entries = vim.tbl_map(function(name)
     return entry.new(self.path .. '/' .. name, self)
-  end, vim.fn.readdir(self.path))
+  end, util.scandir(self.path))
 
   if type(settings.exclude) == 'table' then
     entries = vim.tbl_filter(function(child)
