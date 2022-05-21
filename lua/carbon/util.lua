@@ -47,17 +47,20 @@ function util.cancel(identifier)
 end
 
 function util.defer(identifier, ms, callback)
+  local timer_exists = data.timers[identifier]
   local timer = data.timers[identifier] or vim.loop.new_timer()
 
-  if data.timers[identifier] then
+  if timer_exists then
     timer:stop()
+  else
+    data.timers[identifier] = timer
   end
 
   timer:start(
     ms,
     0,
     vim.schedule_wrap(function()
-      util.cancel(timer)
+      util.cancel(identifier)
       callback()
     end)
   )
