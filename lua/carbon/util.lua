@@ -11,6 +11,19 @@ data.allowed_keys = {
   54, 55, 56, 57, 74, 75, 106, 107
 }
 
+function util.scandir(path)
+  local handle = vim.loop.fs_scandir(path)
+  local entries = {}
+  local entry_filename = vim.loop.fs_scandir_next(handle)
+
+  while entry_filename do
+    entries[#entries + 1] = entry_filename
+    entry_filename = vim.loop.fs_scandir_next(handle)
+  end
+
+  return entries
+end
+
 function util.last_index_of(char, str)
   for index = #str, 1, -1 do
     if string.sub(str, index, index) == char then
