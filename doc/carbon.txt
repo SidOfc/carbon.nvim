@@ -617,9 +617,8 @@ UTIL                                                                 *carbon-uti
 
   Signature: `require('carbon.util').highlight(`{group}, {properties}`)`
 
-  Defines a |highlight| for {group} using provided {properties} and executes that
-  command. {group} will be the highlight group name. {properties} is a table
-  accepting any properties that can be passed to |highlight|.
+  Wraps |nvim_set_hl|. The `default` option is set to `true` by default which
+  can be overridden by {properties}.
 
   {group} must be a string containing the group name.
   {properties} must be a table.
@@ -1966,58 +1965,52 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   highlights                                           *carbon-setting-highlights*
 
-  Default:
-    `{`
-    `  CarbonDir = {`                          *carbon-setting-highlights-CarbonDir*
-    `    ctermfg = 'DarkBlue',`
-    `    guifg = '#00aaff',`
-    `    cterm = 'bold',`
-    `    gui = 'bold',`
-    `  },`
-    `  CarbonFile = {`                        *carbon-setting-highlights-CarbonFile*
-    `    ctermfg = 'LightGray',`
-    `    guifg = '#f8f8f8',`
-    `    cterm = 'bold',`
-    `    gui = 'bold',`
-    `  },`
-    `  CarbonExe = {`                          *carbon-setting-highlights-CarbonExe*
-    `    ctermfg = 'Green',`
-    `    guifg = '#22cc22',`
-    `    cterm = 'bold',`
-    `    gui = 'bold',`
-    `  },`
-    `  CarbonSymlink = {`                  *carbon-setting-highlights-CarbonSymlink*
-    `    ctermfg = 'Magenta',`
-    `    guifg = '#d77ee0',`
-    `    cterm = 'bold',`
-    `    gui = 'bold',`
-    `  },`
-    `  CarbonBrokenSymlink = {`      *carbon-setting-highlights-CarbonBrokenSymlink*
-    `    ctermfg = 'Brown',`
-    `    guifg = '#ea871e',`
-    `    cterm = 'bold',`
-    `    gui = 'bold',`
-    `  },`
-    `  CarbonIndicator = {`              *carbon-setting-highlights-CarbonIndicator*
-    `    ctermfg = 'DarkGray',`
-    `    guifg = 'Gray',`
-    `    cterm = 'bold',`
-    `    gui = 'bold',`
-    `  },`
-    `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
-    `    ctermfg = 'Red',`
-    `    guifg = '#ff3333',`
-    `    cterm = 'bold',`
-    `    gui = 'bold',`
-    `  },`
-    `}`
-
-  The full highlighting configuration used by Carbon. Each key of this table
-  will become a highlight group. The table of properties attached to each key will
-  determine how the final generated highlight group will look. Any valid
-  property of |highlight| commands is also valid in this table.
+  The full highlighting configuration used by Carbon. Each key of the table
+  below will become a highlight group. The table of properties attached to each
+  key will determine how the final generated highlight group will look. Any
+  valid option accepted by |nvim_set_hl| is also valid in the table of
+  properties for a key.
 
   The `highlights` setting may be set to `nil` to prevent any highlight groups
   from being generated.
+
+  Default:
+    `{`
+    `  CarbonDir = {`                          *carbon-setting-highlights-CarbonDir*
+    `    fg = '#00aaff',`
+    `    ctermfg = 'DarkBlue',`
+    `    bold = true,`
+    `  },`
+    `  CarbonFile = {`                        *carbon-setting-highlights-CarbonFile*
+    `    fg = '#f8f8f8',`
+    `    ctermfg = 'LightGray',`
+    `    bold = true,`
+    `  },`
+    `  CarbonExe = {`                          *carbon-setting-highlights-CarbonExe*
+    `    fg = '#22cc22',`
+    `    ctermfg = 'Green',`
+    `    bold = true,`
+    `  },`
+    `  CarbonSymlink = {`                  *carbon-setting-highlights-CarbonSymlink*
+    `    fg = '#d77ee0',`
+    `    ctermfg = 'Magenta',`
+    `    bold = true,`
+    `  },`
+    `  CarbonBrokenSymlink = {`      *carbon-setting-highlights-CarbonBrokenSymlink*
+    `    fg = '#ea871e',`
+    `    ctermfg = 'Brown',`
+    `    bold = true,`
+    `  },`
+    `  CarbonIndicator = {`              *carbon-setting-highlights-CarbonIndicator*
+    `    fg = 'Gray',`
+    `    ctermfg = 'DarkGray',`
+    `    bold = true,`
+    `  },`
+    `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
+    `    fg = '#ff3333',`
+    `    ctermfg = 'Red',`
+    `    bold = true,`
+    `  },`
+    `}`
 
 vim:ft=help
