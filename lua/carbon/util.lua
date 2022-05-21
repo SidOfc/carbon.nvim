@@ -174,16 +174,8 @@ function util.command(lhs, rhs, options)
   return vim.api.nvim_create_user_command(lhs, rhs, options or {})
 end
 
-function util.highlight(group, properties)
-  if type(properties) == 'table' then
-    local command = 'highlight default ' .. group
-
-    for property, value in pairs(properties) do
-      command = command .. ' ' .. property .. '=' .. value
-    end
-
-    vim.cmd(command)
-  end
+function util.highlight(group, opts)
+  vim.api.nvim_set_hl(0, group, util.tbl_merge({ default = true }, opts or {}))
 end
 
 function util.confirm(options)
