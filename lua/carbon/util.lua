@@ -73,15 +73,15 @@ function util.tbl_find(tbl, callback)
 end
 
 function util.tbl_except(tbl, keys)
-  local settings = {}
+  local result = {}
 
-  for setting, value in pairs(tbl) do
-    if not vim.tbl_contains(keys, setting) then
-      settings[setting] = value
+  for key, value in pairs(tbl) do
+    if not vim.tbl_contains(keys, key) then
+      result[key] = value
     end
   end
 
-  return settings
+  return result
 end
 
 function util.map(lhs, rhs, settings_param)
