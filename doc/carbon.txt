@@ -485,24 +485,6 @@ UTIL                                                                 *carbon-uti
   https://github.com/neovim/neovim/issues/18393 for more information.
 
   `------------------------------------------------------------------------------`
-  defer                                                        *carbon-util-defer*
-
-  Signature: `require('carbon.util').defer(`{identifier}, {ms}, {callback}`)`
-
-  Creates a timer for {identifier} which calls {callback} in {ms} milliseconds.
-  The {identifier} is a unique string which represents this specific timer.
-
-  See |carbon-util-cancel| to learn more about cancelling deferred callbacks.
-
-  `------------------------------------------------------------------------------`
-  cancel                                                      *carbon-util-cancel*
-
-  Signature: `require('carbon.util').cancel(`{identifier}`)`
-
-  Cancels a timer created by |carbon-util-defer|. Results in a no-op if
-  {identifier} is not an existing timer.
-
-  `------------------------------------------------------------------------------`
   plug                                                          *carbon-util-plug*
 
   Signature: `require('carbon.util').plug(`{name}`)`
@@ -1249,7 +1231,7 @@ BUFFER                                                             *carbon-buffe
   It is called the following way:
 
   `vim.api.nvim_buf_add_highlight(`
-  `  0,`
+  `  buffer.handle(),`
   `  data.namespace,`
   `  highlight[1],` => `<string HighlightGroupName>`
   `  lnum - 1,`
@@ -1917,7 +1899,7 @@ SETTINGS                                                         *carbon-setting
   When set to a function, the function will be executed and its return value
   must be a table which will then be passed to |nvim_open_window|. The function
   form allows you to specify the size based on the current dimensions of the
-  editor which is not possible when passing a table directly!
+  editor which is not possible when passing a table directly.
 
   The default function will create a horizontally and vertically centered
   popup with a maximum width of 80% up to 50 columns and maximum height of 80%
@@ -1965,15 +1947,6 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   highlights                                           *carbon-setting-highlights*
 
-  The full highlighting configuration used by Carbon. Each key of the table
-  below will become a highlight group. The table of properties attached to each
-  key will determine how the final generated highlight group will look. Any
-  valid option accepted by |nvim_set_hl| is also valid in the table of
-  properties for a key.
-
-  The `highlights` setting may be set to `nil` to prevent any highlight groups
-  from being generated.
-
   Default:
     `{`
     `  CarbonDir = {`                          *carbon-setting-highlights-CarbonDir*
@@ -2012,5 +1985,14 @@ SETTINGS                                                         *carbon-setting
     `    bold = true,`
     `  },`
     `}`
+
+  The full highlighting configuration used by Carbon. Each key of the table
+  below will become a highlight group. The table of properties attached to each
+  key will determine how the final generated highlight group will look. Any
+  valid option accepted by |nvim_set_hl| is also valid in the table of
+  properties for a key.
+
+  The `highlights` setting may be set to `nil` to prevent any highlight groups
+  from being generated.
 
 vim:ft=help
