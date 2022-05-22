@@ -1,6 +1,5 @@
 local util = {}
 local data = {
-  timers = {},
   guicursors = {},
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
