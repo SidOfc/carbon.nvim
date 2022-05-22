@@ -43,8 +43,8 @@ function buffer.handle()
     bufhidden = 'hide',
     mappings = mappings,
     autocmds = {
-      BufEnter = buffer.process_enter,
       BufHidden = buffer.process_hidden,
+      BufWinEnter = buffer.process_enter,
     },
   })
 
