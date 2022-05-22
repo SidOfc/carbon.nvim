@@ -71,22 +71,28 @@ function carbon.edit()
 
     buffer.render()
   elseif vim.w.carbon_lexplore_window then
-    vim.cmd('wincmd l')
+    vim.cmd({ cmd = 'wincmd', args = { 'l' } })
 
     if vim.w.carbon_lexplore_window == vim.api.nvim_get_current_win() then
-      vim.cmd('vertical belowright split ' .. entry.path)
-      vim.cmd('wincmd p')
-      vim.cmd('vertical resize ' .. settings.sidebar_width)
-      vim.cmd('wincmd p')
+      vim.cmd({
+        cmd = 'split',
+        args = { entry.path },
+        mods = { vertical = true, split = 'belowright' },
+      })
+
+      vim.api.nvim_win_set_width(
+        util.bufwinid(buffer.handle()),
+        settings.sidebar_width
+      )
     else
-      vim.cmd('edit ' .. entry.path)
+      vim.cmd({ cmd = 'edit', args = { entry.path } })
     end
   else
     if vim.w.carbon_fexplore_window then
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd('edit ' .. entry.path)
+    vim.cmd({ cmd = 'edit', args = { entry.path } })
   end
 end
 
@@ -98,7 +104,7 @@ function carbon.split()
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd('split ' .. entry.path)
+    vim.cmd({ cmd = 'split', args = { entry.path } })
   end
 end
 
@@ -110,7 +116,7 @@ function carbon.vsplit()
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd('vsplit ' .. entry.path)
+    vim.cmd({ cmd = 'vsplit', args = { entry.path } })
   end
 end
 
@@ -119,9 +125,13 @@ function carbon.explore()
 end
 
 function carbon.explore_left()
-  vim.cmd('vertical leftabove split')
-  vim.cmd('vertical resize ' .. tostring(settings.sidebar_width))
+  vim.cmd({ cmd = 'split', mods = { vertical = true, split = 'leftabove' } })
   buffer.show()
+
+  vim.api.nvim_win_set_width(
+    util.bufwinid(buffer.handle()),
+    settings.sidebar_width
+  )
 
   vim.w.carbon_lexplore_window = vim.api.nvim_get_current_win()
 end
@@ -181,7 +191,7 @@ function carbon.quit()
   if #vim.api.nvim_list_wins() > 1 then
     vim.api.nvim_win_close(0, 1)
   elseif #vim.api.nvim_list_bufs() > 1 then
-    vim.cmd('try | b# | catch | endtry')
+    vim.cmd({ cmd = 'bprevious' })
   end
 end
 

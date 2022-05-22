@@ -414,7 +414,7 @@ function buffer.create()
   util.map('<esc>', handle_create_cancel(ctx), { buffer = 0, mode = 'i' })
   util.cursor(ctx.edit_lnum + 1, #ctx.edit_indent - 1)
   vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
-  vim.cmd('startinsert!')
+  vim.cmd({ cmd = 'startinsert', bang = true })
 end
 
 function buffer.clear_extmarks(...)
@@ -465,12 +465,13 @@ function buffer.process_event(_, path)
 end
 
 function buffer.process_enter()
-  vim.cmd('setlocal fillchars& fillchars=eob:\\  nowrap& nowrap')
+  vim.opt_local.wrap = false
+  vim.opt_local.fillchars = { eob = ' ' }
 end
 
 function buffer.process_hidden()
-  vim.cmd('setlocal fillchars& nowrap&')
-
+  vim.opt_local.wrap = vim.opt_global.wrap:get()
+  vim.opt_local.fillchars = vim.opt_global.fillchars:get()
   vim.w.carbon_lexplore_window = nil
   vim.w.carbon_fexplore_window = nil
 end
@@ -490,7 +491,8 @@ end
 
 function handle_create_confirm(ctx)
   return function()
-    vim.cmd('stopinsert')
+    vim.cmd({ cmd = 'stopinsert' })
+
     local text = vim.trim(util.get_line())
     local name = vim.fn.fnamemodify(text, ':t')
     local parent_directory = ctx.line.entry.path
@@ -510,7 +512,7 @@ end
 
 function handle_create_cancel(ctx)
   return function()
-    vim.cmd('stopinsert')
+    vim.cmd({ cmd = 'stopinsert' })
     ctx.line.entry:set_open(ctx.prev_open)
     finalize_create(ctx)
   end

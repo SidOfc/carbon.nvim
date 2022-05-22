@@ -160,7 +160,7 @@ function util.confirm(options)
       end
 
       vim.api.nvim_set_option('guicursor', guicursor)
-      vim.cmd('close')
+      vim.cmd({ cmd = 'close' })
     end
 
     if not immediate then
