@@ -76,7 +76,7 @@ function carbon.edit()
     if vim.w.carbon_lexplore_window == vim.api.nvim_get_current_win() then
       vim.cmd('vertical belowright split ' .. entry.path)
       vim.cmd('wincmd p')
-      vim.cmd('vertical resize ' .. tostring(settings.sidebar_width))
+      vim.cmd('vertical resize ' .. settings.sidebar_width)
       vim.cmd('wincmd p')
     else
       vim.cmd('edit ' .. entry.path)
