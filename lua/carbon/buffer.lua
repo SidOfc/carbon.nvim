@@ -8,7 +8,6 @@ local data = {
   handle = -1,
   open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
-  resync_timer = vim.loop.new_timer(),
   resync_paths = {},
 }
 
@@ -451,16 +450,14 @@ end
 function buffer.process_event(_, path)
   data.resync_paths[path] = true
 
-  data.resync_timer:stop()
-  data.resync_timer:start(
-    settings.sync_delay,
-    0,
-    vim.schedule_wrap(function()
+  if not data.resync_timer then
+    data.resync_timer = vim.defer_fn(function()
       buffer.synchronize()
 
       data.resync_paths = {}
-    end)
-  )
+      data.resync_timer = nil
+    end, math.max(20, settings.sync_delay))
+  end
 end
 
 function buffer.process_enter()
