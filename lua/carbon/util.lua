@@ -1,14 +1,6 @@
 local util = {}
 local data = {
-  timers = {},
-  guicursors = {},
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
-}
-
--- stylua: ignore
-data.allowed_keys = {
-  38, 40, 48, 49, 50, 51, 52,  53,
-  54, 55, 56, 57, 74, 75, 106, 107
 }
 
 function util.scandir(path)
@@ -81,15 +73,15 @@ function util.tbl_find(tbl, callback)
 end
 
 function util.tbl_except(tbl, keys)
-  local settings = {}
+  local result = {}
 
-  for setting, value in pairs(tbl) do
-    if not vim.tbl_contains(keys, setting) then
-      settings[setting] = value
+  for key, value in pairs(tbl) do
+    if not vim.tbl_contains(keys, key) then
+      result[key] = value
     end
   end
 
-  return settings
+  return result
 end
 
 function util.map(lhs, rhs, settings_param)
@@ -148,6 +140,7 @@ function util.highlight(group, opts)
 end
 
 function util.confirm(options)
+  local guicursor = vim.o.guicursor
   local finished = false
   local actions = {}
   local mappings = {}
@@ -166,8 +159,8 @@ function util.confirm(options)
         callback()
       end
 
-      util.pop_guicursor()
-      vim.cmd('close')
+      vim.api.nvim_set_option('guicursor', guicursor)
+      vim.cmd({ cmd = 'close' })
     end
 
     if not immediate then
@@ -178,7 +171,11 @@ function util.confirm(options)
   end
 
   for ascii = 32, 127 do
-    if not vim.tbl_contains(data.allowed_keys, ascii) then
+    if
+      ascii < 48
+      and ascii > 57
+      and not vim.tbl_contains({ 38, 40, 74, 75, 106, 107 }, ascii)
+    then
       mappings[#mappings + 1] = { string.char(ascii), '<nop>' }
     end
   end
@@ -224,25 +221,13 @@ function util.confirm(options)
     end,
   })
 
+  vim.api.nvim_set_option('guicursor', 'n-v-c:hor100')
   vim.api.nvim_win_set_option(win, 'cursorline', true)
-  util.push_guicursor('n-v-c:hor100')
   util.set_winhl(win, {
     Normal = 'CarbonIndicator',
     FloatBorder = options.highlight or 'Normal',
     CursorLine = options.highlight or 'Normal',
   })
-end
-
-function util.pop_guicursor()
-  if data.guicursors[#data.guicursors] then
-    vim.cmd('set guicursor=' .. data.guicursors[#data.guicursors])
-    data.guicursors[#data.guicursors] = nil
-  end
-end
-
-function util.push_guicursor(guicursor)
-  data.guicursors[#data.guicursors + 1] = vim.o.guicursor
-  vim.cmd('set guicursor=' .. guicursor)
 end
 
 function util.bufwinid(buf)

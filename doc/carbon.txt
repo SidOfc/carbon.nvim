@@ -634,26 +634,6 @@ UTIL                                                                 *carbon-uti
   see |carbon-autocmds|.
 
   `------------------------------------------------------------------------------`
-  push_guicursor                                      *carbon-util-push-guicursor*
-
-  Signature: `require('carbon.util').push_guicursor(`{guicursor}`)`
-
-  Stores the previous cursor and changes the cursor to {guicursor}.
-  See |guicursor| for more information about the format of {guicursor}.
-
-  To revert the cursor, see |carbon-util-pop-guicursor|
-
-  {guicursor} must be a string.
-
-  `------------------------------------------------------------------------------`
-  pop_guicursor                                        *carbon-util-pop-guicursor*
-
-  Signature: `require('carbon.util').pop_guicursor()`
-
-  Revert the last cursor change applied by |carbon-util-push-guicursor|. When
-  there are no more changes to revert calling this method results in a no-op.
-
-  `------------------------------------------------------------------------------`
   set_winhl                                                *carbon-util-set-winhl*
 
   Signature: `require('carbon.util').set_winhl(`{win}, {highlights}`)`
