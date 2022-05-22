@@ -48,37 +48,6 @@ function util.is_directory(path)
   return stat and stat.type == 'directory'
 end
 
-function util.cancel(identifier)
-  local timer = data.timers[identifier]
-
-  if timer then
-    timer:stop()
-    timer:close()
-
-    data.timers[identifier] = nil
-  end
-end
-
-function util.defer(identifier, ms, callback)
-  local timer_exists = data.timers[identifier]
-  local timer = data.timers[identifier] or vim.loop.new_timer()
-
-  if timer_exists then
-    timer:stop()
-  else
-    data.timers[identifier] = timer
-  end
-
-  timer:start(
-    ms,
-    0,
-    vim.schedule_wrap(function()
-      util.cancel(identifier)
-      callback()
-    end)
-  )
-end
-
 function util.plug(name)
   return '<plug>(carbon-' .. name .. ')'
 end
