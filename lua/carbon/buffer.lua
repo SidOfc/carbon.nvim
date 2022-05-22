@@ -53,7 +53,6 @@ end
 
 function buffer.show()
   vim.api.nvim_win_set_buf(0, buffer.handle())
-  vim.api.nvim_win_set_option(0, 'spell', false)
   buffer.render()
 end
 
@@ -466,11 +465,13 @@ end
 
 function buffer.process_enter()
   vim.opt_local.wrap = false
+  vim.opt_local.spell = false
   vim.opt_local.fillchars = { eob = ' ' }
 end
 
 function buffer.process_hidden()
   vim.opt_local.wrap = vim.opt_global.wrap:get()
+  vim.opt_local.spell = vim.opt_global.spell:get()
   vim.opt_local.fillchars = vim.opt_global.fillchars:get()
   vim.w.carbon_lexplore_window = nil
   vim.w.carbon_fexplore_window = nil
