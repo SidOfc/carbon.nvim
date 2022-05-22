@@ -1,6 +1,5 @@
 local util = {}
 local data = {
-  guicursors = {},
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
 
@@ -141,6 +140,7 @@ function util.highlight(group, opts)
 end
 
 function util.confirm(options)
+  local guicursor = vim.o.guicursor
   local finished = false
   local actions = {}
   local mappings = {}
@@ -159,7 +159,7 @@ function util.confirm(options)
         callback()
       end
 
-      util.pop_guicursor()
+      vim.api.nvim_set_option('guicursor', guicursor)
       vim.cmd('close')
     end
 
@@ -221,25 +221,13 @@ function util.confirm(options)
     end,
   })
 
+  vim.api.nvim_set_option('guicursor', 'n-v-c:hor100')
   vim.api.nvim_win_set_option(win, 'cursorline', true)
-  util.push_guicursor('n-v-c:hor100')
   util.set_winhl(win, {
     Normal = 'CarbonIndicator',
     FloatBorder = options.highlight or 'Normal',
     CursorLine = options.highlight or 'Normal',
   })
-end
-
-function util.pop_guicursor()
-  if data.guicursors[#data.guicursors] then
-    vim.cmd('set guicursor=' .. data.guicursors[#data.guicursors])
-    data.guicursors[#data.guicursors] = nil
-  end
-end
-
-function util.push_guicursor(guicursor)
-  data.guicursors[#data.guicursors + 1] = vim.o.guicursor
-  vim.cmd('set guicursor=' .. guicursor)
 end
 
 function util.bufwinid(buf)
