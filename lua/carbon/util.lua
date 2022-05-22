@@ -5,12 +5,6 @@ local data = {
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
 
--- stylua: ignore
-data.allowed_keys = {
-  38, 40, 48, 49, 50, 51, 52,  53,
-  54, 55, 56, 57, 74, 75, 106, 107
-}
-
 function util.scandir(path)
   local handle = vim.loop.fs_scandir(path)
   local entries = {}
@@ -178,7 +172,11 @@ function util.confirm(options)
   end
 
   for ascii = 32, 127 do
-    if not vim.tbl_contains(data.allowed_keys, ascii) then
+    if
+      ascii < 48
+      and ascii > 57
+      and not vim.tbl_contains({ 38, 40, 74, 75, 106, 107 }, ascii)
+    then
       mappings[#mappings + 1] = { string.char(ascii), '<nop>' }
     end
   end
