@@ -1157,6 +1157,7 @@ BUFFER                                                             *carbon-buffe
   `{`
   `  line = <line>,`
   `  target = <entry>,`
+    `target_line = <line>,`
   `}`
 
   Property: `line`
@@ -1176,6 +1177,10 @@ BUFFER                                                             *carbon-buffe
   One way to describe the difference between `line.entry` and `target` is that
   `line.entry` will always point to the last path component entry on the current
   line whereas `target` points to the entry targetted by the user.
+
+  Property: `target_line`
+
+  Like `line` but `target_line` refers to the line which `target` is located on.
 
   For more information about compressed paths, see: |carbon-setting-compress|.
 

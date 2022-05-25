@@ -82,14 +82,29 @@ end
 
 function buffer.cursor(opts)
   local options = opts or {}
-  local line = buffer.lines()[vim.fn.line('.')]
+  local lines = buffer.lines()
+  local line = lines[vim.fn.line('.')]
   local target = line.entry
+  local target_line
 
   if options.target_directory_only and not target.is_directory then
-    target = line.path[#line.path] or target.parent
+    target = target.parent
   end
 
-  return { line = line, target = line.path[vim.v.count] or target }
+  target = line.path[vim.v.count] or target
+  target_line = util.tbl_find(lines, function(current)
+    if current.entry.path == target.path then
+      return true
+    end
+
+    return util.tbl_find(current.path, function(parent)
+      if parent.path == target.path then
+        return true
+      end
+    end)
+  end)
+
+  return { line = line, target = target, target_line = target_line }
 end
 
 function buffer.lines(input_target, lines, depth)
@@ -383,8 +398,8 @@ function buffer.create()
   ctx.target:set_open(true)
   ctx.target:set_compressible(false)
 
-  ctx.edit_indent = string.rep('  ', ctx.line.depth + 2)
-  ctx.edit_lnum = ctx.line.lnum + #buffer.lines(ctx.target)
+  ctx.edit_indent = string.rep('  ', ctx.target_line.depth + 2)
+  ctx.edit_lnum = ctx.target_line.lnum + #buffer.lines(ctx.target)
   ctx.edit_col = #ctx.edit_indent
 
   buffer.render()
@@ -486,7 +501,7 @@ end
 function internal.create_leave(ctx)
   vim.cmd({ cmd = 'stopinsert' })
   ctx.target:set_compressible(ctx.prev_compressible)
-  util.cursor(ctx.line.lnum, 0)
+  util.cursor(ctx.target_line.lnum, 0)
   util.unmap('i', '<cr>', { buffer = 0 })
   util.unmap('i', '<esc>', { buffer = 0 })
   util.clear_autocmd('CursorMovedI', { buffer = 0 })
