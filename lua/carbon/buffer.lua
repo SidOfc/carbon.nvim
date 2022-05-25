@@ -370,6 +370,9 @@ function buffer.delete()
               'Failed to delete: "' .. target.path .. '"'
             )
           end
+
+          target:terminate()
+          buffer.render()
         end,
       },
       {
