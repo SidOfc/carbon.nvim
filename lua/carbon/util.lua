@@ -180,7 +180,7 @@ function util.confirm(options)
     end
   end
 
-  for idx, action in ipairs(options.actions) do
+  for _, action in ipairs(options.actions) do
     actions[action.label] = action
 
     if action.shortcut then

@@ -2,6 +2,7 @@ local util = require('carbon.util')
 local entry = require('carbon.entry')
 local settings = require('carbon.settings')
 local buffer = {}
+local internal = {}
 local open_cwd = vim.loop.cwd()
 local data = {
   root = entry.new(open_cwd),
@@ -79,8 +80,16 @@ function buffer.render()
   end
 end
 
-function buffer.cursor()
-  return buffer.lines()[vim.fn.line('.')]
+function buffer.cursor(opts)
+  local options = opts or {}
+  local line = buffer.lines()[vim.fn.line('.')]
+  local target = line.entry
+
+  if options.target_directory_only and not target.is_directory then
+    target = line.path[#line.path] or target.parent
+  end
+
+  return { line = line, target = line.path[vim.v.count] or target }
 end
 
 function buffer.lines(input_target, lines, depth)
@@ -248,8 +257,8 @@ function buffer.up(count)
 end
 
 function buffer.down(count)
-  local cursor = buffer.cursor()
-  local new_root = cursor.path[count or vim.v.count1] or cursor.entry
+  local line = buffer.cursor().line
+  local new_root = line.path[count or vim.v.count1] or line.entry
 
   if not new_root.is_directory then
     new_root = new_root.parent
@@ -303,22 +312,8 @@ function buffer.cd(path)
   end
 end
 
-function buffer.entry_line(target_entry)
-  for _, current_line in ipairs(buffer.lines()) do
-    if current_line.entry.path == target_entry.path then
-      return current_line
-    end
-
-    for _, parent in ipairs(current_line.path) do
-      if parent.path == target_entry.path then
-        return current_line
-      end
-    end
-  end
-end
-
 function buffer.delete()
-  local line = buffer.cursor()
+  local line = buffer.cursor().line
   local targets = util.tbl_concat(line.path, { line.entry })
 
   local lnum_idx = line.lnum - 1
@@ -380,36 +375,23 @@ function buffer.delete()
 end
 
 function buffer.create()
-  local ctx = { line = buffer.cursor() }
-  local line_entry = ctx.line.entry
+  local ctx = buffer.cursor({ target_directory_only = true })
 
-  if not line_entry.is_directory then
-    line_entry = ctx.line.path[#ctx.line.path] or line_entry.parent
-  end
+  ctx.prev_open = ctx.target:is_open()
+  ctx.prev_compressible = ctx.target:is_compressible()
 
-  if vim.v.count > 0 and #ctx.line.path > 0 then
-    line_entry = ctx.line.path[math.min(vim.v.count, #ctx.line.path)]
-  end
-
-  ctx.prev_open = line_entry:is_open()
-  ctx.prev_compressible = line_entry:is_compressible()
-
-  line_entry:set_open(true)
-  line_entry:set_compressible(false)
-
-  if line_entry ~= ctx.line.entry then
-    ctx.line = buffer.entry_line(line_entry)
-  end
+  ctx.target:set_open(true)
+  ctx.target:set_compressible(false)
 
   ctx.edit_indent = string.rep('  ', ctx.line.depth + 2)
-  ctx.edit_lnum = ctx.line.lnum + #buffer.lines(ctx.line.entry)
+  ctx.edit_lnum = ctx.line.lnum + #buffer.lines(ctx.target)
   ctx.edit_col = #ctx.edit_indent
 
   buffer.render()
   buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum, { ctx.edit_indent })
-  util.autocmd('CursorMovedI', handle_create_insert_move(ctx), { buffer = 0 })
-  util.map('<cr>', handle_create_confirm(ctx), { buffer = 0, mode = 'i' })
-  util.map('<esc>', handle_create_cancel(ctx), { buffer = 0, mode = 'i' })
+  util.autocmd('CursorMovedI', internal.create_insert_move(ctx), { buffer = 0 })
+  util.map('<cr>', internal.create_confirm(ctx), { buffer = 0, mode = 'i' })
+  util.map('<esc>', internal.create_cancel(ctx), { buffer = 0, mode = 'i' })
   util.cursor(ctx.edit_lnum + 1, #ctx.edit_indent - 1)
   vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
   vim.cmd({ cmd = 'startinsert', bang = true })
@@ -474,7 +456,43 @@ function buffer.process_hidden()
   vim.w.carbon_fexplore_window = nil
 end
 
-function handle_create_insert_move(ctx)
+function internal.create_confirm(ctx)
+  return function()
+    local text = vim.trim(util.get_line())
+    local name = vim.fn.fnamemodify(text, ':t')
+    local parent_directory = ctx.target.path
+      .. '/'
+      .. vim.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
+
+    vim.fn.mkdir(parent_directory, 'p')
+
+    if name ~= '' then
+      vim.fn.writefile({}, parent_directory .. '/' .. name)
+    end
+
+    ctx.target:synchronize()
+    internal.create_leave(ctx)
+  end
+end
+
+function internal.create_cancel(ctx)
+  return function()
+    ctx.target:set_open(ctx.prev_open)
+    internal.create_leave(ctx)
+  end
+end
+
+function internal.create_leave(ctx)
+  vim.cmd({ cmd = 'stopinsert' })
+  ctx.target:set_compressible(ctx.prev_compressible)
+  util.cursor(ctx.line.lnum, 0)
+  util.unmap('i', '<cr>', { buffer = 0 })
+  util.unmap('i', '<esc>', { buffer = 0 })
+  util.clear_autocmd('CursorMovedI', { buffer = 0 })
+  buffer.render()
+end
+
+function internal.create_insert_move(ctx)
   return function()
     local text = ctx.edit_indent .. vim.trim(util.get_line())
     local last_slash_col = util.last_index_of('/', text) or 0
@@ -485,45 +503,6 @@ function handle_create_insert_move(ctx)
     buffer.add_highlight('CarbonFile', ctx.edit_lnum, last_slash_col, -1)
     util.cursor(ctx.edit_lnum + 1, math.max(ctx.edit_col, vim.fn.col('.') - 1))
   end
-end
-
-function handle_create_confirm(ctx)
-  return function()
-    vim.cmd({ cmd = 'stopinsert' })
-
-    local text = vim.trim(util.get_line())
-    local name = vim.fn.fnamemodify(text, ':t')
-    local parent_directory = ctx.line.entry.path
-      .. '/'
-      .. vim.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
-
-    vim.fn.mkdir(parent_directory, 'p')
-
-    if name ~= '' then
-      vim.fn.writefile({}, parent_directory .. '/' .. name)
-    end
-
-    ctx.line.entry:synchronize()
-    finalize_create(ctx)
-  end
-end
-
-function handle_create_cancel(ctx)
-  return function()
-    vim.cmd({ cmd = 'stopinsert' })
-    ctx.line.entry:set_open(ctx.prev_open)
-    finalize_create(ctx)
-  end
-end
-
-function finalize_create(ctx)
-  ctx.line.entry:set_compressible(ctx.prev_compressible)
-  util.cursor(ctx.line.lnum, 0)
-  util.unmap('i', '<cr>', { buffer = 0 })
-  util.unmap('i', '<esc>', { buffer = 0 })
-  util.clear_autocmd('CursorMovedI', { buffer = 0 })
-  buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum + 1, {})
-  buffer.render()
 end
 
 return buffer

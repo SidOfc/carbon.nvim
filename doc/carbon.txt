@@ -1150,10 +1150,34 @@ BUFFER                                                             *carbon-buffe
   `------------------------------------------------------------------------------`
   cursor                                                    *carbon-buffer-cursor*
 
-  Signature: `require('carbon.buffer').cursor()`
+  Signature: `require('carbon.buffer').cursor(`[{opts}]`)`
 
-  Returns the result at index `line('.')` from |carbon-buffer-lines| called with
-  |carbon-buffer-data-root| as only argument.
+  Returns a table with the following shape:
+
+  `{`
+  `  line = <line>,`
+  `  target = <entry>,`
+  `}`
+
+  Property: `line`
+
+  An item at index `line('.')` from |carbon-buffer-lines|.
+
+  Property: `target`
+
+  Equal to `line.entry` by default but when called during a mapping, will respect
+  |v:count| where possible. This is used for example to start deleting from
+  "left to right" on compressed paths by prefixing a mapping with a [count].
+
+  When {opts}`.target_directory_only` is truthy and `target.is_directory` is `false`
+  then `target` will be set to `line.path[#line.path] or target.parent` BEFORE
+  any [count] logic is applied.
+
+  One way to describe the difference between `line.entry` and `target` is that
+  `line.entry` will always point to the last path component entry on the current
+  line whereas `target` points to the entry targetted by the user.
+
+  For more information about compressed paths, see: |carbon-setting-compress|.
 
   `------------------------------------------------------------------------------`
   lines                                                      *carbon-buffer-lines*
@@ -1161,10 +1185,10 @@ BUFFER                                                             *carbon-buffe
   Signature: `require('carbon.buffer').lines(`{entry}[, {lines}[, {depth}]]`)`
 
   The {entry} argument must be an entry object as returned by |carbon-entry-new|.
-  The {lines} argument is optional. Defaults to an empty table `{}`.
-  When {lines} is set to a table, this table will be used instead as accumulator
-  for the results. Finally, the optional {depth} argument can be used to specify
-  the initial indentation depth. Defaults to `0`.
+  The {lines} argument is optional. Defaults to an empty table `{}`. When {lines}
+  is set to a table, this table will be used instead as accumulator value.
+  Finally, the optional {depth} argument can be used to specify the initial
+  indentation depth. Defaults to `0`.
 
   Returns a table of "line objects" to render. A "line object" has the
   following data layout:
