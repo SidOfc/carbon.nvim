@@ -27,13 +27,13 @@ function carbon.initialize()
 
   util.map(util.plug('up'), carbon.up)
   util.map(util.plug('down'), carbon.down)
+  util.map(util.plug('quit'), carbon.quit)
   util.map(util.plug('edit'), carbon.edit)
   util.map(util.plug('reset'), carbon.reset)
   util.map(util.plug('split'), carbon.split)
   util.map(util.plug('vsplit'), carbon.vsplit)
   util.map(util.plug('create'), carbon.create)
   util.map(util.plug('delete'), carbon.delete)
-  util.map(util.plug('quit'), carbon.quit)
 
   if settings.sync_on_cd then
     util.autocmd('DirChanged', carbon.cd, { pattern = 'global' })
@@ -64,10 +64,10 @@ function carbon.initialize()
 end
 
 function carbon.edit()
-  local entry = buffer.cursor().entry
+  local line = buffer.cursor().line
 
-  if entry.is_directory then
-    entry:set_open(not entry:is_open())
+  if line.entry.is_directory then
+    line.entry:set_open(not line.entry:is_open())
 
     buffer.render()
   elseif vim.w.carbon_lexplore_window then
@@ -76,7 +76,7 @@ function carbon.edit()
     if vim.w.carbon_lexplore_window == vim.api.nvim_get_current_win() then
       vim.cmd({
         cmd = 'split',
-        args = { entry.path },
+        args = { line.entry.path },
         mods = { vertical = true, split = 'belowright' },
       })
 
@@ -85,38 +85,38 @@ function carbon.edit()
         settings.sidebar_width
       )
     else
-      vim.cmd({ cmd = 'edit', args = { entry.path } })
+      vim.cmd({ cmd = 'edit', args = { line.entry.path } })
     end
   else
     if vim.w.carbon_fexplore_window then
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd({ cmd = 'edit', args = { entry.path } })
+    vim.cmd({ cmd = 'edit', args = { line.entry.path } })
   end
 end
 
 function carbon.split()
-  local entry = buffer.cursor().entry
+  local line = buffer.cursor().line
 
-  if not entry.is_directory then
+  if not line.entry.is_directory then
     if vim.w.carbon_fexplore_window then
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd({ cmd = 'split', args = { entry.path } })
+    vim.cmd({ cmd = 'split', args = { line.entry.path } })
   end
 end
 
 function carbon.vsplit()
-  local entry = buffer.cursor().entry
+  local line = buffer.cursor().line
 
-  if not entry.is_directory then
+  if not line.entry.is_directory then
     if vim.w.carbon_fexplore_window then
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd({ cmd = 'vsplit', args = { entry.path } })
+    vim.cmd({ cmd = 'vsplit', args = { line.entry.path } })
   end
 end
 

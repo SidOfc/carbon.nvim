@@ -44,13 +44,13 @@ return {
   actions = {
     up = '[',
     down = ']',
+    quit = 'q',
     edit = '<cr>',
     reset = '.',
     split = '<c-x>',
     vsplit = '<c-v>',
     create = 'c',
     delete = 'd',
-    quit = 'q',
   },
   highlights = {
     CarbonDir = { fg = '#00aaff', ctermfg = 'DarkBlue', bold = true },
