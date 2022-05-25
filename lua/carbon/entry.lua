@@ -19,12 +19,12 @@ end
 
 function entry.new(path, parent)
   local lstat = vim.loop.fs_lstat(path)
-  local is_executable = bit.band(lstat.mode, 33261) == 33261
+  local is_executable = lstat.mode == 33261
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
-  if is_symlink then
-    is_symlink = vim.loop.fs_stat(path) and is_symlink or 2
+  if is_symlink and not vim.loop.fs_stat(path) then
+    is_symlink = 2
   elseif is_directory then
     watcher.register(path)
   end

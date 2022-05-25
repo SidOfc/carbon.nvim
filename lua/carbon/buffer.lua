@@ -432,14 +432,15 @@ end
 function buffer.process_event(_, path)
   data.resync_paths[path] = true
 
-  if not data.resync_timer then
-    data.resync_timer = vim.defer_fn(function()
-      buffer.synchronize()
-
-      data.resync_paths = {}
-      data.resync_timer = nil
-    end, math.max(20, settings.sync_delay))
+  if data.resync_timer then
+    data.resync_timer:stop()
   end
+
+  data.resync_timer = vim.defer_fn(function()
+    buffer.synchronize()
+
+    data.resync_paths = {}
+  end, settings.sync_delay)
 end
 
 function buffer.process_enter()
