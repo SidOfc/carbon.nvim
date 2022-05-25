@@ -395,22 +395,31 @@ end
 function buffer.create()
   local ctx = buffer.cursor({ target_directory_only = true })
 
+  ctx.compact = ctx.target.is_directory and #ctx.target:children() == 0
   ctx.prev_open = ctx.target:is_open()
   ctx.prev_compressible = ctx.target:is_compressible()
 
   ctx.target:set_open(true)
   ctx.target:set_compressible(false)
 
-  ctx.edit_indent = string.rep('  ', ctx.target_line.depth + 2)
-  ctx.edit_lnum = ctx.target_line.lnum + #buffer.lines(ctx.target)
-  ctx.edit_col = #ctx.edit_indent
+  if ctx.compact then
+    ctx.edit_prefix = ctx.line.line
+    ctx.edit_lnum = ctx.line.lnum - 1
+    ctx.edit_col = #ctx.edit_prefix + 1
+    ctx.init_end_lnum = ctx.edit_lnum + 1
+  else
+    ctx.edit_prefix = string.rep('  ', ctx.target_line.depth + 2)
+    ctx.edit_lnum = ctx.target_line.lnum + #buffer.lines(ctx.target)
+    ctx.edit_col = #ctx.edit_prefix
+    ctx.init_end_lnum = ctx.edit_lnum
+  end
 
   buffer.render()
-  buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum, { ctx.edit_indent })
+  buffer.set_lines(ctx.edit_lnum, ctx.init_end_lnum, { ctx.edit_prefix })
   util.autocmd('CursorMovedI', internal.create_insert_move(ctx), { buffer = 0 })
   util.map('<cr>', internal.create_confirm(ctx), { buffer = 0, mode = 'i' })
   util.map('<esc>', internal.create_cancel(ctx), { buffer = 0, mode = 'i' })
-  util.cursor(ctx.edit_lnum + 1, #ctx.edit_indent - 1)
+  util.cursor(ctx.edit_lnum + 1, ctx.edit_col - 1)
   vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
   vim.cmd({ cmd = 'startinsert', bang = true })
 end
@@ -477,7 +486,7 @@ end
 
 function internal.create_confirm(ctx)
   return function()
-    local text = vim.trim(util.get_line())
+    local text = vim.trim(string.sub(util.get_line(), ctx.edit_col))
     local name = vim.fn.fnamemodify(text, ':t')
     local parent_directory = ctx.target.path
       .. '/'
@@ -513,7 +522,8 @@ end
 
 function internal.create_insert_move(ctx)
   return function()
-    local text = ctx.edit_indent .. vim.trim(util.get_line())
+    local text = ctx.edit_prefix
+      .. vim.trim(string.sub(util.get_line(), ctx.edit_col))
     local last_slash_col = util.last_index_of('/', text) or 0
 
     buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum + 1, { text })
