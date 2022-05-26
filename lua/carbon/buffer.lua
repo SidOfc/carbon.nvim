@@ -532,7 +532,7 @@ function internal.create_insert_move(ctx)
   return function()
     local text = ctx.edit_prefix
       .. vim.trim(string.sub(util.get_line(), ctx.edit_col))
-    local last_slash_col = util.last_index_of('/', text) or 0
+    local last_slash_col = util.str_last_index_of(text, '/') or 0
 
     buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum + 1, { text })
     buffer.clear_extmarks({ ctx.edit_lnum, 0 }, { ctx.edit_lnum, -1 }, {})
