@@ -227,6 +227,7 @@ end
 
 function buffer.synchronize()
   local paths = vim.tbl_keys(data.resync_paths)
+  data.resync_paths = {}
 
   table.sort(paths, function(a, b)
     return #a < #b
@@ -374,13 +375,11 @@ function buffer.delete()
           )
 
           if result == -1 then
-            vim.api.nvim_err_writeln(
-              'Failed to delete: "' .. target.path .. '"'
-            )
+            vim.api.nvim_echo({
+              { 'Failed to delete: ', 'CarbonDanger' },
+              { vim.fn.fnamemodify(target.path, ':.'), 'CarbonIndicator' },
+            }, false, {})
           end
-
-          target:terminate()
-          buffer.render()
         end,
       },
       {
@@ -532,17 +531,12 @@ function buffer.set_lines(start_lnum, end_lnum, lines)
 end
 
 function buffer.process_event(_, path)
-  data.resync_paths[path] = true
-
   if data.resync_timer then
     data.resync_timer:stop()
   end
 
-  data.resync_timer = vim.defer_fn(function()
-    buffer.synchronize()
-
-    data.resync_paths = {}
-  end, settings.sync_delay)
+  data.resync_paths[path] = true
+  data.resync_timer = vim.defer_fn(buffer.synchronize, settings.sync_delay)
 end
 
 function buffer.process_enter()
@@ -573,7 +567,6 @@ function internal.create_confirm(ctx)
       vim.fn.writefile({}, parent_directory .. '/' .. name)
     end
 
-    ctx.target:synchronize()
     internal.create_leave(ctx)
   end
 end
@@ -582,6 +575,7 @@ function internal.create_cancel(ctx)
   return function()
     ctx.target:set_open(ctx.prev_open)
     internal.create_leave(ctx)
+    buffer.render()
   end
 end
 
@@ -592,7 +586,6 @@ function internal.create_leave(ctx)
   util.unmap('i', '<cr>', { buffer = 0 })
   util.unmap('i', '<esc>', { buffer = 0 })
   util.clear_autocmd('CursorMovedI', { buffer = 0 })
-  buffer.render()
 end
 
 function internal.create_insert_move(ctx)

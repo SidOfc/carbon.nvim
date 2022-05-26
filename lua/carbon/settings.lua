@@ -4,7 +4,7 @@ return {
   auto_open = true,
   keep_netrw = false,
   sync_on_cd = not vim.opt.autochdir:get(),
-  sync_delay = 30,
+  sync_delay = 5,
   sidebar_width = 30,
   exclude = {
     '~$',
