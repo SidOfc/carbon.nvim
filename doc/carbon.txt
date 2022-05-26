@@ -507,6 +507,27 @@ UTIL                                                                 *carbon-uti
   {callback} must be a function.
 
   `------------------------------------------------------------------------------`
+  tbl_slice                                                *carbon-util-tbl-slice*
+
+  Signature: `require('carbon.util').tbl_slice(`{tbl}, {start}[, {finish}]`)`
+
+  Returns a new table with elements from {tbl} index {start} to {finish}.
+  Both {start} and {finish} are inclusive. When {finish} is omitted, it will
+  be set to `#`{tbl}. Only works with numeric indices, string keys are ignored.
+
+  `------------------------------------------------------------------------------`
+  tbl_key                                                    *carbon-util-tbl-key*
+
+  Signature: `require('carbon.util').tbl_key(`{tbl}, {item}`)`
+
+  Returns the first key in {tbl} whose value is equal to {item}.
+  When multiple keys are bound to the same value any one of those keys can be
+  returned at random since Lua's `pairs` does not guarantee any specific ordering
+  of keys being looped over.
+
+  Returns `nil` when {item} is not found in {tbl}.
+
+  `------------------------------------------------------------------------------`
   tbl_except                                              *carbon-util-tbl-except*
 
   Signature: `require('carbon.util').tbl_except(`{tbl}, {keys}`)`
