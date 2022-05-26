@@ -483,6 +483,13 @@ UTIL                                                                 *carbon-uti
   that {col} is zero-based instead of one based.
 
   `------------------------------------------------------------------------------`
+  path_exists                                            *carbon-util-path-exists*
+
+  Signature: `require('carbon.util').path_exists(`{path}`)`
+
+  Returns `true` of `false` depending on the result of `vim.loop.fs_stat(`{path}`)`.
+
+  `------------------------------------------------------------------------------`
   is_directory                                          *carbon-util-is-directory*
 
   Signature: `require('carbon.util').is_directory(`{path}`)`

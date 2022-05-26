@@ -29,6 +29,10 @@ function util.cursor(row, col)
   return vim.api.nvim_win_set_cursor(0, { row, col })
 end
 
+function util.path_exists(path)
+  return vim.loop.fs_stat(path) and true or false
+end
+
 function util.is_directory(path)
   local stat = vim.loop.fs_stat(path)
 
