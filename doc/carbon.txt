@@ -435,8 +435,8 @@ UTIL                                                                 *carbon-uti
   Signature: `require('carbon.util').scandir(`{path}`)`
 
   Like |readdir| but uses |vim.loop| methods `fs_scandir` and `fs_scandir_next` to list
-  entries of specified {path}. Returns a table with the names of the entries
-  found in {path}.
+  entries of specified {path}. Returns an iterator function which iterates
+  through each entry found in {path}.
 
   {path} must be an absolute path to an existing directory.
 
