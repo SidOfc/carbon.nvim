@@ -29,6 +29,7 @@ function carbon.initialize()
   util.map(util.plug('down'), carbon.down)
   util.map(util.plug('quit'), carbon.quit)
   util.map(util.plug('edit'), carbon.edit)
+  util.map(util.plug('move'), carbon.move)
   util.map(util.plug('reset'), carbon.reset)
   util.map(util.plug('split'), carbon.split)
   util.map(util.plug('vsplit'), carbon.vsplit)
@@ -204,6 +205,10 @@ end
 
 function carbon.delete()
   buffer.delete()
+end
+
+function carbon.move()
+  buffer.move()
 end
 
 return carbon

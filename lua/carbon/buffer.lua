@@ -400,6 +400,59 @@ function buffer.delete()
   })
 end
 
+function buffer.move()
+  local ctx = buffer.cursor()
+  local targets = util.tbl_concat(
+    ctx.target_line.path,
+    { ctx.target_line.entry }
+  )
+  local target_names = vim.tbl_map(function(part)
+    return part.name
+  end, targets)
+  local clamped_names = util.tbl_slice(
+    target_names,
+    1,
+    util.tbl_key(targets, ctx.target)
+  )
+
+  if ctx.target.path == data.root.path then
+    return
+  end
+
+  local start_hl = ctx.target_line.depth * 2 + 2
+  local end_hl = start_hl + #table.concat(clamped_names, '/')
+  local end_dir_hl = start_hl + #table.concat(target_names, '/')
+  local lnum_idx = ctx.target_line.lnum - 1
+
+  buffer.clear_extmarks({ lnum_idx, start_hl }, { lnum_idx, end_hl }, {})
+  buffer.add_highlight('CarbonPending', lnum_idx, start_hl, end_hl)
+  buffer.add_highlight('CarbonDir', lnum_idx, end_hl, end_dir_hl)
+
+  vim.cmd({ cmd = 'redraw', bang = true })
+  vim.cmd({ cmd = 'echohl', args = { 'CarbonPending' } })
+
+  local updated_path = string.gsub(
+    vim.fn.input({
+      prompt = 'destination: ',
+      default = ctx.target.path,
+      cancelreturn = ctx.target.path,
+    }),
+    '/+$',
+    ''
+  )
+
+  vim.cmd({ cmd = 'echohl', args = { 'None' } })
+
+  if updated_path == ctx.target.path then
+    buffer.render()
+  else
+    local parent_directory = vim.fn.fnamemodify(updated_path, ':h')
+
+    vim.fn.mkdir(parent_directory, 'p')
+    vim.fn.rename(ctx.target.path, updated_path)
+  end
+end
+
 function buffer.create()
   local ctx = buffer.cursor({ target_directory_only = true })
 

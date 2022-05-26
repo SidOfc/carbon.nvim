@@ -46,6 +46,7 @@ return {
     down = ']',
     quit = 'q',
     edit = '<cr>',
+    move = 'm',
     reset = '.',
     split = '<c-x>',
     vsplit = '<c-v>',
@@ -60,5 +61,6 @@ return {
     CarbonBrokenSymlink = { fg = '#ea871e', ctermfg = 'Brown', bold = true },
     CarbonIndicator = { fg = 'Gray', ctermfg = 'DarkGray', bold = true },
     CarbonDanger = { fg = '#ff3333', ctermfg = 'Red', bold = true },
+    CarbonPending = { fg = '#ffee00', ctermfg = 'Yellow', bold = true },
   },
 }

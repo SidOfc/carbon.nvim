@@ -248,6 +248,18 @@ PLUGS                                                               *carbon-plug
   For more information see |carbon-buffer-create|.
 
   `------------------------------------------------------------------------------`
+  <Plug>(carbon-move)                                           *carbon-plug-move*
+
+  Implementation: `:<c-u>lua require('carbon').move()<cr>`
+  Mapping:        |carbon-setting-actions-move|
+
+  Prompts the user to enter a new destination for the entry under the cursor.
+  Accepts a [count] to allow left to right selection of the entry to move when
+  on a compressed path (|carbon-setting-compress|).
+
+  For more information see |carbon-buffer-move|.
+
+  `------------------------------------------------------------------------------`
   <Plug>(carbon-delete)                                       *carbon-plug-delete*
 
   Implementation: `:<c-u>lua require('carbon').delete()<cr>`
@@ -255,8 +267,7 @@ PLUGS                                                               *carbon-plug
 
   Opens a confirmation popup to confirm whether you want to delete the entry
   under the cursor. Accepts a [count] to allow deleting directories "from left
-  to right" when the cursor is on a compressed path
-  (more at |carbon-setting-compress|).
+  to right" when the cursor is on a compressed path (|carbon-setting-compress|).
 
   For more information see |carbon-buffer-delete|.
 
@@ -387,6 +398,13 @@ CARBON                                                             *carbon-carbo
   Signature: `require('carbon').create()`
 
   Calls |carbon-buffer-create|.
+
+  `------------------------------------------------------------------------------`
+  move                                                        *carbon-carbon-move*
+
+  Signature: `require('carbon').move()`
+
+  Calls |carbon-buffer-move|.
 
   `------------------------------------------------------------------------------`
   delete                                                    *carbon-carbon-delete*
@@ -1611,6 +1629,18 @@ BUFFER                                                             *carbon-buffe
   The [count] is clamped. If it exceeds the amount of "components" in the path
   then it will select the last component (the actual entry of that line).
 
+  `------------------------------------------------------------------------------`
+  move                                                        *carbon-buffer-move*
+
+  Signature: `require('carbon.buffer').move()`
+
+  Prompts the user for a new destination for the entry below the cursor.
+  A [count] can be supplied to move starting from left to right on compressed
+  paths. The [count] is clamped. If it exceeds the amount of "components" in the
+  path then it will select the last component (the actual entry of that line).
+
+  Intermediate directories will be created if they do not exist.
+
 ================================================================================
 WATCHER                                                           *carbon-watcher*
 
@@ -1759,6 +1789,7 @@ SETTINGS                                                         *carbon-setting
   `    vsplit = `|carbon-setting-actions-vsplit|`,`
   `    quit   = `|carbon-setting-actions-quit|`,`
   `    create = `|carbon-setting-actions-create|`,`
+  `    move   = `|carbon-setting-actions-move|`,`
   `    delete = `|carbon-setting-actions-delete|`,`
   `  },`
 
@@ -1770,6 +1801,7 @@ SETTINGS                                                         *carbon-setting
   `    CarbonBrokenSymlink = `|carbon-setting-highlights-CarbonBrokenSymlink|`,`
   `    CarbonIndicator     = `|carbon-setting-highlights-CarbonIndicator|`,`
   `    CarbonDanger        = `|carbon-setting-highlights-CarbonDanger|`,`
+  `    CarbonPending       = `|carbon-setting-highlights-CarbonPending|`,`
   `  },`
   `}`
 
@@ -1962,6 +1994,7 @@ SETTINGS                                                         *carbon-setting
     `  split = '<c-x>',`                              *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
     `  create = 'c',`                                *carbon-setting-actions-create*
+    `  move = 'm',`                                    *carbon-setting-actions-move*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
     `  quit = { 'q' '<esc>' },`                        *carbon-setting-actions-quit*
     `}`
@@ -1985,6 +2018,7 @@ SETTINGS                                                         *carbon-setting
   `split`   =>  |carbon-plug-split|
   `vsplit`  =>  |carbon-plug-vsplit|
   `create`  =>  |carbon-plug-create|
+  `move`    =>  |carbon-plug-move|
   `delete`  =>  |carbon-plug-delete|
   `quit`    =>  |carbon-plug-quit|
 
@@ -2026,6 +2060,11 @@ SETTINGS                                                         *carbon-setting
     `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
     `    fg = '#ff3333',`
     `    ctermfg = 'Red',`
+    `    bold = true,`
+    `  },`
+    `  CarbonPending = {`                  *carbon-setting-highlights-CarbonPending*
+    `    fg = '#ffee00',`
+    `    ctermfg = 'Yellow',`
     `    bold = true,`
     `  },`
     `}`
