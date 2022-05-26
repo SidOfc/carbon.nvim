@@ -402,31 +402,28 @@ end
 
 function buffer.move()
   local ctx = buffer.cursor()
-  local targets = util.tbl_concat(
-    ctx.target_line.path,
-    { ctx.target_line.entry }
-  )
+  local target_line = ctx.target_line
+  local targets = util.tbl_concat(target_line.path, { target_line.entry })
   local target_names = vim.tbl_map(function(part)
     return part.name
   end, targets)
-  local clamped_names = util.tbl_slice(
-    target_names,
-    1,
-    util.tbl_key(targets, ctx.target)
-  )
 
   if ctx.target.path == data.root.path then
     return
   end
 
-  local start_hl = ctx.target_line.depth * 2 + 2
-  local end_hl = start_hl + #table.concat(clamped_names, '/')
-  local end_dir_hl = start_hl + #table.concat(target_names, '/')
-  local lnum_idx = ctx.target_line.lnum - 1
+  local path_start = target_line.depth * 2 + 2
+  local lnum_idx = target_line.lnum - 1
+  local target_idx = util.tbl_key(targets, ctx.target)
+  local clamped_names = util.tbl_slice(target_names, 1, target_idx - 1)
+  local start_hl = path_start + #table.concat(clamped_names, '/')
 
-  buffer.clear_extmarks({ lnum_idx, start_hl }, { lnum_idx, end_hl }, {})
-  buffer.add_highlight('CarbonPending', lnum_idx, start_hl, end_hl)
-  buffer.add_highlight('CarbonDir', lnum_idx, end_hl, end_dir_hl)
+  if not ctx.target.is_directory then
+    start_hl = start_hl + 1
+  end
+
+  buffer.clear_extmarks({ lnum_idx, start_hl }, { lnum_idx, -1 }, {})
+  buffer.add_highlight('CarbonPending', lnum_idx, start_hl, -1)
 
   vim.cmd({ cmd = 'redraw', bang = true })
   vim.cmd({ cmd = 'echohl', args = { 'CarbonPending' } })
@@ -442,14 +439,31 @@ function buffer.move()
   )
 
   vim.cmd({ cmd = 'echohl', args = { 'None' } })
+  print('')
 
   if updated_path == ctx.target.path then
     buffer.render()
+  elseif util.path_exists(updated_path) then
+    buffer.render()
+    vim.api.nvim_echo({
+      { 'Failed to move: ', 'CarbonDanger' },
+      { vim.fn.fnamemodify(ctx.target.path, ':.'), 'CarbonIndicator' },
+      { ' => ' },
+      { vim.fn.fnamemodify(updated_path, ':.'), 'CarbonIndicator' },
+      { ' (destination exists)', 'CarbonPending' },
+    }, false, {})
   else
-    local parent_directory = vim.fn.fnamemodify(updated_path, ':h')
+    local directory = vim.fn.fnamemodify(updated_path, ':h')
+    local tmp_path = ctx.target.path
 
-    vim.fn.mkdir(parent_directory, 'p')
-    vim.fn.rename(ctx.target.path, updated_path)
+    if vim.startswith(updated_path, tmp_path) then
+      tmp_path = vim.fn.tempname()
+
+      vim.fn.rename(ctx.target.path, tmp_path)
+    end
+
+    vim.fn.mkdir(directory, 'p')
+    vim.fn.rename(tmp_path, updated_path)
   end
 end
 
