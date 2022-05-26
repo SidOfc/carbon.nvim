@@ -419,7 +419,7 @@ function buffer.move()
   local clamped_names = util.tbl_slice(target_names, 1, target_idx - 1)
   local start_hl = path_start + #table.concat(clamped_names, '/')
 
-  if not ctx.target.is_directory then
+  if target_idx > 1 then
     start_hl = start_hl + 1
   end
 
