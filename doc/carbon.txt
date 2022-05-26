@@ -1054,6 +1054,20 @@ BUFFER                                                             *carbon-buffe
   Returns the updated |carbon-buffer-data-root|.
 
   `------------------------------------------------------------------------------`
+  launch                                                    *carbon-buffer-launch*
+
+  Signature: `require('carbon.buffer').launch(`{new_root}`)`
+
+  Called during |carbon-carbon-initialize| when |carbon-setting-auto-open| is set
+  and Neovim is opened with a directory or no argument. Not called when
+  Neovim is opened with a regular file.
+
+  Calls |carbon-buffer-set-root| with {new_root} and then calls |carbon-buffer-show|.
+  Also set the reset directory used by |carbon-plug-reset| to navigate back to.
+
+  Returns the updated |carbon-buffer-data-root|.
+
+  `------------------------------------------------------------------------------`
   process_event                                      *carbon-buffer-process-event*
 
   Signature: `require('carbon.buffer').process_event()`

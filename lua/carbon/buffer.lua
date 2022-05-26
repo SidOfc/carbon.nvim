@@ -7,10 +7,18 @@ local open_cwd = vim.loop.cwd()
 local data = {
   root = entry.new(open_cwd),
   handle = -1,
-  open_cwd = open_cwd,
   namespace = vim.api.nvim_create_namespace('carbon'),
   resync_paths = {},
 }
+
+function buffer.launch(target)
+  buffer.set_root(target)
+  buffer.show()
+
+  open_cwd = data.root.path
+
+  return data.root
+end
 
 function buffer.is_loaded()
   return vim.api.nvim_buf_is_loaded(data.handle)

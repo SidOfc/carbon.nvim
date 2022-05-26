@@ -53,10 +53,13 @@ function carbon.initialize()
     util.command('Lexplore', 'Lcarbon')
   end
 
-  if settings.auto_open and util.is_directory(vim.fn.expand('%:p')) then
+  local argv = vim.fn.argv()
+  local open = argv[1] and vim.fn.fnamemodify(argv[1], ':p') or vim.loop.cwd()
+
+  if settings.auto_open and util.is_directory(open) then
     local current_buffer = vim.api.nvim_win_get_buf(0)
 
-    buffer.show()
+    buffer.launch(open)
     vim.api.nvim_buf_delete(current_buffer, { force = true })
   end
 
