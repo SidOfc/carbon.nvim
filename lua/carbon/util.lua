@@ -59,6 +59,24 @@ function util.tbl_concat(...)
   return result
 end
 
+function util.tbl_slice(tbl, start, finish)
+  local result = {}
+
+  for index = start, finish or #tbl do
+    result[#result + 1] = tbl[index]
+  end
+
+  return result
+end
+
+function util.tbl_key(tbl, item)
+  for key, tbl_item in pairs(tbl) do
+    if tbl_item == item then
+      return key
+    end
+  end
+end
+
 function util.tbl_find(tbl, callback)
   for key, value in pairs(tbl) do
     if callback(value, key) then
