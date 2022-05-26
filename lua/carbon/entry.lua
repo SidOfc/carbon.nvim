@@ -18,20 +18,21 @@ entry.__lt = function(a, b)
 end
 
 function entry.new(path, parent)
-  local lstat = vim.loop.fs_lstat(path)
+  local clean = string.gsub(path, '/+$', '')
+  local lstat = vim.loop.fs_lstat(clean)
   local is_executable = lstat.mode == 33261
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
-  if is_symlink and not vim.loop.fs_stat(path) then
+  if is_symlink and not vim.loop.fs_stat(clean) then
     is_symlink = 2
   elseif is_directory then
-    watcher.register(path)
+    watcher.register(clean)
   end
 
   return setmetatable({
-    path = path,
-    name = vim.fn.fnamemodify(path, ':t'),
+    path = clean,
+    name = vim.fn.fnamemodify(clean, ':t'),
     parent = parent,
     is_directory = is_directory,
     is_executable = is_executable,
@@ -156,22 +157,26 @@ function entry:set_children(children)
 end
 
 function entry:get_children()
-  local entries = vim.tbl_map(function(name)
-    return entry.new(self.path .. '/' .. name, self)
-  end, util.scandir(self.path))
+  local entries = {}
 
-  if type(settings.exclude) == 'table' then
-    entries = vim.tbl_filter(function(child)
+  for name in util.scandir(self.path) do
+    local is_included = true
+    local absolute_path = self.path .. '/' .. name
+    local relative_path = vim.fn.fnamemodify(absolute_path, ':.')
+
+    if settings.exclude then
       for _, pattern in ipairs(settings.exclude) do
-        if string.find(vim.fn.fnamemodify(child.path, ':.'), pattern) then
-          watcher.release(child.path)
+        if string.find(relative_path, pattern) then
+          is_included = false
 
-          return false
+          break
         end
       end
+    end
 
-      return true
-    end, entries)
+    if is_included then
+      entries[#entries + 1] = entry.new(absolute_path, self)
+    end
   end
 
   table.sort(entries)
