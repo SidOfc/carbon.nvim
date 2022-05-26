@@ -440,7 +440,7 @@ function buffer.move()
   )
 
   vim.cmd({ cmd = 'echohl', args = { 'None' } })
-  print('')
+  vim.api.nvim_echo({ { ' ' } }, false, {})
 
   if updated_path == ctx.target.path then
     buffer.render()
