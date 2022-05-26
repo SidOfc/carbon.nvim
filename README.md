@@ -10,13 +10,21 @@ Carbon.nvim
   <strong>The simple directory tree viewer for Neovim written in Lua.</strong>
 </p>
 
-![Carbon banner](/doc/assets/carbon-banner.gif)
+## Introduction
 
-Carbon.nvim uses Neovim's fantastic Lua API to provide an optimal tree view
-of the parent working directory and synchronizes changes to the file system
-automatically. It does not handle renaming/moving, <strike>creating</strike>, or <strike>deleting</strike>
-files or folders (yet, [file / folder creation is already there](#creating-files-and-directories)
- as well as [file / folder deletion](#deleting-files-and-directories)).
+Carbon.nvim provides a simple tree view of the directory Neovim was opened with/in.
+Its main goal is to remain synchronized with the state of the current working directory.
+When files are added, moved/renamed, or removed, Carbon automatically updates its state
+to reflect these changes.
+
+Special files such as symlinks, broken symlinks, and executables are highlighted differently
+and deeply nested files and folders are compressed as much as possible to reduce the need
+to manually traverse directories to be able to open files.
+
+Carbon provides the ability to [add](#creating-files-and-directories),
+[move/rename](#moving-files-and-directories), and [delete](#deleting-files-and-directories)
+files and directories, supports mappings to view [parent](#move-root-up) or [child](#move-root-down)
+directories, and more!
 
 ## CHANGELOG
 
@@ -255,6 +263,19 @@ done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
 to cancel. Prepending a `count` to <kbd>c</kbd> will select the `count`_nth_
 directory from the left as base. See `:h carbon-buffer-create` for more details.
 
+#### Moving files and directories
+
+| Mapping      |
+|:-------------|
+| <kbd>m</kbd> |
+
+![Moving files and directories example](/doc/assets/carbon-move-action.gif)
+
+Prompts to enter a new destination of the current entry under the cursor.
+Will throw an error when the new destination already exists. Prepending
+a `count` to <kbd>c</kbd> will select the `count`_nth_ directory from
+the left as base. See `:h carbon-buffer-move` for more details.
+
 #### Deleting files and directories
 
 | Mapping      |
@@ -268,25 +289,3 @@ to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion di
 or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
-
-## Why use Carbon.nvim instead of NetRW
-
-While Carbon.nvim does replace NetRW by default, it can live side by side
-with NetRW without any issues. See `:h carbon-setting-keep-netrw` for more
-information. Additionally, while there is some feature overlap between
-Carbon.nvim and NetRW, NetRW supports more features and scenarios.
-Carbon.nvim is merely a local directory tree viewer. Below a subjective
-list of relevant differences:
-
-Some main features that NetRW offers which Carbon.nvim does not:
-
-- Remote file system support
-- The ability to handle renaming/moving, <strike>creating</strike>, or <strike>deleting files or folders</strike> (work-in-progress)
-- A ton of commands and mappings I haven't bothered looking into yet
-
-Some main features that Carbon.nvim offers which NetRW does not:
-
-- Has a [floating window mode](#fcarbon)
-- Automatically reflects changes to the file system in the buffer
-- Compresses deeply nested child paths like GitHub does, but even better!
-  (See `:h carbon-setting-compress` for more informationk
