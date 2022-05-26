@@ -11,7 +11,7 @@ function util.scandir(path)
   end
 end
 
-function util.last_index_of(char, str)
+function util.str_last_index_of(str, char)
   for index = #str, 1, -1 do
     if string.sub(str, index, index) == char then
       return index
