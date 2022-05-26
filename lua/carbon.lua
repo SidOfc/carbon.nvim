@@ -61,7 +61,10 @@ function carbon.initialize()
     local current_buffer = vim.api.nvim_win_get_buf(0)
 
     buffer.launch(open)
-    vim.api.nvim_buf_delete(current_buffer, { force = true })
+
+    if vim.api.nvim_buf_is_loaded(current_buffer) then
+      vim.api.nvim_buf_delete(current_buffer, { force = true })
+    end
   end
 
   return carbon
