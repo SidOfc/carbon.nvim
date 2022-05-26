@@ -4,16 +4,11 @@ local data = {
 }
 
 function util.scandir(path)
-  local handle = vim.loop.fs_scandir(path)
-  local entries = {}
-  local entry_filename = vim.loop.fs_scandir_next(handle)
+  local fs = vim.loop.fs_scandir(path)
 
-  while entry_filename do
-    entries[#entries + 1] = entry_filename
-    entry_filename = vim.loop.fs_scandir_next(handle)
+  return function()
+    return vim.loop.fs_scandir_next(fs)
   end
-
-  return entries
 end
 
 function util.last_index_of(char, str)
