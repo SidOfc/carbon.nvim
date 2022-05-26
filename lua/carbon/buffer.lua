@@ -379,6 +379,8 @@ function buffer.delete()
               { 'Failed to delete: ', 'CarbonDanger' },
               { vim.fn.fnamemodify(target.path, ':.'), 'CarbonIndicator' },
             }, false, {})
+          else
+            buffer.process_event(nil, vim.fn.fnamemodify(target.path, ':h'))
           end
         end,
       },
@@ -463,6 +465,7 @@ function buffer.move()
 
     vim.fn.mkdir(directory, 'p')
     vim.fn.rename(tmp_path, updated_path)
+    buffer.process_event(nil, vim.fn.fnamemodify(ctx.target.path, ':h'))
   end
 end
 
@@ -559,7 +562,7 @@ function internal.create_confirm(ctx)
     local name = vim.fn.fnamemodify(text, ':t')
     local parent_directory = ctx.target.path
       .. '/'
-      .. vim.trim(vim.fn.fnamemodify(text, ':h'), './', 2)
+      .. vim.trim(vim.fn.fnamemodify(text, ':h'))
 
     vim.fn.mkdir(parent_directory, 'p')
 
@@ -568,6 +571,7 @@ function internal.create_confirm(ctx)
     end
 
     internal.create_leave(ctx)
+    buffer.process_event(nil, vim.fn.fnamemodify(parent_directory, ':h'))
   end
 end
 
