@@ -17,16 +17,17 @@ Its main goal is to remain synchronized with the state of the current working di
 When files are added, moved/renamed, or removed, Carbon automatically updates its state
 to reflect these changes.
 
-Special files such as symlinks, broken symlinks, and executables are highlighted differently
-and deeply nested files and folders are compressed as much as possible to reduce the need
-to manually traverse directories to be able to open files.
+Special file types such as symlinks, broken symlinks, and executables are highlighted differently
+and deeply nested files and folders are compressed as much as possible to reduce the need to
+manually traverse directories to be able to open files.
 
 Carbon provides the ability to [add](#creating-files-and-directories),
 [move/rename](#moving-files-and-directories), and [delete](#deleting-files-and-directories)
 files and directories, supports mappings to view [parent](#move-root-up) or [child](#move-root-down)
-directories, and more!
+directories, settings to control Neovim's pwd (`:h carbon-setting-sync-pwd`) and lock Carbon's root
+to Neovim's pwd (`:h carbon-setting-sync-on-cd`) and much more!
 
-## CHANGELOG
+## Changelog
 
 See the [releases](https://github.com/SidOfc/carbon.nvim/releases) page for more information.
 
