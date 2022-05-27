@@ -35,41 +35,15 @@ See the [releases](https://github.com/SidOfc/carbon.nvim/releases) page for more
 
 Install on Neovim 0.7.0 and up (latest nightly recommended) using your favorite plugin manager:
 
-[vim-plug](https://github.com/junegunn/vim-plug)
-
-```viml
-Plug 'SidOfc/carbon.nvim'
-```
-
-[Vundle.vim](https://github.com/VundleVim/Vundle.vim)
-
-```viml
-Plugin 'SidOfc/carbon.nvim'
-```
-
-[dein.vim](https://github.com/Shougo/dein.vim)
-
-```viml
-call dein#add('SidOfc/carbon.nvim')
-```
-
-[minpac](https://github.com/k-takata/minpac)
-
-```viml
-call minpac#add('SidOfc/carbon.nvim')
-```
-
-[packer.nvim](https://github.com/wbthomason/packer.nvim)
-
-```lua
-use 'SidOfc/carbon.nvim'
-```
-
-[paq-nvim](https://github.com/savq/paq-nvim)
-
-```lua
-require 'paq' { 'SidOfc/carbon.nvim', ... }
-```
+| Name                                                         | Code                                          |
+|:-------------------------------------------------------------|:----------------------------------------------|
+| **[vim-plug](https://github.com/junegunn/vim-plug)**         | `Plug 'SidOfc/carbon.nvim'`                   |
+| **[Vundle.vim](https://github.com/VundleVim/Vundle.vim)**    | `Plugin 'SidOfc/carbon.nvim'`                 |
+| **[Vundle.vim](https://github.com/VundleVim/Vundle.vim)**    | `Plugin 'SidOfc/carbon.nvim'`                 |
+| **[dein.vim](https://github.com/Shougo/dein.vim)**           | `call dein#add('SidOfc/carbon.nvim')`         |
+| **[minpac](https://github.com/k-takata/minpac)**             | `call minpac#add('SidOfc/carbon.nvim')`       |
+| **[packer.nvim](https://github.com/wbthomason/packer.nvim)** | `use 'SidOfc/carbon.nvim'`                    |
+| **[paq-nvim](https://github.com/savq/paq-nvim)**             | `require 'paq' { 'SidOfc/carbon.nvim', ... }` |
 
 ## Configuration
 
@@ -251,7 +225,7 @@ opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
 
-### Creating files and directories
+#### Creating files and directories
 
 | Mapping      |
 |:-------------|
