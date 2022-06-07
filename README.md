@@ -33,7 +33,7 @@ See the [releases](https://github.com/SidOfc/carbon.nvim/releases) page for more
 
 ## Installation
 
-Install on Neovim 0.7.0 and up (latest nightly recommended) using your favorite plugin manager:
+Install on Nightly Neovim (0.8.0+) using your favorite plugin manager:
 
 | Name                                                         | Code                                          |
 |:-------------------------------------------------------------|:----------------------------------------------|
