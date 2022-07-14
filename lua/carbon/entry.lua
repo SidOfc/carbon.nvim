@@ -19,12 +19,12 @@ end
 
 function entry.new(path, parent)
   local clean = string.gsub(path, '/+$', '')
-  local lstat = vim.loop.fs_lstat(clean)
+  local lstat = select(2, pcall(vim.loop.fs_lstat, clean)) or {}
   local is_executable = lstat.mode == 33261
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
-  if is_symlink and not vim.loop.fs_stat(clean) then
+  if is_symlink and not select(2, pcall(vim.loop.fs_stat, clean)) then
     is_symlink = 2
   elseif is_directory then
     watcher.register(clean)
