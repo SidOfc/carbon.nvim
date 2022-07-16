@@ -87,6 +87,8 @@ COMMANDS                                                         *carbon-command
   Alias:          Explore unless |carbon-setting-keep-netrw| is enabled.
 
   Replaces the current buffer with the Carbon buffer.
+  When called with a <bang> (`Carbon!`) the tree will expand to show the
+  current buffer path if possible. This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Lcarbon                                                                *Lcarbon*
@@ -97,6 +99,9 @@ COMMANDS                                                         *carbon-command
   Opens the Carbon buffer in a new vertical split. When Carbon is opened this
   way, pressing the key mapped to |carbon-plug-edit| will open files in a
   split directly to the right.
+
+  When called with a <bang> (`Lcarbon!`) the tree will expand to show the
+  current buffer path if possible. This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Fcarbon                                                                *Fcarbon*
@@ -114,6 +119,9 @@ COMMANDS                                                         *carbon-command
 
   |carbon-plug-vsplit| will close the floating Carbon window and open the file
   in a vertical split relative to the current window.
+
+  When called with a <bang> (`Fcarbon!`) the tree will expand to show the
+  current buffer path if possible.
 
   See |carbon-setting-float-settings| for more information on how to configure
   the floating window spawned by `:Fcarbon`.
@@ -1085,6 +1093,21 @@ BUFFER                                                             *carbon-buffe
   |carbon-buffer-cd| can manipulate to enable navigating up from the current
   working directory, down into a child, reset back to the original
   directory Neovim was opened with, or set to an arbitrary path.
+
+  `------------------------------------------------------------------------------`
+  expand_to_path                                    *carbon-buffer-expand-to-path*
+
+  Signature: `require('carbon.buffer').expand_to_path(`{path}`)`
+
+  Expands the Carbon buffer to reveal {path} in the tree. If {path} is not
+  present within |carbon-buffer-data-root| this will result in a no-op.
+
+  Given {path} will be converted to an absolute path automatically by means of
+  calling |fnamemodify| with the `:p` flag. You do not need to pass an
+  absolute path yourself.
+
+  This method also works when Carbon is not currently visible. It will fail
+  only if {path} is not a string.
 
   `------------------------------------------------------------------------------`
   set_root                                                *carbon-buffer-set-root*

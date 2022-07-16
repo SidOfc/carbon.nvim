@@ -21,9 +21,9 @@ end
 function carbon.initialize()
   watcher.on('*', buffer.process_event)
 
-  util.command('Carbon', carbon.explore)
-  util.command('Lcarbon', carbon.explore_left)
-  util.command('Fcarbon', carbon.explore_float)
+  util.command('Carbon', carbon.explore, { bang = true })
+  util.command('Lcarbon', carbon.explore_left, { bang = true })
+  util.command('Fcarbon', carbon.explore_float, { bang = true })
 
   util.map(util.plug('up'), carbon.up)
   util.map(util.plug('down'), carbon.down)
@@ -50,8 +50,8 @@ function carbon.initialize()
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
-    util.command('Explore', 'Carbon')
-    util.command('Lexplore', 'Lcarbon')
+    util.command('Explore', carbon.explore, { bang = true })
+    util.command('Lexplore', carbon.explore_left, { bang = true })
   end
 
   local argv = vim.fn.argv()
@@ -127,11 +127,19 @@ function carbon.vsplit()
   end
 end
 
-function carbon.explore()
+function carbon.explore(options)
+  if options.bang then
+    buffer.expand_to_path(vim.fn.expand('%'))
+  end
+
   buffer.show()
 end
 
-function carbon.explore_left()
+function carbon.explore_left(options)
+  if options.bang then
+    buffer.expand_to_path(vim.fn.expand('%'))
+  end
+
   vim.cmd({ cmd = 'split', mods = { vertical = true, split = 'leftabove' } })
   buffer.show()
 
@@ -143,7 +151,11 @@ function carbon.explore_left()
   vim.w.carbon_lexplore_window = vim.api.nvim_get_current_win()
 end
 
-function carbon.explore_float()
+function carbon.explore_float(options)
+  if options.bang then
+    buffer.expand_to_path(vim.fn.expand('%'))
+  end
+
   local window_settings = settings.float_settings
 
   if type(window_settings) == 'function' then

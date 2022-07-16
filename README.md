@@ -104,6 +104,9 @@ Carbon comes with a few commands and mappings out of the box, each is described 
 See `:h carbon-commands` for more detailed information about commands and their
 customization options.
 
+All commands also support bang (`!`) versions which will make Carbon expand the
+tree to reveal the current buffer path if possible.
+
 #### Carbon / Explore
 
 | Command   | Alias      |
