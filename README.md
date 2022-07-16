@@ -129,6 +129,9 @@ The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
 current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
 `:Lexplore` command is aliased to `:Lcarbon`.
 
+Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
+window opened via `:Lcarbon`.
+
 ![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
 
 #### Fcarbon
