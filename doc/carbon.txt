@@ -376,6 +376,9 @@ CARBON                                                             *carbon-carbo
   |carbon-setting-sidebar-width|. Used by the |Lcarbon| command and modifies how
   |carbon-carbon-edit| works for that window.
 
+  Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
+  window opened via `:Lcarbon`.
+
   `------------------------------------------------------------------------------`
   up                                                            *carbon-carbon-up*
 
