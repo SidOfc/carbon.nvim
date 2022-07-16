@@ -69,11 +69,16 @@ function buffer.render()
     return
   end
 
+  local cursor = nil
   local lines = {}
   local hls = {}
 
   for lnum, line_data in ipairs(buffer.lines()) do
     lines[#lines + 1] = line_data.line
+
+    if data.jump and data.jump.path == line_data.entry.path then
+      cursor = { lnum = lnum, col = (line_data.depth + 1) * 2 }
+    end
 
     for _, hl in ipairs(line_data.highlights) do
       hls[#hls + 1] = { hl[1], lnum - 1, hl[2], hl[3] }
@@ -85,6 +90,37 @@ function buffer.render()
 
   for _, hl in ipairs(hls) do
     buffer.add_highlight(unpack(hl))
+  end
+
+  if cursor then
+    util.cursor(cursor.lnum, cursor.col)
+  end
+
+  data.jump = nil
+end
+
+function buffer.expand_to_path(input_path)
+  local path = vim.fn.fnamemodify(input_path, ':p')
+
+  if vim.startswith(path, data.root.path) then
+    local dirs = vim.split(string.sub(path, #data.root.path + 2), '/')
+    local current = data.root
+
+    for _, dir in ipairs(dirs) do
+      current:children()
+
+      current = entry.find(string.format('%s/%s', current.path, dir))
+
+      if current then
+        current:set_open(true)
+      else
+        break
+      end
+    end
+
+    if current and current.path == path then
+      data.jump = current
+    end
   end
 end
 
