@@ -1112,6 +1112,9 @@ BUFFER                                                             *carbon-buffe
   This method also works when Carbon is not currently visible. It will fail
   only if {path} is not a string.
 
+  The buffer is NOT rerendered automatically, this must be done manually by
+  calling |carbon-buffer-render| afterwards.
+
   `------------------------------------------------------------------------------`
   set_root                                                *carbon-buffer-set-root*
 
