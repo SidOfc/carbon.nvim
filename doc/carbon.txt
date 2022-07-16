@@ -100,6 +100,9 @@ COMMANDS                                                         *carbon-command
   way, pressing the key mapped to |carbon-plug-edit| will open files in a
   split directly to the right.
 
+  Subsequent calls will reuse a window previously opened via `Lcarbon` if this
+  window still exists and valid.
+
   When called with a <bang> (`Lcarbon!`) the tree will expand to show the
   current buffer path if possible. This also works for its alias.
 

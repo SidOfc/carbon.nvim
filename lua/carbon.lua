@@ -140,15 +140,32 @@ function carbon.explore_left(options)
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
-  vim.cmd({ cmd = 'split', mods = { vertical = true, split = 'leftabove' } })
-  buffer.show()
+  local existing_win
 
-  vim.api.nvim_win_set_width(
-    util.bufwinid(buffer.handle()),
-    settings.sidebar_width
-  )
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if pcall(vim.api.nvim_win_get_var, win, 'carbon_lexplore_window') then
+      if vim.api.nvim_win_is_valid(win) then
+        existing_win = win
+      end
 
-  vim.w.carbon_lexplore_window = vim.api.nvim_get_current_win()
+      break
+    end
+  end
+
+  if existing_win then
+    vim.api.nvim_set_current_win(existing_win)
+    buffer.show()
+  else
+    vim.cmd({ cmd = 'split', mods = { vertical = true, split = 'leftabove' } })
+    buffer.show()
+
+    vim.api.nvim_win_set_width(
+      util.bufwinid(buffer.handle()),
+      settings.sidebar_width
+    )
+
+    vim.w.carbon_lexplore_window = vim.api.nvim_get_current_win()
+  end
 end
 
 function carbon.explore_float(options)
