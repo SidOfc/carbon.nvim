@@ -7,7 +7,7 @@ local open_cwd = vim.loop.cwd()
 local data = {
   root = entry.new(open_cwd),
   handle = -1,
-  namespace = vim.api.nvim_create_namespace('carbon'),
+  ns = vim.api.nvim_create_namespace('carbon'),
   resync_paths = {},
 }
 
@@ -76,7 +76,7 @@ function buffer.render()
   for lnum, line_data in ipairs(buffer.lines()) do
     lines[#lines + 1] = line_data.line
 
-    if data.jump and data.jump.path == line_data.entry.path then
+    if data.flash and data.flash.path == line_data.entry.path then
       cursor = { lnum = lnum, col = (line_data.depth + 1) * 2 }
     end
 
@@ -94,9 +94,20 @@ function buffer.render()
 
   if cursor then
     util.cursor(cursor.lnum, cursor.col)
+
+    if settings.flash then
+      vim.defer_fn(function()
+        buffer.focus_flash(
+          settings.flash.duration,
+          'CarbonFlash',
+          { cursor.lnum - 1, cursor.col },
+          { cursor.lnum - 1, -1 }
+        )
+      end, settings.flash.delay)
+    end
   end
 
-  data.jump = nil
+  data.flash = nil
 end
 
 function buffer.expand_to_path(input_path)
@@ -119,7 +130,7 @@ function buffer.expand_to_path(input_path)
     end
 
     if current and current.path == path then
-      data.jump = current
+      data.flash = current
     end
   end
 end
@@ -405,10 +416,8 @@ function buffer.delete()
         label = 'delete',
         shortcut = 'D',
         callback = function()
-          local result = vim.fn.delete(
-            target.path,
-            target.is_directory and 'rf' or ''
-          )
+          local result =
+            vim.fn.delete(target.path, target.is_directory and 'rf' or '')
 
           if result == -1 then
             vim.api.nvim_echo({
@@ -538,23 +547,19 @@ function buffer.create()
 end
 
 function buffer.clear_extmarks(...)
-  local extmarks = vim.api.nvim_buf_get_extmarks(
-    data.handle,
-    data.namespace,
-    ...
-  )
+  local extmarks = vim.api.nvim_buf_get_extmarks(data.handle, data.ns, ...)
 
   for _, extmark in ipairs(extmarks) do
-    vim.api.nvim_buf_del_extmark(data.handle, data.namespace, extmark[1])
+    vim.api.nvim_buf_del_extmark(data.handle, data.ns, extmark[1])
   end
 end
 
 function buffer.clear_namespace(...)
-  vim.api.nvim_buf_clear_namespace(data.handle, data.namespace, ...)
+  vim.api.nvim_buf_clear_namespace(data.handle, data.ns, ...)
 end
 
 function buffer.add_highlight(...)
-  vim.api.nvim_buf_add_highlight(data.handle, data.namespace, ...)
+  vim.api.nvim_buf_add_highlight(data.handle, data.ns, ...)
 end
 
 function buffer.set_lines(start_lnum, end_lnum, lines)
@@ -640,6 +645,39 @@ function internal.create_insert_move(ctx)
     buffer.add_highlight('CarbonFile', ctx.edit_lnum, last_slash_col, -1)
     util.cursor(ctx.edit_lnum + 1, math.max(ctx.edit_col, vim.fn.col('.') - 1))
   end
+end
+
+function buffer.focus_flash(duration, group, start, finish)
+  local extmarks = vim.api.nvim_buf_get_extmarks(
+    data.handle,
+    data.ns,
+    start,
+    finish,
+    { details = true }
+  )
+
+  buffer.clear_extmarks(start, finish, {})
+  vim.highlight.range(data.handle, data.ns, group, start, finish, {})
+
+  if data.focus_flash_timer then
+    data.focus_flash_timer:stop()
+  end
+
+  data.focus_flash_timer = vim.defer_fn(function()
+    if buffer.is_loaded() then
+      buffer.clear_extmarks(start, finish, {})
+
+      for _, extmark in ipairs(extmarks) do
+        vim.api.nvim_buf_set_extmark(
+          data.handle,
+          data.ns,
+          extmark[2],
+          extmark[3],
+          extmark[4]
+        )
+      end
+    end
+  end, duration)
 end
 
 return buffer

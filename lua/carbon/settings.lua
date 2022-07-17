@@ -25,6 +25,10 @@ return {
     expand = '+',
     collapse = '-',
   },
+  flash = {
+    delay = 75,
+    duration = 750,
+  },
   float_settings = function()
     local columns = vim.opt.columns:get()
     local rows = vim.opt.lines:get()
@@ -62,5 +66,6 @@ return {
     CarbonIndicator = { fg = 'Gray', ctermfg = 'DarkGray', bold = true },
     CarbonDanger = { fg = '#ff3333', ctermfg = 'Red', bold = true },
     CarbonPending = { fg = '#ffee00', ctermfg = 'Yellow', bold = true },
+    CarbonFlash = { link = 'Search', bold = true },
   },
 }
