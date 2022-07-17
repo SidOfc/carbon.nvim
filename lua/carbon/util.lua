@@ -111,10 +111,8 @@ function util.map(lhs, rhs, settings_param)
     rhs = ''
   end
 
-  options = util.tbl_merge(
-    { silent = true, nowait = true, noremap = true },
-    options
-  )
+  options =
+    util.tbl_merge({ silent = true, nowait = true, noremap = true }, options)
 
   if settings.buffer then
     vim.api.nvim_buf_set_keymap(settings.buffer, mode, lhs, rhs, options)

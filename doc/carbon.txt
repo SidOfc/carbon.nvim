@@ -88,7 +88,8 @@ COMMANDS                                                         *carbon-command
 
   Replaces the current buffer with the Carbon buffer.
   When called with a <bang> (`Carbon!`) the tree will expand to show the
-  current buffer path if possible. This also works for its alias.
+  current buffer path and |carbon-buffer-flash-bang| it if possible.
+  This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Lcarbon                                                                *Lcarbon*
@@ -103,8 +104,9 @@ COMMANDS                                                         *carbon-command
   Subsequent calls will reuse a window previously opened via `Lcarbon` if this
   window still exists and valid.
 
-  When called with a <bang> (`Lcarbon!`) the tree will expand to show the
-  current buffer path if possible. This also works for its alias.
+  When called with a <bang> (`Carbon!`) the tree will expand to show the
+  current buffer path and |carbon-buffer-flash-bang| it if possible.
+  This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Fcarbon                                                                *Fcarbon*
@@ -123,8 +125,8 @@ COMMANDS                                                         *carbon-command
   |carbon-plug-vsplit| will close the floating Carbon window and open the file
   in a vertical split relative to the current window.
 
-  When called with a <bang> (`Fcarbon!`) the tree will expand to show the
-  current buffer path if possible.
+  When called with a <bang> (`Carbon!`) the tree will expand to show the
+  current buffer path and |carbon-buffer-flash-bang| it if possible.
 
   See |carbon-setting-float-settings| for more information on how to configure
   the floating window spawned by `:Fcarbon`.
@@ -1101,12 +1103,36 @@ BUFFER                                                             *carbon-buffe
   directory Neovim was opened with, or set to an arbitrary path.
 
   `------------------------------------------------------------------------------`
+  focus_flash                                          *carbon-buffer-focus-flash*
+
+  Signature: `require('carbon.buffer').focus_flash(`{duration}, {group},
+                                                  {start}, {finish}`)`
+
+  Highlights a region from {start} to {finish} with {group} for {duration}
+  milliseconds. {start} and {finish} must be values accepted by
+  |nvim_buf_get_extmarks| / |vim.highlight.range|.
+
+  The steps below explain how it works:
+
+  1. Clear highlights from {start} to {finish}.
+  2. Apply highlight {group} from {start} to {finish}.
+  3. Wait {duration} milliseconds.
+  4. Clear highlights from {start} to {finish}.
+  5. Restore original highlights cleared in step `1`.
+
+  NOTE: step `4` and `5` only happen is |carbon-buffer-is-loaded|.
+
+  `------------------------------------------------------------------------------`
   expand_to_path                                    *carbon-buffer-expand-to-path*
 
   Signature: `require('carbon.buffer').expand_to_path(`{path}`)`
 
   Expands the Carbon buffer to reveal {path} in the tree. If {path} is not
   present within |carbon-buffer-data-root| this will result in a no-op.
+
+  When successful this sets `data.flash` to the entry identified by {path}.
+  This causes the next call to |carbon-buffer-render| to move to and highlight
+  the entry |carbon-buffer-flash-bang|.
 
   Given {path} will be converted to an absolute path automatically by means of
   calling |fnamemodify| with the `:p` flag. You do not need to pass an
@@ -1239,6 +1265,16 @@ BUFFER                                                             *carbon-buffe
   The Carbon buffer is NOT rendered if |carbon-buffer-is-loaded| returns
   `false` or if |carbon-buffer-is-hidden| returns `true`.
 
+                                                        |carbon-buffer-flash-bang|
+
+  After rendering, if `data.flash` is set to an entry which is currently visible,
+  (it is set by |carbon-buffer-expand-to-path|) then the cursor will move to
+  that entry and reset `data.flash` to `nil`.
+
+  Additionally, when this happens, that entry is also highlighted using
+  |carbon-setting-highlights-CarbonFlash|. The delay and duration of the
+  highlight are controlled by |carbon-setting-flash|.
+
   `------------------------------------------------------------------------------`
   cursor                                                    *carbon-buffer-cursor*
 
@@ -1333,7 +1369,7 @@ BUFFER                                                             *carbon-buffe
 
   `vim.api.nvim_buf_add_highlight(`
   `  buffer.handle(),`
-  `  data.namespace,`
+  `  data.ns,`
   `  highlight[1],` => `<string HighlightGroupName>`
   `  lnum - 1,`
   `  highlight[2],` => `<number start_column>`
@@ -1819,6 +1855,11 @@ SETTINGS                                                         *carbon-setting
   `    collapse = `|carbon-setting-indicators-collapse|`,`
   `  },`
 
+    `flash = {`
+      `delay    = `|carbon-setting-flash-delay|`,`
+      `duration = `|carbon-setting-flash-duration|`,`
+    `},`
+
   `  actions = {`
   `    up     = `|carbon-setting-actions-up|`,`
   `    down   = `|carbon-setting-actions-down|`,`
@@ -1841,6 +1882,7 @@ SETTINGS                                                         *carbon-setting
   `    CarbonIndicator     = `|carbon-setting-highlights-CarbonIndicator|`,`
   `    CarbonDanger        = `|carbon-setting-highlights-CarbonDanger|`,`
   `    CarbonPending       = `|carbon-setting-highlights-CarbonPending|`,`
+  `    CarbonFlash         = `|carbon-setting-highlights-CarbonFlash|`,`
   `  },`
   `}`
 
@@ -1987,6 +2029,19 @@ SETTINGS                                                         *carbon-setting
   them to `nil`.
 
   `------------------------------------------------------------------------------`
+  flash                                                     *carbon-setting-flash*
+
+  Default:
+    `{`
+    `  delay = 75,`                                     *carbon-setting-flash-delay*
+    `  duration = 750,`                              *carbon-setting-flash-duration*
+    `}`
+
+  Controls highlight {delay} and {duration} for entries revealed by
+  |carbon-buffer-expand-to-path|. Setting it to `nil` will disable
+  highlighting of revealed entries.
+
+  `------------------------------------------------------------------------------`
   float_settings                                   *carbon-setting-float-settings*
 
   Default:
@@ -2105,6 +2160,10 @@ SETTINGS                                                         *carbon-setting
     `    fg = '#ffee00',`
     `    ctermfg = 'Yellow',`
     `    bold = true,`
+    `  },`
+    `  CarbonFlash = {`                      *carbon-setting-highlights-CarbonFlash*
+    `    link = 'Search',`
+        `bold = true,`
     `  },`
     `}`
 
