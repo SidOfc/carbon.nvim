@@ -10,7 +10,7 @@ Carbon.nvim
   <strong>The simple directory tree viewer for Neovim written in Lua.</strong>
 </p>
 
-## Introduction
+# Introduction
 
 Carbon.nvim provides a simple tree view of the directory Neovim was opened with/in.
 Its main goal is to remain synchronized with the state of the current working directory.
@@ -27,11 +27,11 @@ files and directories, supports mappings to view [parent](#move-root-up) or [chi
 directories, settings to control Neovim's pwd (`:h carbon-setting-sync-pwd`) and lock Carbon's root
 to Neovim's pwd (`:h carbon-setting-sync-on-cd`) and much more!
 
-## Changelog
+# Changelog
 
 See the [releases](https://github.com/SidOfc/carbon.nvim/releases) page for more information.
 
-## Installation
+# Installation
 
 Install on Nightly Neovim (0.8.0+) using your favorite plugin manager:
 
@@ -45,7 +45,7 @@ Install on Nightly Neovim (0.8.0+) using your favorite plugin manager:
 | **[packer.nvim](https://github.com/wbthomason/packer.nvim)** | `use 'SidOfc/carbon.nvim'`                    |
 | **[paq-nvim](https://github.com/savq/paq-nvim)**             | `require 'paq' { 'SidOfc/carbon.nvim', ... }` |
 
-## Configuration
+# Configuration
 
 Configuration can be supplied like this:
 
@@ -95,11 +95,11 @@ You are free to modify them as you wish, no merging will occur.
 See `:h carbon-setup` for a more detailed explanation on configuration.
 See `:h carbon-carbon-setup` for documentation about the `.setup` method.
 
-## Usage
+# Usage
 
 Carbon comes with a few commands and mappings out of the box, each is described below:
 
-### Commands
+## Commands
 
 See `:h carbon-commands` for more detailed information about commands and their
 customization options.
@@ -110,7 +110,7 @@ will be moved to the entry and it will be highlighted for a short time as well.
 
 See `:h carbon-buffer-flash-bang`` for more information.
 
-#### `:Carbon` / `:Explore`
+### `:Carbon` / `:Explore`
 
 The `:Carbon` command replaces the current buffer with a Carbon buffer.
 When `:h carbon-setting-keep-netrw` is `false` then NetRW's `:Explore`
@@ -118,7 +118,7 @@ command is aliased to `:Carbon`.
 
 ![Carbon / Explore command example](/doc/assets/carbon-explore.gif)
 
-#### `:Lcarbon` / `:Lexplore`
+### `:Lcarbon` / `:Lexplore`
 
 The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
 current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
@@ -129,19 +129,19 @@ window opened via `:Lcarbon`.
 
 ![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
 
-#### `:Fcarbon`
+### `:Fcarbon`
 
 The `:Fcarbon` command opens a Carbon buffer in a floating window. This
 window can be configured using `:h carbon-setting-float-settings`.
 
 ![Fcarbon command example](/doc/assets/carbon-fexplore.gif)
 
-### Mappings
+## Mappings
 
 See `:h carbon-plugs` for more detailed information about mappings and their
 customization options.
 
-#### <kbd>[</kbd> Move root up
+### <kbd>[</kbd> Move root up
 
 Moves Carbon's root directory up one level and rerender. See `:h carbon-plug-up`
 for more information and customization options. Accepts a **count** to go up
@@ -149,7 +149,7 @@ multiple levels at once.
 
 ![Carbon up example](/doc/assets/carbon-up.gif)
 
-#### <kbd>]</kbd> Move root down
+### <kbd>]</kbd> Move root down
 
 Moves Carbon's root directory down one level and rerender. See
 `:h carbon-plug-down` for more information and customization options. Accepts
@@ -157,14 +157,14 @@ a **count** to go down multiple levels at once on compressed paths.
 
 ![Carbon down example](/doc/assets/carbon-down.gif)
 
-#### <kbd>.</kbd> Reset root
+### <kbd>.</kbd> Reset root
 
 Resets Carbon's root directory back to the directory Neovim is opened with.
 See `:h carbon-plug-reset` for more information and customization options.
 
 ![Carbon reset example](/doc/assets/carbon-reset.gif)
 
-#### <kbd>enter</kbd> Edit file or toggle directory
+### <kbd>enter</kbd> Edit file or toggle directory
 
 When on a directory, expand or collapse that directory. When on a file, edit
 that file in the current buffer and hide Carbon. This mapping works differently
@@ -173,28 +173,28 @@ information and customization options.
 
 ![Carbon edit example](/doc/assets/carbon-edit.gif)
 
-#### <kbd>ctrl</kbd>+<kbd>x</kbd> Edit file in horizontal split
+### <kbd>ctrl</kbd>+<kbd>x</kbd> Edit file in horizontal split
 
 Does nothing when on a directory. Edit a file in a new horizontal split. See
 `:h carbon-plug-split` for more information and customization points.
 
 ![Carbon split example](/doc/assets/carbon-split.gif)
 
-#### <kbd>ctrl</kbd>+<kbd>v</kbd> Edit file in vertical split
+### <kbd>ctrl</kbd>+<kbd>v</kbd> Edit file in vertical split
 
 Does nothing when on a directory. Edit a file in a new vertical split. See
 `:h carbon-plug-vsplit` for more information and customization points.
 
 ![Carbon vsplit example](/doc/assets/carbon-vsplit.gif)
 
-#### <kbd>q</kbd> / <kbd>escape</kbd> Close a Carbon buffer
+### <kbd>q</kbd> / <kbd>escape</kbd> Close a Carbon buffer
 
 Close a Carbon buffer, useful for closing Carbon buffers which were
 opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
 
-#### <kbd>c</kbd> Creating files and directories
+### <kbd>c</kbd> Creating files and directories
 
 ![Creating files and directories example](/doc/assets/carbon-create-action.gif)
 
@@ -203,7 +203,7 @@ done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
 to cancel. Prepending a `count` to <kbd>c</kbd> will select the `count`_nth_
 directory from the left as base. See `:h carbon-buffer-create` for more details.
 
-#### <kbd>m</kbd> Moving files and directories
+### <kbd>m</kbd> Moving files and directories
 
 ![Moving files and directories example](/doc/assets/carbon-move-action.gif)
 
@@ -212,7 +212,7 @@ Will throw an error when the new destination already exists. Prepending
 a `count` to <kbd>c</kbd> will select the `count`_nth_ directory from
 the left as base. See `:h carbon-buffer-move` for more details.
 
-#### <kbd>d</kbd> Deleting files and directories
+### <kbd>d</kbd> Deleting files and directories
 
 ![Deleting files and directories example](/doc/assets/carbon-delete-action-3.gif)
 
@@ -222,9 +222,9 @@ or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
 
-## Known issues
+# Known issues
 
-### Slow `c` and `d` mappings.
+## Slow `c` and `d` mappings.
 
 This is caused by a mapping which also starts with `c` or `d`.
 For example, [nvim-surround](https://github.com/kylechui/nvim-surround) creates such
