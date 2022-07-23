@@ -108,7 +108,7 @@ All commands also support bang (`!`) versions which will make Carbon expand the
 tree to reveal the current buffer path if possible. When successful, the cursor
 will be moved to the entry and it will be highlighted for a short time as well.
 
-See |:h carbon-buffer-flash-bang| for more information.
+See `:h carbon-buffer-flash-bang`` for more information.
 
 #### `:Carbon` / `:Explore`
 
