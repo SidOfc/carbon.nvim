@@ -110,11 +110,7 @@ will be moved to the entry and it will be highlighted for a short time as well.
 
 See |:h carbon-buffer-flash-bang| for more information.
 
-#### Carbon / Explore
-
-| Command   | Alias      |
-|:----------|:-----------|
-| `:Carbon` | `:Explore` |
+#### `:Carbon` / `:Explore`
 
 The `:Carbon` command replaces the current buffer with a Carbon buffer.
 When `:h carbon-setting-keep-netrw` is `false` then NetRW's `:Explore`
@@ -122,11 +118,7 @@ command is aliased to `:Carbon`.
 
 ![Carbon / Explore command example](/doc/assets/carbon-explore.gif)
 
-#### Lcarbon / Lexplore
-
-| Command    | Alias       |
-|:-----------|:------------|
-| `:Lcarbon` | `:Lexplore` |
+#### `:Lcarbon` / `:Lexplore`
 
 The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
 current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
@@ -137,11 +129,7 @@ window opened via `:Lcarbon`.
 
 ![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
 
-#### Fcarbon
-
-| Command    |
-|:-----------|
-| `:Fcarbon` |
+#### `:Fcarbon`
 
 The `:Fcarbon` command opens a Carbon buffer in a floating window. This
 window can be configured using `:h carbon-setting-float-settings`.
@@ -153,11 +141,7 @@ window can be configured using `:h carbon-setting-float-settings`.
 See `:h carbon-plugs` for more detailed information about mappings and their
 customization options.
 
-#### Move root up
-
-| Mapping      |
-|:-------------|
-| <kbd>[</kbd> |
+#### <kbd>[</kbd> Move root up
 
 Moves Carbon's root directory up one level and rerender. See `:h carbon-plug-up`
 for more information and customization options. Accepts a **count** to go up
@@ -165,11 +149,7 @@ multiple levels at once.
 
 ![Carbon up example](/doc/assets/carbon-up.gif)
 
-#### Move root down
-
-| Mapping      |
-|:-------------|
-| <kbd>]</kbd> |
+#### <kbd>]</kbd> Move root down
 
 Moves Carbon's root directory down one level and rerender. See
 `:h carbon-plug-down` for more information and customization options. Accepts
@@ -177,22 +157,14 @@ a **count** to go down multiple levels at once on compressed paths.
 
 ![Carbon down example](/doc/assets/carbon-down.gif)
 
-#### Reset root
-
-| Mapping      |
-|:-------------|
-| <kbd>.</kbd> |
+#### <kbd>.</kbd> Reset root
 
 Resets Carbon's root directory back to the directory Neovim is opened with.
 See `:h carbon-plug-reset` for more information and customization options.
 
 ![Carbon reset example](/doc/assets/carbon-reset.gif)
 
-#### Edit file or toggle directory
-
-| Mapping          |
-|:-----------------|
-| <kbd>enter</kbd> |
+#### <kbd>enter</kbd> Edit file or toggle directory
 
 When on a directory, expand or collapse that directory. When on a file, edit
 that file in the current buffer and hide Carbon. This mapping works differently
@@ -201,44 +173,28 @@ information and customization options.
 
 ![Carbon edit example](/doc/assets/carbon-edit.gif)
 
-#### Edit file in horizontal split
-
-| Mapping                      |
-|:-----------------------------|
-| <kbd>ctrl</kbd>+<kbd>x</kbd> |
+#### <kbd>ctrl</kbd>+<kbd>x</kbd> Edit file in horizontal split
 
 Does nothing when on a directory. Edit a file in a new horizontal split. See
 `:h carbon-plug-split` for more information and customization points.
 
 ![Carbon split example](/doc/assets/carbon-split.gif)
 
-#### Edit file in vertical split
-
-| Mapping                      |
-|:-----------------------------|
-| <kbd>ctrl</kbd>+<kbd>v</kbd> |
+#### <kbd>ctrl</kbd>+<kbd>v</kbd> Edit file in vertical split
 
 Does nothing when on a directory. Edit a file in a new vertical split. See
 `:h carbon-plug-vsplit` for more information and customization points.
 
 ![Carbon vsplit example](/doc/assets/carbon-vsplit.gif)
 
-#### Close a Carbon buffer
-
-| Mapping      | Alias             |
-|:-------------|:------------------|
-| <kbd>q</kbd> | <kbd>escape</kbd> |
+#### <kbd>q</kbd> / <kbd>escape</kbd> Close a Carbon buffer
 
 Close a Carbon buffer, useful for closing Carbon buffers which were
 opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
 
-#### Creating files and directories
-
-| Mapping      |
-|:-------------|
-| <kbd>c</kbd> |
+#### <kbd>c</kbd> Creating files and directories
 
 ![Creating files and directories example](/doc/assets/carbon-create-action.gif)
 
@@ -247,11 +203,7 @@ done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
 to cancel. Prepending a `count` to <kbd>c</kbd> will select the `count`_nth_
 directory from the left as base. See `:h carbon-buffer-create` for more details.
 
-#### Moving files and directories
-
-| Mapping      |
-|:-------------|
-| <kbd>m</kbd> |
+#### <kbd>m</kbd> Moving files and directories
 
 ![Moving files and directories example](/doc/assets/carbon-move-action.gif)
 
@@ -260,11 +212,7 @@ Will throw an error when the new destination already exists. Prepending
 a `count` to <kbd>c</kbd> will select the `count`_nth_ directory from
 the left as base. See `:h carbon-buffer-move` for more details.
 
-#### Deleting files and directories
-
-| Mapping      |
-|:-------------|
-| <kbd>d</kbd> |
+#### <kbd>d</kbd> Deleting files and directories
 
 ![Deleting files and directories example](/doc/assets/carbon-delete-action-3.gif)
 
@@ -273,3 +221,29 @@ to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion di
 or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
+
+## Known issues
+
+### Slow `c` and `d` mappings.
+
+This is caused by a mapping which also starts with `c` or `d`.
+For example, [nvim-surround](https://github.com/kylechui/nvim-surround) creates such
+mappings. After installing, I observed slow mappings and upon disabling, mappings were
+once again fast. In the case for `nvim-surround` it can be solved by creating a
+`vim.fn.stdpath('config') .. '/ftplugin/carbon.lua'` file with the following contents:
+
+```lua
+require("nvim-surround").buffer_setup({
+  keymaps = {
+    insert = false,
+    insert_line = false,
+    visual = false,
+    delete = false,
+    change = false,
+  },
+})
+```
+
+To find out if there are other mappings, check the output of `:verbose map c` or
+`:verbose map c` when Carbon is the current buffer. If more than one mapping is shown
+the one(s) not set by Carbon are causing the slowdown in Carbon buffers.
