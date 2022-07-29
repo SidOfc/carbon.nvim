@@ -229,19 +229,20 @@ for more details.
 
 This is caused by a mapping which also starts with `c` or `d`.
 For example, [nvim-surround](https://github.com/kylechui/nvim-surround) creates such
-mappings. After installing, I observed slow mappings and upon disabling, mappings were
-once again fast. In the case for `nvim-surround` it can be solved by creating a
-`vim.fn.stdpath('config') .. '/ftplugin/carbon.lua'` file with the following contents:
+mappings. After installing and calling `require('nvim-surround').setup()` in my configuration,
+I observed slow mappings and upon disabling it, mappings were once again fast.
+
+My recommendation for this specific plugin is to only set up nvim-surround for filetypes
+where it makes sense to surround, and exclude others such as `carbon` filetype buffers:
 
 ```lua
-require("nvim-surround").buffer_setup({
-  keymaps = {
-    insert = false,
-    insert_line = false,
-    visual = false,
-    delete = false,
-    change = false,
-  },
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = '*',
+  callback = function()
+    if vim.bo.filetype ~= 'carbon' then
+      require('nvim-surround').buffer_setup()
+    end
+  end
 })
 ```
 
