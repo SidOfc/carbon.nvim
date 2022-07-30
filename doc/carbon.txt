@@ -608,42 +608,6 @@ UTIL                                                                 *carbon-uti
   `{1, 2, 4, 5, b = 6, a = 7}`
 
   `------------------------------------------------------------------------------`
-  map                                                            *carbon-util-map*
-
-  Signature: `require('carbon.util').map(`{lhs}, {rhs}[, {options}]`)`
-
-  Wraps |nvim_set_keymap| and |nvim_buf_set_keymap|. Maps {lhs} to {rhs}.
-  An optional {options} table can supplied. It accepts the same options
-  as |nvim_set_keymap| does and also supports two extra options: `mode` which
-  defaults to `'n'` and `buffer` which defaults to `nil`.
-
-  Mappings are |map-silent|, |map-nowait|, and |noremap| by default unless specified
-  otherwise in {options}.
-
-  {lhs} must be a string containing the key for this mapping.
-  {rhs} must be a vim command string or a lua callback.
-  {options} must be a table if supplied.
-
-  When a function is passed to {rhs} `options.callback` will be set to
-  {rhs} and {rhs} will be set to an empty string.
-
-  To create a |visual-mode| mapping pass `mode = 'v'`, to create a buffer-local
-  mapping pass `buffer = <bufnr>` where `<bufnr>` is a |bufnr()|.
-
-  `------------------------------------------------------------------------------`
-  unmap                                                        *carbon-util-unmap*
-
-  Signature: `require('carbon.util').unmap(`{mode}, {lhs}[, {options}]`)`
-
-  Wraps |nvim_del_keymap| and |nvim_buf_del_keymap|. Unmaps {lhs} in {mode}.
-  An optional {options} table can be supplied. When {options}`.buffer` is
-  supplied the mapping will be unmapped from the provided buffer only.
-
-  {mode} must be a valid |mode()|.
-  {lhs} must be the key to unmap.
-  {options} must be a table if supplied.
-
-  `------------------------------------------------------------------------------`
   command                                                    *carbon-util-command*
 
   Signature: `require('carbon.util').command(`{lhs}, {rhs}[, {options}]`)`
@@ -734,15 +698,16 @@ UTIL                                                                 *carbon-uti
   Signature: `require('carbon.util').set_buf_mappings(`{buf}, {mappings}`)`
 
   Set {mappings} for {buf}. The {mappings} table is expected to be a table
-  array of tables where each table has the following layout:
+  of tables where each nested table has the following layout:
 
-  `{`{lhs}, {rhs}[, {options}]`}`
+  `{`{modes}, {lhs}, {rhs}[, {options}]`}`
 
-  The {lhs}, {rhs}, and optional {options} are passed to |carbon-util-map|.
+  The {modes}, {lhs}, {rhs}, and optional {options} are
+  passed to |vim.keymap.set|.
 
   When {options} is not specified, an empty table is used.
   The `buffer` option in {options} will always be set to {buf} in the call
-  to |carbon-util-map|.
+  to |vim.keymap.set|.
 
   {buf} must be a valid |bufnr|.
   {mappings} must be a table.
