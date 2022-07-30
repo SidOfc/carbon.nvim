@@ -240,6 +240,9 @@ vim.api.nvim_create_autocmd('FileType', {
   pattern = '*',
   callback = function()
     if vim.bo.filetype ~= 'carbon' then
+      local surround_config = require('nvim-surround.config')
+      surround_config.user_opts = surround_config.default_opts
+
       require('nvim-surround').buffer_setup()
     end
   end
