@@ -101,34 +101,6 @@ function util.tbl_except(tbl, keys)
   return result
 end
 
-function util.map(lhs, rhs, settings_param)
-  local settings = settings_param or {}
-  local options = util.tbl_except(settings, { 'mode', 'buffer' })
-  local mode = settings.mode or 'n'
-
-  if type(rhs) == 'function' then
-    options.callback = rhs
-    rhs = ''
-  end
-
-  options =
-    util.tbl_merge({ silent = true, nowait = true, noremap = true }, options)
-
-  if settings.buffer then
-    vim.api.nvim_buf_set_keymap(settings.buffer, mode, lhs, rhs, options)
-  else
-    vim.api.nvim_set_keymap(mode, lhs, rhs, options)
-  end
-end
-
-function util.unmap(mode, lhs, settings)
-  if settings and settings.buffer then
-    vim.api.nvim_buf_del_keymap(settings.buffer, mode, lhs)
-  else
-    vim.api.nvim_del_keymap(mode, lhs)
-  end
-end
-
 function util.autocmd(event, cmd_or_callback, opts)
   return vim.api.nvim_create_autocmd(
     event,
@@ -191,7 +163,7 @@ function util.confirm(options)
       and ascii > 57
       and not vim.tbl_contains({ 38, 40, 74, 75, 106, 107 }, ascii)
     then
-      mappings[#mappings + 1] = { string.char(ascii), '<nop>' }
+      mappings[#mappings + 1] = { 'n', string.char(ascii), '<nop>' }
     end
   end
 
@@ -199,15 +171,16 @@ function util.confirm(options)
     actions[action.label] = action
 
     if action.shortcut then
-      mappings[#mappings + 1] = { action.shortcut, finish(action.label) }
+      mappings[#mappings + 1] = { 'n', action.shortcut, finish(action.label) }
       lines[#lines + 1] = ' [' .. action.shortcut .. '] ' .. action.label
     else
       lines[#lines + 1] = '     ' .. action.label
     end
   end
 
-  mappings[#mappings + 1] = { '<esc>', finish('cancel') }
+  mappings[#mappings + 1] = { 'n', '<esc>', finish('cancel') }
   mappings[#mappings + 1] = {
+    'n',
     '<cr>',
     function()
       finish(string.sub(util.get_line(), 6), true)
@@ -288,10 +261,11 @@ end
 
 function util.set_buf_mappings(buf, mappings)
   for _, mapping in ipairs(mappings) do
-    util.map(
+    vim.keymap.set(
       mapping[1],
       mapping[2],
-      util.tbl_merge(mapping[3] or {}, { buffer = buf })
+      mapping[3],
+      util.tbl_merge(mapping[4] or {}, { buffer = buf })
     )
   end
 end

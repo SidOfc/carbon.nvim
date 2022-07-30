@@ -33,13 +33,14 @@ function buffer.handle()
     return data.handle
   end
 
-  local mappings = { { 'i', '<nop>' }, { 'o', '<nop>' }, { 'O', '<nop>' } }
+  local mappings =
+    { { 'n', 'i', '<nop>' }, { 'n', 'o', '<nop>' }, { 'n', 'O', '<nop>' } }
 
   for action, mapping in pairs(settings.actions or {}) do
     mapping = type(mapping) == 'string' and { mapping } or mapping or {}
 
     for _, key in ipairs(mapping) do
-      mappings[#mappings + 1] = { key, util.plug(action) }
+      mappings[#mappings + 1] = { 'n', key, util.plug(action) }
     end
   end
 
@@ -539,8 +540,8 @@ function buffer.create()
   buffer.render()
   buffer.set_lines(ctx.edit_lnum, ctx.init_end_lnum, { ctx.edit_prefix })
   util.autocmd('CursorMovedI', internal.create_insert_move(ctx), { buffer = 0 })
-  util.map('<cr>', internal.create_confirm(ctx), { buffer = 0, mode = 'i' })
-  util.map('<esc>', internal.create_cancel(ctx), { buffer = 0, mode = 'i' })
+  vim.keymap.set('i', '<cr>', internal.create_confirm(ctx), { buffer = 0 })
+  vim.keymap.set('i', '<esc>', internal.create_cancel(ctx), { buffer = 0 })
   util.cursor(ctx.edit_lnum + 1, ctx.edit_col - 1)
   vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
   vim.cmd({ cmd = 'startinsert', bang = true })
@@ -628,8 +629,8 @@ function internal.create_leave(ctx)
   vim.cmd({ cmd = 'stopinsert' })
   ctx.target:set_compressible(ctx.prev_compressible)
   util.cursor(ctx.target_line.lnum, 0)
-  util.unmap('i', '<cr>', { buffer = 0 })
-  util.unmap('i', '<esc>', { buffer = 0 })
+  vim.keymap.del('i', '<cr>', { buffer = 0 })
+  vim.keymap.del('i', '<esc>', { buffer = 0 })
   util.clear_autocmd('CursorMovedI', { buffer = 0 })
 end
 
