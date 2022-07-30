@@ -35,6 +35,7 @@ function carbon.initialize()
   vim.keymap.set('', util.plug('vsplit'), carbon.vsplit)
   vim.keymap.set('', util.plug('create'), carbon.create)
   vim.keymap.set('', util.plug('delete'), carbon.delete)
+  vim.keymap.set('', util.plug('toggle_recursive'), carbon.toggle_recursive)
 
   if settings.sync_on_cd then
     util.autocmd('DirChanged', carbon.cd, { pattern = 'global' })
@@ -68,6 +69,16 @@ function carbon.initialize()
   end
 
   return carbon
+end
+
+function carbon.toggle_recursive()
+  local line = buffer.cursor().line
+
+  if line.entry.is_directory then
+    line.entry:set_open(not line.entry:is_open(), true)
+
+    buffer.render()
+  end
 end
 
 function carbon.edit()

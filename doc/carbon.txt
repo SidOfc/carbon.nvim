@@ -189,7 +189,7 @@ PLUGS                                                               *carbon-plug
   `------------------------------------------------------------------------------`
   <Plug>(carbon-up)                                               *carbon-plug-up*
 
-  Implementation: `:<c-u>lua require('carbon').up()<cr>`
+  Implementation: `require('carbon').up()`
   Mapping:        |carbon-setting-actions-up|
 
   Sets |carbon-buffer-data-root| to the parent directory of the current
@@ -199,7 +199,7 @@ PLUGS                                                               *carbon-plug
   `------------------------------------------------------------------------------`
   <Plug>(carbon-down)                                           *carbon-plug-down*
 
-  Implementation: `:<c-u>lua require('carbon').down()<cr>`
+  Implementation: `require('carbon').down()`
   Mapping:        |carbon-setting-actions-down|
 
   Sets |carbon-buffer-data-root| to the directory under the cursor. If the entry
@@ -209,18 +209,23 @@ PLUGS                                                               *carbon-plug
   about how compressed paths work and how they are handled.
 
   `------------------------------------------------------------------------------`
-  <Plug>(carbon-reset)                                         *carbon-plug-reset*
+  <Plug>(carbon-quit)                                           *carbon-plug-quit*
 
-  Implementation: `:<c-u>lua require('carbon').reset()<cr>`
-  Mapping:        |carbon-setting-actions-reset|
+  Implementation: `require('carbon').quit()`
+  Mapping:        |carbon-setting-actions-quit|
 
-  Sets |carbon-buffer-data-root| to the initial directory that Neovim
-  was opened with.
+  When Carbon is active in the only window and there are multiple buffers
+  this mapping will show the |alternate-file|. When Carbon is showing in one of
+  several windows, the window will be closed. Finally, if Carbon is the only
+  buffer in the only window, nothing happens.
+
+  This mapping will never exit Neovim completely. See |carbon-carbon-quit| for
+  more technical details.
 
   `------------------------------------------------------------------------------`
   <Plug>(carbon-edit)                                           *carbon-plug-edit*
 
-  Implementation: `:<c-u>lua require('carbon').edit()<cr>`
+  Implementation: `require('carbon').edit()`
   Mapping:        |carbon-setting-actions-edit|
 
   If the entry below the cursor is a directory, expands or collapses the
@@ -228,9 +233,30 @@ PLUGS                                                               *carbon-plug
   |Lcarbon| or |Fcarbon| command was used.
 
   `------------------------------------------------------------------------------`
+  <Plug>(carbon-move)                                           *carbon-plug-move*
+
+  Implementation: `require('carbon').move()`
+  Mapping:        |carbon-setting-actions-move|
+
+  Prompts the user to enter a new destination for the entry under the cursor.
+  Accepts a [count] to allow left to right selection of the entry to move when
+  on a compressed path (|carbon-setting-compress|).
+
+  For more information see |carbon-buffer-move|.
+
+  `------------------------------------------------------------------------------`
+  <Plug>(carbon-reset)                                         *carbon-plug-reset*
+
+  Implementation: `require('carbon').reset()`
+  Mapping:        |carbon-setting-actions-reset|
+
+  Sets |carbon-buffer-data-root| to the initial directory that Neovim
+  was opened with.
+
+  `------------------------------------------------------------------------------`
   <Plug>(carbon-split)                                         *carbon-plug-split*
 
-  Implementation: `:<c-u>lua require('carbon').split()<cr>`
+  Implementation: `require('carbon').split()`
   Mapping:        |carbon-setting-actions-split|
 
   Opens the entry below the cursor in a new |split| if it is a file. If the
@@ -240,7 +266,7 @@ PLUGS                                                               *carbon-plug
   `------------------------------------------------------------------------------`
   <Plug>(carbon-vsplit)                                       *carbon-plug-vsplit*
 
-  Implementation: `:<c-u>lua require('carbon').vsplit()<cr>`
+  Implementation: `require('carbon').vsplit()`
   Mapping:        |carbon-setting-actions-vsplit|
 
   Opens the entry below the cursor in a new |vsplit| if it is a file. If the
@@ -250,7 +276,7 @@ PLUGS                                                               *carbon-plug
   `------------------------------------------------------------------------------`
   <Plug>(carbon-create)                                       *carbon-plug-create*
 
-  Implementation: `:<c-u>lua require('carbon').create()<cr>`
+  Implementation: `require('carbon').create()`
   Mapping:        |carbon-setting-actions-create|
 
   Enters a context-aware insert mode in which a file or directory path can be
@@ -261,21 +287,9 @@ PLUGS                                                               *carbon-plug
   For more information see |carbon-buffer-create|.
 
   `------------------------------------------------------------------------------`
-  <Plug>(carbon-move)                                           *carbon-plug-move*
-
-  Implementation: `:<c-u>lua require('carbon').move()<cr>`
-  Mapping:        |carbon-setting-actions-move|
-
-  Prompts the user to enter a new destination for the entry under the cursor.
-  Accepts a [count] to allow left to right selection of the entry to move when
-  on a compressed path (|carbon-setting-compress|).
-
-  For more information see |carbon-buffer-move|.
-
-  `------------------------------------------------------------------------------`
   <Plug>(carbon-delete)                                       *carbon-plug-delete*
 
-  Implementation: `:<c-u>lua require('carbon').delete()<cr>`
+  Implementation: `require('carbon').delete()`
   Mapping:        |carbon-setting-actions-delete|
 
   Opens a confirmation popup to confirm whether you want to delete the entry
@@ -285,18 +299,13 @@ PLUGS                                                               *carbon-plug
   For more information see |carbon-buffer-delete|.
 
   `------------------------------------------------------------------------------`
-  <Plug>(carbon-quit)                                           *carbon-plug-quit*
+  <Plug>(carbon-toggle-recursive)                   *carbon-plug-toggle-recursive*
 
-  Implementation: `:<c-u>lua require('carbon').quit()<cr>`
-  Mapping:        |carbon-setting-actions-quit|
+  Implementation: `require('carbon').toggle_recursive()`
+  Mapping:        |carbon-setting-actions-toggle-recursive|
 
-  When Carbon is active in the only window and there are multiple buffers
-  this mapping will show the |alternate-file|. When Carbon is showing in one of
-  several windows, the window will be closed. Finally, if Carbon is the only
-  buffer in the only window, nothing happens.
-
-  This mapping will never exit Neovim completely. See |carbon-carbon-quit| for
-  more technical details.
+  Recursively opens or closes the entry under the cursor. If the entry is not
+  a directory nothing happens.
 
 ================================================================================
 CARBON                                                             *carbon-carbon*
@@ -453,6 +462,14 @@ CARBON                                                             *carbon-carbo
 
   Finally, if the Carbon buffer is the only active buffer in the only active
   window, nothing happens.
+
+  `------------------------------------------------------------------------------`
+  toggle_recursive                                *carbon-carbon-toggle-recursive*
+
+  Signature: `require('carbon').toggle_recursive()`
+
+  Recursively opens or closes the entry under the cursor. If the entry is not
+  a directory nothing happens.
 
 ================================================================================
 UTIL                                                                 *carbon-util*
@@ -954,10 +971,13 @@ ENTRY                                                               *carbon-entr
   `------------------------------------------------------------------------------`
   set_open                                                 *carbon-entry-set-open*
 
-  Signature: `entry:set_open(`{value}`)`
+  Signature: `entry:set_open(`{value}[, {recursive}]`)`
 
-  Any truthy value will be treated as if the `entry` is open, any falsy value
+  Any truthy {value} will be treated as if the `entry` is open, any falsy {value}
   will be treated as if the `entry` is closed.
+
+  When {recursive} is truthy and `entry:has_children()` is also true, traverse
+  child directories and set them to the same {value} recursively.
 
   `------------------------------------------------------------------------------`
   is_open                                                   *carbon-entry-is-open*
@@ -1826,16 +1846,17 @@ SETTINGS                                                         *carbon-setting
     `},`
 
   `  actions = {`
-  `    up     = `|carbon-setting-actions-up|`,`
-  `    down   = `|carbon-setting-actions-down|`,`
-  `    edit   = `|carbon-setting-actions-edit|`,`
-  `    reset  = `|carbon-setting-actions-reset|`,`
-  `    split  = `|carbon-setting-actions-split|`,`
-  `    vsplit = `|carbon-setting-actions-vsplit|`,`
-  `    quit   = `|carbon-setting-actions-quit|`,`
-  `    create = `|carbon-setting-actions-create|`,`
-  `    move   = `|carbon-setting-actions-move|`,`
-  `    delete = `|carbon-setting-actions-delete|`,`
+  `    up               = `|carbon-setting-actions-up|`,`
+  `    down             = `|carbon-setting-actions-down|`,`
+  `    edit             = `|carbon-setting-actions-edit|`,`
+  `    reset            = `|carbon-setting-actions-reset|`,`
+  `    split            = `|carbon-setting-actions-split|`,`
+  `    vsplit           = `|carbon-setting-actions-vsplit|`,`
+  `    quit             = `|carbon-setting-actions-quit|`,`
+  `    create           = `|carbon-setting-actions-create|`,`
+  `    move             = `|carbon-setting-actions-move|`,`
+  `    delete           = `|carbon-setting-actions-delete|`,`
+  `    toggle_recursive = `|carbon-setting-actions-toggle-recursive|`,`
   `  },`
 
   `  highlights = {`
@@ -2050,12 +2071,13 @@ SETTINGS                                                         *carbon-setting
     `  down = ']',`                                    *carbon-setting-actions-down*
     `  quit = 'q',`                                    *carbon-setting-actions-quit*
     `  edit = '<cr>',`                                 *carbon-setting-actions-edit*
+    `  move = 'm',`                                    *carbon-setting-actions-move*
     `  reset = '.',`                                  *carbon-setting-actions-reset*
     `  split = '<c-x>',`                              *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
     `  create = 'c',`                                *carbon-setting-actions-create*
-    `  move = 'm',`                                    *carbon-setting-actions-move*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
+    `  toggle_recusive = '!',`              *carbon-setting-actions-toggle-recusive*
     `}`
 
   Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
@@ -2070,16 +2092,17 @@ SETTINGS                                                         *carbon-setting
 
   Each property maps to a |<Plug>| mapping defined in |carbon-plugs|:
 
-  `up`      =>  |carbon-plug-up|
-  `down`    =>  |carbon-plug-down|
-  `edit`    =>  |carbon-plug-edit|
-  `reset`   =>  |carbon-plug-reset|
-  `split`   =>  |carbon-plug-split|
-  `vsplit`  =>  |carbon-plug-vsplit|
-  `create`  =>  |carbon-plug-create|
-  `move`    =>  |carbon-plug-move|
-  `delete`  =>  |carbon-plug-delete|
-  `quit`    =>  |carbon-plug-quit|
+  `up`               => |carbon-plug-up|
+  `down`             => |carbon-plug-down|
+  `quit`             => |carbon-plug-quit|
+  `edit`             => |carbon-plug-edit|
+  `move`             => |carbon-plug-move|
+  `reset`            => |carbon-plug-reset|
+  `split`            => |carbon-plug-split|
+  `vsplit`           => |carbon-plug-vsplit|
+  `create`           => |carbon-plug-create|
+  `delete`           => |carbon-plug-delete|
+  `toggle_recursive` => |carbon-plug-toggle-recursive|
 
   `------------------------------------------------------------------------------`
   highlights                                           *carbon-setting-highlights*
