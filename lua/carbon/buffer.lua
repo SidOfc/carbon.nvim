@@ -40,7 +40,8 @@ function buffer.handle()
     mapping = type(mapping) == 'string' and { mapping } or mapping or {}
 
     for _, key in ipairs(mapping) do
-      mappings[#mappings + 1] = { 'n', key, util.plug(action) }
+      mappings[#mappings + 1] =
+        { 'n', key, util.plug(action), { nowait = true } }
     end
   end
 
@@ -386,7 +387,7 @@ end
 
 function buffer.delete()
   local line = buffer.cursor().line
-  local targets = util.tbl_concat(line.path, { line.entry })
+  local targets = vim.list_extend({ unpack(line.path) }, { line.entry })
 
   local lnum_idx = line.lnum - 1
   local count = vim.v.count == 0 and #targets or vim.v.count1
@@ -450,7 +451,10 @@ end
 function buffer.move()
   local ctx = buffer.cursor()
   local target_line = ctx.target_line
-  local targets = util.tbl_concat(target_line.path, { target_line.entry })
+  local targets = vim.list_extend(
+    { unpack(target_line.path) },
+    { target_line.entry }
+  )
   local target_names = vim.tbl_map(function(part)
     return part.name
   end, targets)
@@ -462,7 +466,7 @@ function buffer.move()
   local path_start = target_line.depth * 2 + 2
   local lnum_idx = target_line.lnum - 1
   local target_idx = util.tbl_key(targets, ctx.target)
-  local clamped_names = util.tbl_slice(target_names, 1, target_idx - 1)
+  local clamped_names = unpack(target_names, 1, target_idx - 1)
   local start_hl = path_start + #table.concat(clamped_names, '/')
 
   if target_idx > 1 then
@@ -490,7 +494,7 @@ function buffer.move()
 
   if updated_path == ctx.target.path then
     buffer.render()
-  elseif util.path_exists(updated_path) then
+  elseif vim.loop.fs_stat(updated_path) then
     buffer.render()
     vim.api.nvim_echo({
       { 'Failed to move: ', 'CarbonDanger' },
@@ -600,7 +604,7 @@ end
 
 function internal.create_confirm(ctx)
   return function()
-    local text = vim.trim(string.sub(util.get_line(), ctx.edit_col))
+    local text = vim.trim(string.sub(vim.fn.getline('.'), ctx.edit_col))
     local name = vim.fn.fnamemodify(text, ':t')
     local parent_directory = ctx.target.path
       .. '/'
@@ -637,8 +641,8 @@ end
 function internal.create_insert_move(ctx)
   return function()
     local text = ctx.edit_prefix
-      .. vim.trim(string.sub(util.get_line(), ctx.edit_col))
-    local last_slash_col = util.str_last_index_of(text, '/') or 0
+      .. vim.trim(string.sub(vim.fn.getline('.'), ctx.edit_col))
+    local last_slash_col = vim.fn.strridx(text, '/') + 1
 
     buffer.set_lines(ctx.edit_lnum, ctx.edit_lnum + 1, { text })
     buffer.clear_extmarks({ ctx.edit_lnum, 0 }, { ctx.edit_lnum, -1 }, {})
