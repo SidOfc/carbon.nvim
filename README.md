@@ -174,6 +174,40 @@ information and customization options.
 
 ![Carbon edit example](/doc/assets/carbon-edit.gif)
 
+### <kbd>!</kbd> Recursively toggle directories
+
+When on a directory, expand or collapse that directory recursively. When on a
+file nothing will happen.
+
+![Carbon recursive directory toggle example](/doc/assets/carbon-toggle-recursive-action.gif)
+
+**NOTE:** This mapping is probably best remapped to <kbd>shift</kbd>+<kbd>enter</kbd>. The reason
+it is not the default is due to specific configuration required to make it work.
+
+Some emulators send the same codes for <kbd>enter</kbd> and <kbd>shift</kbd>+<kbd>enter</kbd>
+which means Neovim cannot distinguish one from another. This can usually be fixed by setting
+them manually for your emulator. Included from this [SO answer](https://stackoverflow.com/a/42461580/2224331):
+
+> I managed to correct my terminal key-code for <kbd>Shift</kbd>+<kbd>Enter</kbd>
+> by sending the key-code Vim apparently expects. Depending on your terminal,
+> _(Adding <kbd>Ctrl</kbd>+<kbd>Enter</kbd> as a bonus!)_
+>
+> **[iTerm2](https://www.iterm2.com/)**, open _Preferences_ → _Profiles_ → _Keys_ → _[+] (Add)_ →
+> - _Keyboard shortcut:_ (Hit <kbd>Shift</kbd>+<kbd>Enter</kbd>)
+> - _Action:_ _Send Escape Sequence_
+> - _Esc+_ `[[13;2u`
+>   Repeat for <kbd>Ctrl</kbd>+<kbd>Enter</kbd>, with sequence: `[[13;5u`
+>
+> **[urxvt](http://software.schmorp.de/pkg/rxvt-unicode.html)**, append to your `.Xresources` file:
+>
+>     URxvt.keysym.S-Return:     \033[13;2u
+>     URxvt.keysym.C-Return:     \033[13;5u
+>
+> **[Alacritty](https://github.com/jwilm/alacritty)**, under `key_bindings`, add following to your `~/.config/alacritty/alacritty.yml`:
+>
+>     - { key: Return,   mods: Shift,   chars: "\x1b[13;2u" }
+>     - { key: Return,   mods: Control, chars: "\x1b[13;5u" }
+
 ### <kbd>ctrl</kbd>+<kbd>x</kbd> Edit file in horizontal split
 
 Does nothing when on a directory. Edit a file in a new horizontal split. See
