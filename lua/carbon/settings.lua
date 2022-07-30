@@ -56,6 +56,7 @@ return {
     vsplit = '<c-v>',
     create = 'c',
     delete = 'd',
+    toggle_recursive = '!',
   },
   highlights = {
     CarbonDir = { fg = '#00aaff', ctermfg = 'DarkBlue', bold = true },

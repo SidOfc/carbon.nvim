@@ -132,8 +132,16 @@ function entry:is_compressible()
     or data.compressible[self.path]
 end
 
-function entry:set_open(value)
-  data.open[self.path] = value
+function entry:set_open(value, recursive)
+  if self.is_directory then
+    data.open[self.path] = value
+
+    if recursive and self:has_children() then
+      for _, child in ipairs(self:children()) do
+        child:set_open(value, recursive)
+      end
+    end
+  end
 end
 
 function entry:is_open()
