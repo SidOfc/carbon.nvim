@@ -2048,6 +2048,7 @@ SETTINGS                                                         *carbon-setting
     `{`
     `  up = '[',`                                        *carbon-setting-actions-up*
     `  down = ']',`                                    *carbon-setting-actions-down*
+    `  quit = 'q',`                                    *carbon-setting-actions-quit*
     `  edit = '<cr>',`                                 *carbon-setting-actions-edit*
     `  reset = '.',`                                  *carbon-setting-actions-reset*
     `  split = '<c-x>',`                              *carbon-setting-actions-split*
@@ -2055,7 +2056,6 @@ SETTINGS                                                         *carbon-setting
     `  create = 'c',`                                *carbon-setting-actions-create*
     `  move = 'm',`                                    *carbon-setting-actions-move*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
-    `  quit = { 'q' '<esc>' },`                        *carbon-setting-actions-quit*
     `}`
 
   Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
