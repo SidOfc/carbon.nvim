@@ -2077,7 +2077,7 @@ SETTINGS                                                         *carbon-setting
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
     `  create = 'c',`                                *carbon-setting-actions-create*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
-    `  toggle_recusive = '!',`              *carbon-setting-actions-toggle-recusive*
+    `  toggle_recursive = '!',`            *carbon-setting-actions-toggle-recursive*
     `}`
 
   Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
