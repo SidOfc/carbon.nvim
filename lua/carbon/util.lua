@@ -3,74 +3,16 @@ local data = {
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
 
-function util.scandir(path)
-  local fs = vim.loop.fs_scandir(path)
-
-  return function()
-    return vim.loop.fs_scandir_next(fs)
-  end
-end
-
-function util.str_last_index_of(str, char)
-  for index = #str, 1, -1 do
-    if string.sub(str, index, index) == char then
-      return index
-    end
-  end
-end
-
-function util.get_line(lnum)
-  lnum = lnum or vim.api.nvim_win_get_cursor(0)[1]
-
-  return vim.api.nvim_buf_get_lines(0, lnum - 1, lnum, 1)[1]
-end
-
 function util.cursor(row, col)
   return vim.api.nvim_win_set_cursor(0, { row, col })
 end
 
-function util.path_exists(path)
-  return vim.loop.fs_stat(path) and true or false
-end
-
 function util.is_directory(path)
-  local stat = vim.loop.fs_stat(path)
-
-  return stat and stat.type == 'directory'
+  return (vim.loop.fs_stat(path) or {}).type == 'directory'
 end
 
 function util.plug(name)
-  return '<plug>(carbon-' .. name .. ')'
-end
-
-function util.tbl_merge(...)
-  return vim.tbl_extend('force', {}, ...)
-end
-
-function util.tbl_concat(...)
-  local result = {}
-
-  for idx = 1, select('#', ...) do
-    for key, value in pairs(select(idx, ...)) do
-      if type(key) == 'number' then
-        result[#result + 1] = value
-      else
-        result[key] = value
-      end
-    end
-  end
-
-  return result
-end
-
-function util.tbl_slice(tbl, start, finish)
-  local result = {}
-
-  for index = start, finish or #tbl do
-    result[#result + 1] = tbl[index]
-  end
-
-  return result
+  return string.format('<plug>(carbon-%s)', name)
 end
 
 function util.tbl_key(tbl, item)
@@ -104,7 +46,7 @@ end
 function util.autocmd(event, cmd_or_callback, opts)
   return vim.api.nvim_create_autocmd(
     event,
-    util.tbl_merge({
+    vim.tbl_extend('force', {
       group = data.augroup,
       callback = cmd_or_callback,
     }, opts or {})
@@ -112,7 +54,7 @@ function util.autocmd(event, cmd_or_callback, opts)
 end
 
 function util.clear_autocmd(event, opts)
-  return vim.api.nvim_clear_autocmds(util.tbl_merge({
+  return vim.api.nvim_clear_autocmds(vim.tbl_extend('force', {
     event = event,
     group = data.augroup,
   }, opts or {}))
@@ -123,7 +65,9 @@ function util.command(lhs, rhs, options)
 end
 
 function util.highlight(group, opts)
-  vim.api.nvim_set_hl(0, group, util.tbl_merge({ default = true }, opts or {}))
+  local merged = vim.tbl_extend('force', { default = true }, opts or {})
+
+  vim.api.nvim_set_hl(0, group, merged)
 end
 
 function util.confirm(options)
@@ -183,7 +127,7 @@ function util.confirm(options)
     'n',
     '<cr>',
     function()
-      finish(string.sub(util.get_line(), 6), true)
+      finish(string.sub(vim.fn.getline('.'), 6), true)
     end,
   }
 
@@ -229,7 +173,7 @@ end
 function util.create_scratch_buf(options)
   options = options or {}
   local buf = vim.api.nvim_create_buf(false, true)
-  local settings = util.tbl_merge({
+  local settings = vim.tbl_extend('force', {
     bufhidden = 'wipe',
     buftype = 'nofile',
     swapfile = false,
@@ -265,7 +209,7 @@ function util.set_buf_mappings(buf, mappings)
       mapping[1],
       mapping[2],
       mapping[3],
-      util.tbl_merge(mapping[4] or {}, { buffer = buf })
+      vim.tbl_extend('force', mapping[4] or {}, { buffer = buf })
     )
   end
 end

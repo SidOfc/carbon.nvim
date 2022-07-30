@@ -481,46 +481,12 @@ UTIL                                                                 *carbon-uti
   external to Carbon.
 
   `------------------------------------------------------------------------------`
-  scandir                                                    *carbon-util-scandir*
-
-  Signature: `require('carbon.util').scandir(`{path}`)`
-
-  Like |readdir| but uses |vim.loop| methods `fs_scandir` and `fs_scandir_next` to list
-  entries of specified {path}. Returns an iterator function which iterates
-  through each entry found in {path}.
-
-  {path} must be an absolute path to an existing directory.
-
-  `------------------------------------------------------------------------------`
-  str_last_index_of                                *carbon-util-str-last-index-of*
-
-  Signature: `require('carbon.util').str_last_index_of(`{str}, {char}`)`
-
-  Returns the 1-based last index of {char} in {str}.
-  Returns `nil` when {char} is not found in {str}.
-
-  `------------------------------------------------------------------------------`
-  get_line                                                  *carbon-util-get-line*
-
-  Signature: `require('carbon.util').get_line(`[{lnum}]`)`
-
-  Replacement for |getline|. Returns the content of line {lnum} in the current
-  buffer. The cursor line number will be used if {lnum} is not supplied.
-
-  `------------------------------------------------------------------------------`
   cursor                                                      *carbon-util-cursor*
 
   Signature: `require('carbon.util').cursor(`{row}, {col}`)`
 
   Wrapper for |nvim_win_set_cursor| which functions more like |cursor| except
   that {col} is zero-based instead of one based.
-
-  `------------------------------------------------------------------------------`
-  path_exists                                            *carbon-util-path-exists*
-
-  Signature: `require('carbon.util').path_exists(`{path}`)`
-
-  Returns `true` of `false` depending on the result of `vim.loop.fs_stat(`{path}`)`.
 
   `------------------------------------------------------------------------------`
   is_directory                                          *carbon-util-is-directory*
@@ -565,15 +531,6 @@ UTIL                                                                 *carbon-uti
   {callback} must be a function.
 
   `------------------------------------------------------------------------------`
-  tbl_slice                                                *carbon-util-tbl-slice*
-
-  Signature: `require('carbon.util').tbl_slice(`{tbl}, {start}[, {finish}]`)`
-
-  Returns a new table with elements from {tbl} index {start} to {finish}.
-  Both {start} and {finish} are inclusive. When {finish} is omitted, it will
-  be set to `#`{tbl}. Only works with numeric indices, string keys are ignored.
-
-  `------------------------------------------------------------------------------`
   tbl_key                                                    *carbon-util-tbl-key*
 
   Signature: `require('carbon.util').tbl_key(`{tbl}, {item}`)`
@@ -595,34 +552,6 @@ UTIL                                                                 *carbon-uti
 
   {tbl} must be a table.
   {keys} must be a table.
-
-  `------------------------------------------------------------------------------`
-  tbl_merge                                                *carbon-util-tbl-merge*
-
-  Signature: `require('carbon.util').tbl_merge(`{...varargs}`)`
-
-  Wraps |vim.tbl_extend|, each {...varargs} argument must be a table. Tables
-  are merged using `force` into a new table.
-
-  `------------------------------------------------------------------------------`
-  tbl_concat                                              *carbon-util-tbl-concat*
-
-  Signature: `require('carbon.util').tbl_concat(`{...varargs}`)`
-
-  Concatenates all tables.
-
-  String keys will overwrite previously set string keys if they exist.
-
-  Numeric keys are reindexed which means that concatenating tables will change
-  the numeric keys of all table values except the first argument.
-
-  For example:
-
-  `util.tbl_concat(`{1, 2, a = 3}, {4, 5, b = 6, a = 7}`)`
-
-  will result in:
-
-  `{1, 2, 4, 5, b = 6, a = 7}`
 
   `------------------------------------------------------------------------------`
   command                                                    *carbon-util-command*

@@ -167,7 +167,7 @@ end
 function entry:get_children()
   local entries = {}
 
-  for name in util.scandir(self.path) do
+  for name in vim.fs.dir(self.path) do
     local is_included = true
     local absolute_path = self.path .. '/' .. name
     local relative_path = vim.fn.fnamemodify(absolute_path, ':.')

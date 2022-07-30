@@ -25,17 +25,9 @@ function carbon.initialize()
   util.command('Lcarbon', carbon.explore_left, { bang = true })
   util.command('Fcarbon', carbon.explore_float, { bang = true })
 
-  vim.keymap.set('', util.plug('up'), carbon.up)
-  vim.keymap.set('', util.plug('down'), carbon.down)
-  vim.keymap.set('', util.plug('quit'), carbon.quit)
-  vim.keymap.set('', util.plug('edit'), carbon.edit)
-  vim.keymap.set('', util.plug('move'), carbon.move)
-  vim.keymap.set('', util.plug('reset'), carbon.reset)
-  vim.keymap.set('', util.plug('split'), carbon.split)
-  vim.keymap.set('', util.plug('vsplit'), carbon.vsplit)
-  vim.keymap.set('', util.plug('create'), carbon.create)
-  vim.keymap.set('', util.plug('delete'), carbon.delete)
-  vim.keymap.set('', util.plug('toggle_recursive'), carbon.toggle_recursive)
+  for action in pairs(settings.defaults.actions) do
+    vim.keymap.set('', util.plug(action), carbon[action])
+  end
 
   if settings.sync_on_cd then
     util.autocmd('DirChanged', carbon.cd, { pattern = 'global' })

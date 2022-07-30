@@ -1,4 +1,4 @@
-return {
+local defaults = {
   sync_pwd = false,
   compress = true,
   auto_open = true,
@@ -70,3 +70,5 @@ return {
     CarbonFlash = { link = 'Search', bold = true },
   },
 }
+
+return vim.tbl_extend('force', vim.deepcopy(defaults), { defaults = defaults })
