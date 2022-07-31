@@ -653,34 +653,12 @@ function internal.create_insert_move(ctx)
 end
 
 function buffer.focus_flash(duration, group, start, finish)
-  local extmarks = vim.api.nvim_buf_get_extmarks(
-    data.handle,
-    data.ns,
-    start,
-    finish,
-    { details = true }
-  )
+  local ns = vim.api.nvim_create_namespace('carbon.buffer.focus_flash')
 
-  buffer.clear_extmarks(start, finish, {})
-  vim.highlight.range(data.handle, data.ns, group, start, finish, {})
-
-  if data.focus_flash_timer then
-    data.focus_flash_timer:stop()
-  end
-
-  data.focus_flash_timer = vim.defer_fn(function()
+  vim.highlight.range(data.handle, ns, group, start, finish, {})
+  vim.defer_fn(function()
     if buffer.is_loaded() then
-      buffer.clear_extmarks(start, finish, {})
-
-      for _, extmark in ipairs(extmarks) do
-        vim.api.nvim_buf_set_extmark(
-          data.handle,
-          data.ns,
-          extmark[2],
-          extmark[3],
-          extmark[4]
-        )
-      end
+      vim.api.nvim_buf_clear_namespace(data.handle, ns, 0, -1)
     end
   end, duration)
 end
