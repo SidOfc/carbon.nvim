@@ -135,7 +135,7 @@ function carbon.vsplit()
 end
 
 function carbon.explore(options)
-  if options.bang then
+  if options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
@@ -143,7 +143,7 @@ function carbon.explore(options)
 end
 
 function carbon.explore_left(options)
-  if options.bang then
+  if options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
@@ -176,7 +176,7 @@ function carbon.explore_left(options)
 end
 
 function carbon.explore_float(options)
-  if options.bang then
+  if options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 

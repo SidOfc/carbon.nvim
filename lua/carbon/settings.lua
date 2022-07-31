@@ -6,6 +6,7 @@ local defaults = {
   sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 5,
   sidebar_width = 30,
+  always_reveal = false,
   exclude = {
     '~$',
     '#$',
