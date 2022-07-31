@@ -84,18 +84,18 @@ COMMANDS                                                         *carbon-command
   Carbon                                                                  *Carbon*
 
   Implementation: `:lua require('carbon').explore()`
-  Alias:          Explore unless |carbon-setting-keep-netrw| is enabled.
+  Alias:          `Explore` unless |carbon-setting-keep-netrw| is enabled.
 
   Replaces the current buffer with the Carbon buffer.
-  When called with a <bang> (`Carbon!`) the tree will expand to show the
-  current buffer path and |carbon-buffer-flash-bang| it if possible.
-  This also works for its alias.
+  When called with a <bang> (`Carbon!`) or |carbon-setting-always-reveal| enabled,
+  the tree will expand to show the current buffer path and
+  |carbon-buffer-flash-bang| it if possible. This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Lcarbon                                                                *Lcarbon*
 
   Implementation: `:lua require('carbon').explore_left()`
-  Alias:          Lexplore unless |carbon-setting-keep-netrw| is enabled.
+  Alias:          `Lexplore` unless |carbon-setting-keep-netrw| is enabled.
 
   Opens the Carbon buffer in a new vertical split. When Carbon is opened this
   way, pressing the key mapped to |carbon-plug-edit| will open files in a
@@ -104,9 +104,9 @@ COMMANDS                                                         *carbon-command
   Subsequent calls will reuse a window previously opened via `Lcarbon` if this
   window still exists and valid.
 
-  When called with a <bang> (`Carbon!`) the tree will expand to show the
-  current buffer path and |carbon-buffer-flash-bang| it if possible.
-  This also works for its alias.
+  When called with a <bang> (`Carbon!`) or |carbon-setting-always-reveal| enabled,
+  the tree will expand to show the current buffer path and
+  |carbon-buffer-flash-bang| it if possible. This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Fcarbon                                                                *Fcarbon*
@@ -125,8 +125,10 @@ COMMANDS                                                         *carbon-command
   |carbon-plug-vsplit| will close the floating Carbon window and open the file
   in a vertical split relative to the current window.
 
-  When called with a <bang> (`Carbon!`) the tree will expand to show the
-  current buffer path and |carbon-buffer-flash-bang| it if possible.
+
+  When called with a <bang> (`Carbon!`) or |carbon-setting-always-reveal| enabled,
+  the tree will expand to show the current buffer path and
+  |carbon-buffer-flash-bang| it if possible.
 
   See |carbon-setting-float-settings| for more information on how to configure
   the floating window spawned by `:Fcarbon`.
@@ -1752,6 +1754,7 @@ SETTINGS                                                         *carbon-setting
   `  sync_on_cd    = `|carbon-setting-sync-on-cd|`,`
   `  sync_delay    = `|carbon-setting-sync-delay|`,`
   `  sidebar_width = `|carbon-setting-sidebar-width|`,`
+  `  always_reveal = `|carbon-setting-always-reveal|`,`
   `  exclude       = `|carbon-setting-exclude|`,`
 
   `  indicators = {`
@@ -1894,6 +1897,15 @@ SETTINGS                                                         *carbon-setting
   Default: `30`
 
   The width in columns of the sidebar window opened by |Lcarbon|.
+
+  `------------------------------------------------------------------------------`
+  always_reveal                                     *carbon-setting-always-reveal*
+
+  Default: `false`
+
+  By default, only the <bang> versions of all |carbon-commands| will reveal
+  the current buffer. Enabling this will cause all versions of these commands
+  to reveal the current buffer.
 
   `------------------------------------------------------------------------------`
   exclude                                                 *carbon-setting-exclude*
