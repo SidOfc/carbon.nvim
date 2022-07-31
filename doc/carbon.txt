@@ -1948,8 +1948,8 @@ SETTINGS                                                         *carbon-setting
 
   Default:
     `{`
-    `  delay = 75,`                                     *carbon-setting-flash-delay*
-    `  duration = 750,`                              *carbon-setting-flash-duration*
+    `  delay = 50,`                                     *carbon-setting-flash-delay*
+    `  duration = 500,`                              *carbon-setting-flash-duration*
     `}`
 
   Controls highlight {delay} and {duration} for entries revealed by
@@ -2079,8 +2079,7 @@ SETTINGS                                                         *carbon-setting
     `    bold = true,`
     `  },`
     `  CarbonFlash = {`                      *carbon-setting-highlights-CarbonFlash*
-    `    link = 'Search',`
-        `bold = true,`
+    `    link = 'Visual',`
     `  },`
     `}`
 
