@@ -466,7 +466,7 @@ function buffer.move()
   local path_start = target_line.depth * 2 + 2
   local lnum_idx = target_line.lnum - 1
   local target_idx = util.tbl_key(targets, ctx.target)
-  local clamped_names = unpack(target_names, 1, target_idx - 1)
+  local clamped_names = { unpack(target_names, 1, target_idx - 1) }
   local start_hl = path_start + #table.concat(clamped_names, '/')
 
   if target_idx > 1 then
