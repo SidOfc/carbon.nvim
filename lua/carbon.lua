@@ -50,12 +50,16 @@ function carbon.initialize()
   local argv = vim.fn.argv()
   local open = argv[1] and vim.fn.fnamemodify(argv[1], ':p') or vim.loop.cwd()
 
-  if settings.auto_open and util.is_directory(open) then
+  if
+    vim.fn.has('vim_starting')
+    and settings.auto_open
+    and util.is_directory(open)
+  then
     local current_buffer = vim.api.nvim_win_get_buf(0)
 
     buffer.launch(open)
 
-    if vim.api.nvim_buf_is_loaded(current_buffer) then
+    if vim.api.nvim_buf_is_valid(current_buffer) then
       vim.api.nvim_buf_delete(current_buffer, { force = true })
     end
   end
