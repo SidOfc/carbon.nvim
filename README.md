@@ -256,33 +256,3 @@ to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion di
 or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
-
-# Known issues
-
-## Slow `c` and `d` mappings.
-
-This is caused by a mapping which also starts with `c` or `d`.
-For example, [nvim-surround](https://github.com/kylechui/nvim-surround) creates such
-mappings. After installing and calling `require('nvim-surround').setup()` in my configuration,
-I observed slow mappings and upon disabling it, mappings were once again fast.
-
-My recommendation for this specific plugin is to only set up nvim-surround for filetypes
-where it makes sense to surround, and exclude others such as `carbon` filetype buffers:
-
-```lua
-vim.api.nvim_create_autocmd('FileType', {
-  pattern = '*',
-  callback = function()
-    if vim.bo.filetype ~= 'carbon' then
-      local surround_config = require('nvim-surround.config')
-      surround_config.user_opts = surround_config.default_opts
-
-      require('nvim-surround').buffer_setup()
-    end
-  end
-})
-```
-
-To find out if there are other mappings, check the output of `:verbose map c` or
-`:verbose map c` when Carbon is the current buffer. If more than one mapping is shown
-the one(s) not set by Carbon are causing the slowdown in Carbon buffers.
