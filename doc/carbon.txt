@@ -1024,17 +1024,7 @@ BUFFER                                                             *carbon-buffe
 
   Highlights a region from {start} to {finish} with {group} for {duration}
   milliseconds. {start} and {finish} must be values accepted by
-  |nvim_buf_get_extmarks| / |vim.highlight.range|.
-
-  The steps below explain how it works:
-
-  1. Clear highlights from {start} to {finish}.
-  2. Apply highlight {group} from {start} to {finish}.
-  3. Wait {duration} milliseconds.
-  4. Clear highlights from {start} to {finish}.
-  5. Restore original highlights cleared in step `1`.
-
-  NOTE: step `4` and `5` only happen is |carbon-buffer-is-loaded|.
+  |vim.highlight.range|.
 
   `------------------------------------------------------------------------------`
   expand_to_path                                    *carbon-buffer-expand-to-path*
@@ -1948,8 +1938,8 @@ SETTINGS                                                         *carbon-setting
 
   Default:
     `{`
-    `  delay = 75,`                                     *carbon-setting-flash-delay*
-    `  duration = 750,`                              *carbon-setting-flash-duration*
+    `  delay = 50,`                                     *carbon-setting-flash-delay*
+    `  duration = 500,`                              *carbon-setting-flash-duration*
     `}`
 
   Controls highlight {delay} and {duration} for entries revealed by
@@ -2079,8 +2069,7 @@ SETTINGS                                                         *carbon-setting
     `    bold = true,`
     `  },`
     `  CarbonFlash = {`                      *carbon-setting-highlights-CarbonFlash*
-    `    link = 'Search',`
-        `bold = true,`
+    `    link = 'Visual',`
     `  },`
     `}`
 
