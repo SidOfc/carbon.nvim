@@ -1,6 +1,11 @@
+.PHONY: all
+all:
+	make lint
+	make test
+
 .PHONY: test
 test:
-	nvim --headless --noplugin -c "lua require('test.config.bootstrap')" +qa!
+	nvim --headless --clean -c "lua require('test.config.bootstrap')" +qa!
 
 .PHONY: lint
 lint:

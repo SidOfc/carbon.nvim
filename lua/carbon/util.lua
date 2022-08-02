@@ -15,7 +15,7 @@ function util.is_excluded(path)
 end
 
 function util.cursor(row, col)
-  return vim.api.nvim_win_set_cursor(0, { row, col })
+  return vim.api.nvim_win_set_cursor(0, { row, col - 1 })
 end
 
 function util.is_directory(path)
@@ -160,7 +160,7 @@ function util.confirm(options)
   util.set_buf_autocmds(buf, {
     BufLeave = finish('cancel'),
     CursorMoved = function()
-      util.cursor(vim.fn.line('.'), 2)
+      util.cursor(vim.fn.line('.'), 3)
     end,
   })
 

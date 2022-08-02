@@ -1,9 +1,12 @@
 local repo_root = vim.loop.cwd()
-local test_util = require('test.config.util')
 local tmp_dir = vim.fn.tempname()
 
-test_util.copy(repo_root, tmp_dir)
+vim.opt.runtimepath:prepend(repo_root)
+
+vim.fn.system(string.format('cp -R %s %s', repo_root, tmp_dir))
 vim.fn.chdir(tmp_dir)
+
+require('carbon').initialize()
 
 vim.api.nvim_create_autocmd('VimLeavePre', {
   pattern = '*',
