@@ -33,7 +33,7 @@ describe('carbon', function()
     local key_maparg = string.lower(vim.fn.maparg(key, 'n'))
 
     it(string.format('maps %s to carbon.%s', plug, action), function()
-      assert.not_nil(string.find(plug_maparg, '<lua function %d+>'))
+      assert.is_number(string.find(plug_maparg, '<lua %w+'))
     end)
 
     it(string.format('maps %s to %s', key, plug), function()
