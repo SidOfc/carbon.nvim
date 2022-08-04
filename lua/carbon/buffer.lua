@@ -1,3 +1,4 @@
+local ns = require('carbon.ns')
 local util = require('carbon.util')
 local entry = require('carbon.entry')
 local watcher = require('carbon.watcher')
@@ -5,12 +6,7 @@ local settings = require('carbon.settings')
 local buffer = {}
 local internal = {}
 local open_cwd = vim.loop.cwd()
-local data = {
-  root = entry.new(open_cwd),
-  handle = -1,
-  ns = vim.api.nvim_create_namespace('carbon'),
-  resync_paths = {},
-}
+local data = { root = entry.new(open_cwd), resync_paths = {}, handle = -1 }
 
 function buffer.launch(target)
   buffer.set_root(target)
@@ -541,19 +537,19 @@ function buffer.create()
 end
 
 function buffer.clear_extmarks(...)
-  local extmarks = vim.api.nvim_buf_get_extmarks(data.handle, data.ns, ...)
+  local extmarks = vim.api.nvim_buf_get_extmarks(data.handle, ns.hl, ...)
 
   for _, extmark in ipairs(extmarks) do
-    vim.api.nvim_buf_del_extmark(data.handle, data.ns, extmark[1])
+    vim.api.nvim_buf_del_extmark(data.handle, ns.hl, extmark[1])
   end
 end
 
 function buffer.clear_namespace(...)
-  vim.api.nvim_buf_clear_namespace(data.handle, data.ns, ...)
+  vim.api.nvim_buf_clear_namespace(data.handle, ns.hl, ...)
 end
 
 function buffer.add_highlight(...)
-  vim.api.nvim_buf_add_highlight(data.handle, data.ns, ...)
+  vim.api.nvim_buf_add_highlight(data.handle, ns.hl, ...)
 end
 
 function buffer.set_lines(start_lnum, end_lnum, lines)
@@ -642,12 +638,10 @@ function internal.create_insert_move(ctx)
 end
 
 function buffer.focus_flash(duration, group, start, finish)
-  local ns = vim.api.nvim_create_namespace('carbon.buffer.focus_flash')
-
-  vim.highlight.range(data.handle, ns, group, start, finish, {})
+  vim.highlight.range(data.handle, ns.hl_tmp, group, start, finish, {})
   vim.defer_fn(function()
     if buffer.is_loaded() then
-      vim.api.nvim_buf_clear_namespace(data.handle, ns, 0, -1)
+      vim.api.nvim_buf_clear_namespace(data.handle, ns.hl_tmp, 0, -1)
     end
   end, duration)
 end

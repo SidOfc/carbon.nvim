@@ -1,8 +1,6 @@
 local settings = require('carbon.settings')
+local ns = require('carbon.ns')
 local util = {}
-local data = {
-  augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
-}
 
 function util.is_excluded(path)
   if settings.exclude then
@@ -58,7 +56,7 @@ function util.autocmd(event, cmd_or_callback, opts)
   return vim.api.nvim_create_autocmd(
     event,
     vim.tbl_extend('force', {
-      group = data.augroup,
+      group = ns.augroup,
       callback = cmd_or_callback,
     }, opts or {})
   )
@@ -66,8 +64,8 @@ end
 
 function util.clear_autocmd(event, opts)
   return vim.api.nvim_clear_autocmds(vim.tbl_extend('force', {
+    group = ns.augroup,
     event = event,
-    group = data.augroup,
   }, opts or {}))
 end
 
