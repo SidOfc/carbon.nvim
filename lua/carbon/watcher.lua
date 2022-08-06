@@ -1,12 +1,15 @@
+local util = require('carbon.util')
 local watcher = {}
 local data = {
   listeners = {},
   events = { change = {}, rename = {}, ['change-and-rename'] = {} },
 }
 
-function watcher.clear()
+function watcher.keep(callback)
   for path in pairs(data.listeners) do
-    watcher.release(path)
+    if not callback(path) then
+      watcher.release(path)
+    end
   end
 end
 
@@ -19,23 +22,23 @@ function watcher.release(path)
 end
 
 function watcher.register(path)
-  watcher.release(path)
+  if not data.listeners[path] and not util.is_excluded(path) then
+    data.listeners[path] = vim.loop.new_fs_event()
 
-  data.listeners[path] = vim.loop.new_fs_event()
-
-  data.listeners[path]:start(
-    path,
-    {},
-    vim.schedule_wrap(function(error, filename, status)
-      if status.change and status.rename then
-        watcher.emit('change-and-rename', path, filename, error)
-      elseif status.change then
-        watcher.emit('change', path, filename, error)
-      elseif status.rename then
-        watcher.emit('rename', path, filename, error)
-      end
-    end)
-  )
+    data.listeners[path]:start(
+      path,
+      {},
+      vim.schedule_wrap(function(error, filename, status)
+        if status.change and status.rename then
+          watcher.emit('change-and-rename', path, filename, error)
+        elseif status.change then
+          watcher.emit('change', path, filename, error)
+        elseif status.rename then
+          watcher.emit('rename', path, filename, error)
+        end
+      end)
+    )
+  end
 end
 
 function watcher.emit(event, ...)

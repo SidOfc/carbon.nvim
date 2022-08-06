@@ -1,5 +1,6 @@
 local util = require('carbon.util')
 local entry = require('carbon.entry')
+local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local buffer = {}
 local internal = {}
@@ -185,6 +186,8 @@ function buffer.lines(input_target, lines, depth)
       highlights = { { 'CarbonDir', 0, -1 } },
       path = {},
     }
+
+    watcher.register(data.root.path)
   end
 
   for _, child in ipairs(target:children()) do
@@ -203,12 +206,16 @@ function buffer.lines(input_target, lines, depth)
         and #tmp:children() == 1
         and tmp:is_compressible()
       do
+        watcher.register(tmp.path)
+
         path[#path + 1] = tmp
         tmp = tmp:children()[1]
       end
     end
 
     if tmp.is_directory then
+      watcher.register(tmp.path)
+
       is_empty = #tmp:children() == 0
       path_suffix = '/'
 
@@ -275,31 +282,10 @@ function buffer.lines(input_target, lines, depth)
 end
 
 function buffer.synchronize()
-  local paths = vim.tbl_keys(data.resync_paths)
-  data.resync_paths = {}
-
-  table.sort(paths, function(a, b)
-    return #a < #b
-  end)
-
-  for idx = #paths, 1, -1 do
-    local path = paths[idx]
-    local found_path = util.tbl_find(paths, function(other)
-      return path ~= other and vim.startswith(path, other)
-    end)
-
-    if not found_path then
-      local found_entry = entry.find(path)
-
-      if found_entry then
-        found_entry:synchronize()
-      elseif path == data.root.path then
-        data.root:synchronize()
-      end
-    end
-  end
-
+  data.root:synchronize(data.resync_paths)
   buffer.render()
+
+  data.resync_paths = {}
 end
 
 function buffer.up(count)
@@ -351,7 +337,10 @@ function buffer.set_root(target)
   end
 
   data.root = target
-  entry.clean(data.root.path)
+
+  watcher.keep(function(path)
+    return vim.startswith(path, data.root.path)
+  end)
 
   if settings.sync_pwd then
     vim.api.nvim_set_current_dir(data.root.path)

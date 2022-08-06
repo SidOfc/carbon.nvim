@@ -1,6 +1,5 @@
 local util = require('carbon.util')
 local watcher = require('carbon.watcher')
-local settings = require('carbon.settings')
 local entry = {}
 local data = { children = {}, open = {}, compressible = {} }
 
@@ -26,8 +25,6 @@ function entry.new(path, parent)
 
   if is_symlink and not select(2, pcall(vim.loop.fs_stat, clean)) then
     is_symlink = 2
-  elseif is_directory then
-    watcher.register(clean)
   end
 
   return setmetatable({
@@ -40,22 +37,6 @@ function entry.new(path, parent)
   }, entry)
 end
 
-function entry.clean(path)
-  for parent_path, children in pairs(data.children) do
-    if not vim.startswith(parent_path, path) then
-      watcher.release(parent_path)
-
-      for _, child in ipairs(children) do
-        watcher.release(child.path)
-      end
-
-      data.children[parent_path] = nil
-    end
-  end
-
-  watcher.register(path)
-end
-
 function entry.find(path)
   for _, children in pairs(data.children) do
     for _, child in ipairs(children) do
@@ -66,42 +47,48 @@ function entry.find(path)
   end
 end
 
-function entry:synchronize()
+function entry:synchronize(paths)
   if not self.is_directory then
     return
   end
 
-  if util.is_directory(self.path) then
+  if paths[self.path] then
+    local all_paths = {}
     local current_paths = {}
+    local previous_paths = {}
     local previous_children = data.children[self.path] or {}
-    data.children[self.path] = nil
+
+    self:set_children(nil)
 
     for _, previous in ipairs(previous_children) do
-      watcher.release(previous.path)
+      all_paths[previous.path] = true
+      previous_paths[previous.path] = previous
     end
 
-    for _, child in ipairs(self:children()) do
-      current_paths[#current_paths + 1] = child.path
-      local previous = util.tbl_find(previous_children, function(previous)
-        return previous.path == child.path
-      end)
+    for _, current in ipairs(self:children()) do
+      all_paths[current.path] = true
+      current_paths[current.path] = current
+    end
 
-      if previous then
-        child:set_open(previous:is_open())
+    for path in pairs(all_paths) do
+      local current = current_paths[path]
+      local previous = previous_paths[path]
 
-        if previous:has_children() then
-          child:synchronize()
+      if previous and current then
+        if current.is_directory then
+          current:set_open(previous:is_open())
+          current:synchronize(paths)
         end
+      elseif previous then
+        previous:terminate()
       end
     end
-
-    for _, child in ipairs(previous_children) do
-      if not vim.tbl_contains(current_paths, child.path) then
-        child:terminate()
+  elseif self:has_children() then
+    for _, child in ipairs(self:children()) do
+      if child.is_directory then
+        child:synchronize(paths)
       end
     end
-  else
-    self:terminate()
   end
 end
 
@@ -168,21 +155,10 @@ function entry:get_children()
   local entries = {}
 
   for name in vim.fs.dir(self.path) do
-    local is_included = true
     local absolute_path = self.path .. '/' .. name
     local relative_path = vim.fn.fnamemodify(absolute_path, ':.')
 
-    if settings.exclude then
-      for _, pattern in ipairs(settings.exclude) do
-        if string.find(relative_path, pattern) then
-          is_included = false
-
-          break
-        end
-      end
-    end
-
-    if is_included then
+    if not util.is_excluded(relative_path) then
       entries[#entries + 1] = entry.new(absolute_path, self)
     end
   end

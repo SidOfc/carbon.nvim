@@ -1,7 +1,18 @@
+local settings = require('carbon.settings')
 local util = {}
 local data = {
   augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
 }
+
+function util.is_excluded(path)
+  if settings.exclude then
+    for _, pattern in ipairs(settings.exclude) do
+      if string.find(path, pattern) then
+        return true
+      end
+    end
+  end
+end
 
 function util.cursor(row, col)
   return vim.api.nvim_win_set_cursor(0, { row, col })
@@ -173,7 +184,7 @@ end
 function util.create_scratch_buf(options)
   options = options or {}
   local buf = vim.api.nvim_create_buf(false, true)
-  local settings = vim.tbl_extend('force', {
+  local buffer_options = vim.tbl_extend('force', {
     bufhidden = 'wipe',
     buftype = 'nofile',
     swapfile = false,
@@ -196,7 +207,7 @@ function util.create_scratch_buf(options)
     util.set_buf_autocmds(buf, options.autocmds)
   end
 
-  for option, value in pairs(settings) do
+  for option, value in pairs(buffer_options) do
     vim.api.nvim_buf_set_option(buf, option, value)
   end
 
