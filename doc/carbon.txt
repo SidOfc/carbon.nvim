@@ -483,6 +483,14 @@ UTIL                                                                 *carbon-uti
   external to Carbon.
 
   `------------------------------------------------------------------------------`
+  is_excluded                                            *carbon-util-is-excluded*
+
+  Signature: `require('carbon.util').is_excluded(`{path}`)`
+
+  Returns `true` if given {path} matches any |carbon-setting-exclude|.
+  Will not be called when |carbon-settings-exclude| is set to `nil` or `false`.
+
+  `------------------------------------------------------------------------------`
   cursor                                                      *carbon-util-cursor*
 
   Signature: `require('carbon.util').cursor(`{row}, {col}`)`

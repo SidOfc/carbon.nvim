@@ -1,6 +1,5 @@
 local util = require('carbon.util')
 local watcher = require('carbon.watcher')
-local settings = require('carbon.settings')
 local entry = {}
 local data = { children = {}, open = {}, compressible = {} }
 
@@ -168,21 +167,10 @@ function entry:get_children()
   local entries = {}
 
   for name in vim.fs.dir(self.path) do
-    local is_included = true
     local absolute_path = self.path .. '/' .. name
     local relative_path = vim.fn.fnamemodify(absolute_path, ':.')
 
-    if settings.exclude then
-      for _, pattern in ipairs(settings.exclude) do
-        if string.find(relative_path, pattern) then
-          is_included = false
-
-          break
-        end
-      end
-    end
-
-    if is_included then
+    if not util.is_excluded(relative_path) then
       entries[#entries + 1] = entry.new(absolute_path, self)
     end
   end
