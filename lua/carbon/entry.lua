@@ -47,35 +47,37 @@ function entry.find(path)
   end
 end
 
-function entry:synchronize(resync_paths)
+function entry:synchronize(paths)
   if not self.is_directory then
     return
   end
 
-  if resync_paths[self.path] then
+  if paths[self.path] then
+    local all_paths = {}
+    local current_paths = {}
+    local previous_paths = {}
     local previous_children = data.children[self.path] or {}
-    local paths = { all = {}, previous = {}, current = {} }
 
     self:set_children(nil)
 
     for _, previous in ipairs(previous_children) do
-      paths.all[previous.path] = true
-      paths.previous[previous.path] = previous
+      all_paths[previous.path] = true
+      previous_paths[previous.path] = previous
     end
 
     for _, current in ipairs(self:children()) do
-      paths.all[current.path] = true
-      paths.current[current.path] = current
+      all_paths[current.path] = true
+      current_paths[current.path] = current
     end
 
-    for path in pairs(paths.all) do
-      local previous = paths.previous[path]
-      local current = paths.current[path]
+    for path in pairs(all_paths) do
+      local current = current_paths[path]
+      local previous = previous_paths[path]
 
       if previous and current then
         if current.is_directory then
           current:set_open(previous:is_open())
-          current:synchronize(resync_paths)
+          current:synchronize(paths)
         end
       elseif previous then
         previous:terminate()
@@ -84,7 +86,7 @@ function entry:synchronize(resync_paths)
   elseif self:has_children() then
     for _, child in ipairs(self:children()) do
       if child.is_directory then
-        child:synchronize(resync_paths)
+        child:synchronize(paths)
       end
     end
   end
