@@ -16,7 +16,7 @@ Carbon.nvim
 Carbon.nvim provides a simple tree view of the directory Neovim was opened with/in.
 Its main goal is to remain synchronized with the state of the current working directory.
 When files are added, moved/renamed, or removed, Carbon automatically updates its state
-to reflect these changes.
+to reflect these changes even if they were made external to Neovim.
 
 Special file types such as symlinks, broken symlinks, and executables are highlighted differently
 and deeply nested files and folders are compressed as much as possible to reduce the need to
@@ -97,6 +97,10 @@ See `:h carbon-setup` for a more detailed explanation on configuration.
 See `:h carbon-carbon-setup` for documentation about the `.setup` method.
 
 # Usage
+
+After installation, Carbon will launch automatically and disable NetRW.
+These behaviors and many others can be customized, see `:h carbon-settings` for
+more information about customization or `:h carbon-toc` for a table of contents.
 
 Carbon comes with a few commands and mappings out of the box, each is described below:
 
