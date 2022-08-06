@@ -1,5 +1,5 @@
+local constants = require('carbon.constants')
 local settings = require('carbon.settings')
-local ns = require('carbon.ns')
 local util = {}
 
 function util.is_excluded(path)
@@ -56,7 +56,7 @@ function util.autocmd(event, cmd_or_callback, opts)
   return vim.api.nvim_create_autocmd(
     event,
     vim.tbl_extend('force', {
-      group = ns.augroup,
+      group = constants.augroup,
       callback = cmd_or_callback,
     }, opts or {})
   )
@@ -64,7 +64,7 @@ end
 
 function util.clear_autocmd(event, opts)
   return vim.api.nvim_clear_autocmds(vim.tbl_extend('force', {
-    group = ns.augroup,
+    group = constants.augroup,
     event = event,
   }, opts or {}))
 end

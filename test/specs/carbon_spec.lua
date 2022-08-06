@@ -1,6 +1,6 @@
-local ns = require('carbon.ns')
 local util = require('carbon.util')
 local settings = require('carbon.settings')
+local constants = require('carbon.constants')
 
 local function cwd_dirname()
   return vim.fn.fnamemodify(vim.loop.cwd(), ':t') .. '/'
@@ -8,7 +8,7 @@ end
 
 local function get_carbon_autocmd(event)
   return vim.api.nvim_get_autocmds({
-    group = ns.augroup,
+    group = constants.augroup,
     event = event,
   })[1] or {}
 end

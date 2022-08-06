@@ -78,34 +78,34 @@ SETUP                                                               *carbon-setu
   are directly modified and no merging of any kind will occur.
 
 ================================================================================
-NS                                                                     *carbon-ns*
+CONSTANTS                                                       *carbon-constants*
 
-  Usage: `require('carbon.ns')`
+  Usage: `require('carbon.constants')`
 
-  Exposes a table containing all the namespaces which Carbon uses.
+  Exposes a table containing all the constants which Carbon uses.
 
   `------------------------------------------------------------------------------`
-  hl                                                                *carbon-ns-hl*
+  hl                                                         *carbon-constants-hl*
 
-  Usage: `require('carbon.ns').hl`
-  Name:  `carbon`
+  Usage: `require('carbon.constants').hl`
+  Value: `carbon`
 
   Used for all default highlighting.
 
   `------------------------------------------------------------------------------`
-  hl_tmp                                                        *carbon-ns-hl-tmp*
+  hl_tmp                                                 *carbon-constants-hl-tmp*
 
-  Usage: `require('carbon.ns').hl_tmp`
-  Name:  `carbon:tmp`
+  Usage: `require('carbon.constants').hl_tmp`
+  Value: `carbon:tmp`
 
   Used for temporary highlighting. Used only by |carbon-buffer-focus-flash|
   at the moment.
 
   `------------------------------------------------------------------------------`
-  augroup                                                      *carbon-ns-augroup*
+  augroup                                                *carbon-constants-augroup*
 
-  Usage: `require('carbon.ns').augroup`
-  Name:  `carbon:tmp`
+  Usage: `require('carbon.constants').augroup`
+  Value  `carbon:tmp`
 
   Used for temporary highlighting. Used only by |carbon-buffer-focus-flash|
   at the moment.
@@ -177,7 +177,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   BufEnter                                               *carbon-autocmd-bufenter*
 
-  Group:          `carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `BufEnter`
   Pattern:
   Implementation: `require('carbon.buffer').process_enter()`
@@ -188,7 +188,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   BufHidden                                             *carbon-autocmd-bufhidden*
 
-  Group:          `carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `BufHidden`
   Pattern:
   Implementation: `require('carbon.buffer').process_hidden()`
@@ -199,7 +199,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   CursorMovedI                                       *carbon-autocmd-cursormovedi*
 
-  Group:          `carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `CursorMovedI`
   Pattern:
   Implementation:
@@ -211,7 +211,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   DirChanged                                           *carbon-autocmd-dirchanged*
 
-  Group:          `carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `DirChanged`
   Pattern:        `global`
   Implementation: `require('carbon').cd()`
@@ -1068,6 +1068,9 @@ BUFFER                                                             *carbon-buffe
   milliseconds. {start} and {finish} must be values accepted by
   |vim.highlight.range|.
 
+  See |carbon-buffer-flash-bang| for more information about customizing the
+  highlighting properties when entries are revealed.
+
   `------------------------------------------------------------------------------`
   expand_to_path                                    *carbon-buffer-expand-to-path*
 
@@ -1315,7 +1318,7 @@ BUFFER                                                             *carbon-buffe
 
   `vim.api.nvim_buf_add_highlight(`
   `  buffer.handle(),`
-  `  data.ns,`
+  `  require('util.constants').hl,`
   `  highlight[1],` => `<string HighlightGroupName>`
   `  lnum - 1,`
   `  highlight[2],` => `<number start_column>`
@@ -1997,6 +2000,8 @@ SETTINGS                                                         *carbon-setting
   Controls highlight {delay} and {duration} for entries revealed by
   |carbon-buffer-expand-to-path|. Setting it to `nil` will disable
   highlighting of revealed entries.
+
+  Uses |carbon-setting-highlights-CarbonFlash| to highlight the revealed entry.
 
   `------------------------------------------------------------------------------`
   float_settings                                   *carbon-setting-float-settings*
