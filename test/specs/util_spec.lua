@@ -1,5 +1,6 @@
 local spy = require('luassert.spy')
 local util = require('carbon.util')
+local helpers = require('test.config.helpers')
 
 describe('carbon.util', function()
   describe('cursor', function()
@@ -24,6 +25,10 @@ describe('carbon.util', function()
   describe('plug', function()
     it('returns <plug>(carbon-{name})', function()
       assert.equal('<plug>(carbon-test)', util.plug('test'))
+    end)
+
+    it('converts snake_case to kebab-case', function()
+      assert.equal('<plug>(carbon-snake-to-kebab)', util.plug('snake_to_kebab'))
     end)
   end)
 
@@ -73,16 +78,61 @@ describe('carbon.util', function()
 
   describe('set_buf_mappings', function()
     it('sets {mappings} local to {buf}', function()
-      local function unmap()
+      assert.error(function()
         vim.keymap.del('n', '<c-z>', { buffer = 0 })
-      end
-
-      assert.error(unmap)
+      end)
 
       util.set_buf_mappings(0, { { 'n', '<c-z>', function() end } })
 
-      assert.not_error(unmap)
-      assert.error(unmap)
+      assert.not_error(function()
+        vim.keymap.del('n', '<c-z>', { buffer = 0 })
+      end)
+    end)
+  end)
+
+  describe('autocmd', function()
+    it('creates a buffer local autocommand', function()
+      local scratch = util.create_scratch_buf()
+
+      util.autocmd('FileAppendCmd', function() end, { buffer = scratch })
+
+      local autocmd = helpers.autocmd('FileAppendCmd', { buffer = scratch })
+
+      assert.same(scratch, autocmd.buffer)
+      assert.is_true(autocmd.buflocal)
+
+      vim.api.nvim_buf_delete(scratch, { force = true })
+    end)
+  end)
+
+  describe('clear_autocmd', function()
+    it('clears a buffer local autocmd', function()
+      local scratch = util.create_scratch_buf()
+
+      util.autocmd('FileAppendCmd', function() end, { buffer = scratch })
+      util.clear_autocmd('FileAppendCmd', { buffer = scratch })
+
+      local autocmd = helpers.autocmd('FileAppendCmd', { buffer = scratch })
+
+      assert.is_nil(autocmd.buffer)
+      assert.is_nil(autocmd.buflocal)
+
+      vim.api.nvim_buf_delete(scratch, { force = true })
+    end)
+  end)
+
+  describe('set_buf_autocmds', function()
+    it('sets {autocmds} local to {buf}', function()
+      local scratch = util.create_scratch_buf()
+
+      util.set_buf_autocmds(scratch, { FileAppendCmd = function() end })
+
+      local autocmd = helpers.autocmd('FileAppendCmd', { buffer = scratch })
+
+      assert.same(scratch, autocmd.buffer)
+      assert.is_true(autocmd.buflocal)
+
+      vim.api.nvim_buf_delete(scratch, { force = true })
     end)
   end)
 
@@ -93,6 +143,60 @@ describe('carbon.util', function()
       util.set_winhl(0, { FloatBorder = 'Normal' })
 
       assert.not_equal(initial, vim.wo.winhl)
+    end)
+  end)
+
+  describe('create_scratch_buf', function()
+    it('sets {options}.name', function()
+      local scratch = util.create_scratch_buf({
+        name = 'scratch-test',
+      })
+
+      assert.is_same(
+        'scratch-test',
+        vim.fn.fnamemodify(vim.api.nvim_buf_get_name(scratch), ':t')
+      )
+
+      vim.api.nvim_buf_delete(scratch, { force = true })
+    end)
+
+    it('sets {options}.lines', function()
+      local scratch = util.create_scratch_buf({
+        lines = { 'hello', 'world' },
+      })
+
+      assert.same(
+        { 'hello', 'world' },
+        vim.api.nvim_buf_get_lines(scratch, 0, -1, true)
+      )
+
+      vim.api.nvim_buf_delete(scratch, { force = true })
+    end)
+
+    it('sets {options}.mappings', function()
+      local scratch = util.create_scratch_buf({
+        mappings = { { 'n', '<c-z>', function() end } },
+      })
+
+      assert.not_error(function()
+        vim.keymap.del('n', '<c-z>', { buffer = scratch })
+      end)
+
+      vim.api.nvim_buf_delete(scratch, { force = true })
+    end)
+
+    it('sets {options}.autocmds', function()
+      local scratch = util.create_scratch_buf({
+        autocmds = {
+          FileAppendCmd = function() end,
+        },
+      })
+
+      local autocmd = helpers.autocmd('FileAppendCmd', { buffer = scratch })
+
+      assert.is_number(autocmd.id)
+
+      vim.api.nvim_buf_delete(scratch, { force = true })
     end)
   end)
 end)

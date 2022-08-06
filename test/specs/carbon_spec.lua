@@ -1,58 +1,81 @@
 local util = require('carbon.util')
 local settings = require('carbon.settings')
-local constants = require('carbon.constants')
-
-local function cwd_dirname()
-  return vim.fn.fnamemodify(vim.loop.cwd(), ':t') .. '/'
-end
-
-local function get_carbon_autocmd(event)
-  return vim.api.nvim_get_autocmds({
-    group = constants.augroup,
-    event = event,
-  })[1] or {}
-end
+local helpers = require('test.config.helpers')
 
 describe('carbon', function()
-  it('opens a buffer with name "carbon"', function()
-    assert.equal('carbon', vim.fn.bufname())
+  describe('initialization', function()
+    it('buffer has name "carbon"', function()
+      assert.equal('carbon', vim.fn.bufname())
+    end)
+
+    it('buffer has filetype "carbon"', function()
+      assert.equal('carbon', vim.o.filetype)
+      assert.equal('carbon', vim.bo.filetype)
+    end)
+
+    it('shows contents of current directory', function()
+      assert.same({
+        vim.fn.fnamemodify(vim.loop.cwd(), ':t') .. '/',
+        '  dev/init.lua',
+        '+ doc/',
+        '+ lua/',
+        '  plugin/carbon.vim',
+        '+ test/',
+        '  .luacheckrc',
+        '  LICENSE.md',
+        '  Makefile',
+        '  README.md',
+        '  stylua.toml',
+      }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
+    end)
   end)
 
-  it('opens a buffer with filetype "carbon"', function()
-    assert.equal('carbon', vim.o.filetype)
-    assert.equal('carbon', vim.bo.filetype)
-  end)
-
-  it('displays the contents of the current directory', function()
-    assert.same({
-      cwd_dirname(),
-      '  dev/init.lua',
-      '+ doc/',
-      '+ lua/',
-      '  plugin/carbon.vim',
-      '+ test/',
-      '  .luacheckrc',
-      '  LICENSE.md',
-      '  Makefile',
-      '  README.md',
-      '  stylua.toml',
-    }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
-  end)
-
-  describe('default autocommands', function()
+  describe('autocommands', function()
     describe('DirChanged', function()
-      local autocmd = get_carbon_autocmd('DirChanged')
-
       it('exists', function()
+        local autocmd = helpers.autocmd('DirChanged')
+
         assert.is_number(autocmd.id)
       end)
 
-      it('not buffer local', function()
+      it('is not buffer local', function()
+        local autocmd = helpers.autocmd('DirChanged')
+
         assert.is_false(autocmd.buflocal)
       end)
 
       it('pattern is global', function()
-        assert.is_same('global', autocmd.pattern)
+        local autocmd = helpers.autocmd('DirChanged')
+
+        assert.same('global', autocmd.pattern)
+      end)
+    end)
+
+    describe('BufWinEnter', function()
+      it('exists', function()
+        local autocmd = helpers.autocmd('BufWinEnter')
+
+        assert.is_number(autocmd.id)
+      end)
+
+      it('is buffer local', function()
+        local autocmd = helpers.autocmd('BufWinEnter')
+
+        assert.is_true(autocmd.buflocal)
+      end)
+    end)
+
+    describe('BufHidden', function()
+      it('exists', function()
+        local autocmd = helpers.autocmd('BufHidden')
+
+        assert.is_number(autocmd.id)
+      end)
+
+      it('is buffer local', function()
+        local autocmd = helpers.autocmd('BufHidden')
+
+        assert.is_true(autocmd.buflocal)
       end)
     end)
   end)
