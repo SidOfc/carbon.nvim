@@ -23,7 +23,7 @@ function util.is_directory(path)
 end
 
 function util.plug(name)
-  return string.format('<plug>(carbon-%s)', name)
+  return string.format('<plug>(carbon-%s)', string.gsub(name, '_', '-'))
 end
 
 function util.tbl_key(tbl, item)
