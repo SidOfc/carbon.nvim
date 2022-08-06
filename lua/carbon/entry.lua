@@ -25,8 +25,6 @@ function entry.new(path, parent)
 
   if is_symlink and not select(2, pcall(vim.loop.fs_stat, clean)) then
     is_symlink = 2
-  elseif is_directory then
-    watcher.register(clean)
   end
 
   return setmetatable({

@@ -1,5 +1,6 @@
 local util = require('carbon.util')
 local entry = require('carbon.entry')
+local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local buffer = {}
 local internal = {}
@@ -185,6 +186,8 @@ function buffer.lines(input_target, lines, depth)
       highlights = { { 'CarbonDir', 0, -1 } },
       path = {},
     }
+
+    watcher.register(data.root.path)
   end
 
   for _, child in ipairs(target:children()) do
@@ -203,12 +206,16 @@ function buffer.lines(input_target, lines, depth)
         and #tmp:children() == 1
         and tmp:is_compressible()
       do
+        watcher.register(tmp.path)
+
         path[#path + 1] = tmp
         tmp = tmp:children()[1]
       end
     end
 
     if tmp.is_directory then
+      watcher.register(tmp.path)
+
       is_empty = #tmp:children() == 0
       path_suffix = '/'
 
