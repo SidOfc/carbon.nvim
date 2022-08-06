@@ -39,22 +39,6 @@ function entry.new(path, parent)
   }, entry)
 end
 
-function entry.clean(path)
-  for parent_path, children in pairs(data.children) do
-    if not vim.startswith(parent_path, path) then
-      watcher.release(parent_path)
-
-      for _, child in ipairs(children) do
-        watcher.release(child.path)
-      end
-
-      data.children[parent_path] = nil
-    end
-  end
-
-  watcher.register(path)
-end
-
 function entry.find(path)
   for _, children in pairs(data.children) do
     for _, child in ipairs(children) do

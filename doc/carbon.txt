@@ -854,20 +854,6 @@ ENTRY                                                               *carbon-entr
   For more information about entry objects, see: |carbon-entry-new|.
 
   `------------------------------------------------------------------------------`
-  clean                                                       *carbon-entry-clean*
-
-  Signature: `require('carbon.entry').clean(`{path}`)`
-
-  Removes all parent and sibling files and directories from the internal
-  children cache used by Carbon. Also removes watchers from all removed
-  children using |carbon-watcher-release|.
-
-  WARNING:
-  It is not recommended to call this method manually because it
-  has a high likelyhood of breaking Carbon if not used with caution. It is
-  only documented for completeness.
-
-  `------------------------------------------------------------------------------`
   synchronize                                           *carbon-entry-synchronize*
 
   Signature: `entry:synchronize()`
@@ -1719,13 +1705,14 @@ WATCHER                                                           *carbon-watche
   which support some shortcuts.
 
   `------------------------------------------------------------------------------`
-  clear                                                     *carbon-watcher-clear*
+  keep                                                       *carbon-watcher-keep*
 
-  Signature: `require('carbon.watcher').clear()`
+  Signature: `require('carbon.watcher').keep(`{callback}`)`
 
-  This method calls |carbon-watcher-release| on all paths registered using
-  |carbon-watcher-register|. This unregisters all the paths but leaves the
-  callbacks intact.
+  Calls {callback} for each `path` which is currently being listened to.
+  When {callback} returns `true` for a `path`, it will be kept.
+  Otherwise, when `false` is returned |carbon-watcher-release| will be
+  called with `path`.
 
   `------------------------------------------------------------------------------`
   release                                                 *carbon-watcher-release*

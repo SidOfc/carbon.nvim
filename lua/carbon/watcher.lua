@@ -4,9 +4,11 @@ local data = {
   events = { change = {}, rename = {}, ['change-and-rename'] = {} },
 }
 
-function watcher.clear()
+function watcher.keep(callback)
   for path in pairs(data.listeners) do
-    watcher.release(path)
+    if not callback(path) then
+      watcher.release(path)
+    end
   end
 end
 

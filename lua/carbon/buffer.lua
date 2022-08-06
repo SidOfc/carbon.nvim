@@ -351,7 +351,10 @@ function buffer.set_root(target)
   end
 
   data.root = target
-  entry.clean(data.root.path)
+
+  watcher.keep(function(path)
+    return vim.startswith(path, data.root.path)
+  end)
 
   if settings.sync_pwd then
     vim.api.nvim_set_current_dir(data.root.path)
