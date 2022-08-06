@@ -1,8 +1,6 @@
+local constants = require('carbon.constants')
 local settings = require('carbon.settings')
 local util = {}
-local data = {
-  augroup = vim.api.nvim_create_augroup('Carbon', { clear = false }),
-}
 
 function util.is_excluded(path)
   if settings.exclude then
@@ -15,7 +13,7 @@ function util.is_excluded(path)
 end
 
 function util.cursor(row, col)
-  return vim.api.nvim_win_set_cursor(0, { row, col })
+  return vim.api.nvim_win_set_cursor(0, { row, col - 1 })
 end
 
 function util.is_directory(path)
@@ -58,7 +56,7 @@ function util.autocmd(event, cmd_or_callback, opts)
   return vim.api.nvim_create_autocmd(
     event,
     vim.tbl_extend('force', {
-      group = data.augroup,
+      group = constants.augroup,
       callback = cmd_or_callback,
     }, opts or {})
   )
@@ -66,8 +64,8 @@ end
 
 function util.clear_autocmd(event, opts)
   return vim.api.nvim_clear_autocmds(vim.tbl_extend('force', {
+    group = constants.augroup,
     event = event,
-    group = data.augroup,
   }, opts or {}))
 end
 
@@ -160,7 +158,7 @@ function util.confirm(options)
   util.set_buf_autocmds(buf, {
     BufLeave = finish('cancel'),
     CursorMoved = function()
-      util.cursor(vim.fn.line('.'), 2)
+      util.cursor(vim.fn.line('.'), 3)
     end,
   })
 

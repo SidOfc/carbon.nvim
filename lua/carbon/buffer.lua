@@ -2,15 +2,11 @@ local util = require('carbon.util')
 local entry = require('carbon.entry')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
+local constants = require('carbon.constants')
 local buffer = {}
 local internal = {}
 local open_cwd = vim.loop.cwd()
-local data = {
-  root = entry.new(open_cwd),
-  handle = -1,
-  ns = vim.api.nvim_create_namespace('carbon'),
-  resync_paths = {},
-}
+local data = { root = entry.new(open_cwd), resync_paths = {}, handle = -1 }
 
 function buffer.launch(target)
   buffer.set_root(target)
@@ -80,7 +76,7 @@ function buffer.render()
     lines[#lines + 1] = line_data.line
 
     if data.flash and data.flash.path == line_data.entry.path then
-      cursor = { lnum = lnum, col = (line_data.depth + 1) * 2 }
+      cursor = { lnum = lnum, col = 1 + (line_data.depth + 1) * 2 }
     end
 
     for _, hl in ipairs(line_data.highlights) do
@@ -103,7 +99,7 @@ function buffer.render()
         buffer.focus_flash(
           settings.flash.duration,
           'CarbonFlash',
-          { cursor.lnum - 1, cursor.col },
+          { cursor.lnum - 1, cursor.col - 1 },
           { cursor.lnum - 1, -1 }
         )
       end, settings.flash.delay)
@@ -535,25 +531,25 @@ function buffer.create()
   util.autocmd('CursorMovedI', internal.create_insert_move(ctx), { buffer = 0 })
   vim.keymap.set('i', '<cr>', internal.create_confirm(ctx), { buffer = 0 })
   vim.keymap.set('i', '<esc>', internal.create_cancel(ctx), { buffer = 0 })
-  util.cursor(ctx.edit_lnum + 1, ctx.edit_col - 1)
+  util.cursor(ctx.edit_lnum + 1, ctx.edit_col)
   vim.api.nvim_buf_set_option(data.handle, 'modifiable', true)
   vim.cmd({ cmd = 'startinsert', bang = true })
 end
 
 function buffer.clear_extmarks(...)
-  local extmarks = vim.api.nvim_buf_get_extmarks(data.handle, data.ns, ...)
+  local extmarks = vim.api.nvim_buf_get_extmarks(data.handle, constants.hl, ...)
 
   for _, extmark in ipairs(extmarks) do
-    vim.api.nvim_buf_del_extmark(data.handle, data.ns, extmark[1])
+    vim.api.nvim_buf_del_extmark(data.handle, constants.hl, extmark[1])
   end
 end
 
 function buffer.clear_namespace(...)
-  vim.api.nvim_buf_clear_namespace(data.handle, data.ns, ...)
+  vim.api.nvim_buf_clear_namespace(data.handle, constants.hl, ...)
 end
 
 function buffer.add_highlight(...)
-  vim.api.nvim_buf_add_highlight(data.handle, data.ns, ...)
+  vim.api.nvim_buf_add_highlight(data.handle, constants.hl, ...)
 end
 
 function buffer.set_lines(start_lnum, end_lnum, lines)
@@ -621,7 +617,7 @@ end
 function internal.create_leave(ctx)
   vim.cmd({ cmd = 'stopinsert' })
   ctx.target:set_compressible(ctx.prev_compressible)
-  util.cursor(ctx.target_line.lnum, 0)
+  util.cursor(ctx.target_line.lnum, 1)
   vim.keymap.del('i', '<cr>', { buffer = 0 })
   vim.keymap.del('i', '<esc>', { buffer = 0 })
   util.clear_autocmd('CursorMovedI', { buffer = 0 })
@@ -637,17 +633,15 @@ function internal.create_insert_move(ctx)
     buffer.clear_extmarks({ ctx.edit_lnum, 0 }, { ctx.edit_lnum, -1 }, {})
     buffer.add_highlight('CarbonDir', ctx.edit_lnum, 0, last_slash_col)
     buffer.add_highlight('CarbonFile', ctx.edit_lnum, last_slash_col, -1)
-    util.cursor(ctx.edit_lnum + 1, math.max(ctx.edit_col, vim.fn.col('.') - 1))
+    util.cursor(ctx.edit_lnum + 1, math.max(ctx.edit_col, vim.fn.col('.')))
   end
 end
 
 function buffer.focus_flash(duration, group, start, finish)
-  local ns = vim.api.nvim_create_namespace('carbon.buffer.focus_flash')
-
-  vim.highlight.range(data.handle, ns, group, start, finish, {})
+  vim.highlight.range(data.handle, constants.hl_tmp, group, start, finish, {})
   vim.defer_fn(function()
     if buffer.is_loaded() then
-      vim.api.nvim_buf_clear_namespace(data.handle, ns, 0, -1)
+      vim.api.nvim_buf_clear_namespace(data.handle, constants.hl_tmp, 0, -1)
     end
   end, duration)
 end

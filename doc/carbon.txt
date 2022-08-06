@@ -12,17 +12,20 @@ TABLE OF CONTENTS                                     *carbon-contents* *carbon-
   To quickly jump to this table of contents, use |gg| or |go|.
   To navigate to the helptag below the cursor, use CTRL-].
 
-  TABLE OF CONTENTS `.........` |carbon-contents|
-  USAGE `.....................` |carbon-usage|
-  SETUP `.....................` |carbon-setup|
-  COMMANDS `..................` |carbon-commands|
-  PLUGS `.....................` |carbon-plugs|
-  CARBON `....................` |carbon-carbon|
-  UTIL `......................` |carbon-util|
-  ENTRY `.....................` |carbon-entry|
-  BUFFER `....................` |carbon-buffer|
-  WATCHER `...................` |carbon-watcher|
-  SETTINGS `..................` |carbon-settings|
+  TABLE OF CONTENTS `....` |carbon-contents|
+  `--------------------------------------`
+  USAGE `................` |carbon-usage|
+  SETUP `................` |carbon-setup|
+
+  NS `...................` |carbon-ns|
+  UTIL `.................` |carbon-util|
+  ENTRY `................` |carbon-entry|
+  PLUGS `................` |carbon-plugs|
+  BUFFER `...............` |carbon-buffer|
+  CARBON `...............` |carbon-carbon|
+  WATCHER `..............` |carbon-watcher|
+  COMMANDS `.............` |carbon-commands|
+  SETTINGS `.............` |carbon-settings|
 
 ================================================================================
 USAGE                                                               *carbon-usage*
@@ -75,6 +78,39 @@ SETUP                                                               *carbon-setu
   are directly modified and no merging of any kind will occur.
 
 ================================================================================
+CONSTANTS                                                       *carbon-constants*
+
+  Usage: `require('carbon.constants')`
+
+  Exposes a table containing all the constants which Carbon uses.
+
+  `------------------------------------------------------------------------------`
+  hl                                                         *carbon-constants-hl*
+
+  Usage: `require('carbon.constants').hl`
+  Value: `carbon`
+
+  Used for all default highlighting.
+
+  `------------------------------------------------------------------------------`
+  hl_tmp                                                 *carbon-constants-hl-tmp*
+
+  Usage: `require('carbon.constants').hl_tmp`
+  Value: `carbon:tmp`
+
+  Used for temporary highlighting. Used only by |carbon-buffer-focus-flash|
+  at the moment.
+
+  `------------------------------------------------------------------------------`
+  augroup                                                *carbon-constants-augroup*
+
+  Usage: `require('carbon.constants').augroup`
+  Value  `carbon:tmp`
+
+  Used for temporary highlighting. Used only by |carbon-buffer-focus-flash|
+  at the moment.
+
+================================================================================
 COMMANDS                                                         *carbon-commands*
 
   This section documents the behavior as well as the implementation of the
@@ -83,7 +119,7 @@ COMMANDS                                                         *carbon-command
   `------------------------------------------------------------------------------`
   Carbon                                                                  *Carbon*
 
-  Implementation: `:lua require('carbon').explore()`
+  Implementation: `require('carbon').explore()`
   Alias:          `Explore` unless |carbon-setting-keep-netrw| is enabled.
 
   Replaces the current buffer with the Carbon buffer.
@@ -94,7 +130,7 @@ COMMANDS                                                         *carbon-command
   `------------------------------------------------------------------------------`
   Lcarbon                                                                *Lcarbon*
 
-  Implementation: `:lua require('carbon').explore_left()`
+  Implementation: `require('carbon').explore_left()`
   Alias:          `Lexplore` unless |carbon-setting-keep-netrw| is enabled.
 
   Opens the Carbon buffer in a new vertical split. When Carbon is opened this
@@ -111,7 +147,7 @@ COMMANDS                                                         *carbon-command
   `------------------------------------------------------------------------------`
   Fcarbon                                                                *Fcarbon*
 
-  Implementation: `:lua require('carbon').explore_float()`
+  Implementation: `require('carbon').explore_float()`
 
   Opens the Carbon buffer in a floating window. When Carbon is opened this
   way, Carbon will open files the following way:
@@ -141,10 +177,10 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   BufEnter                                               *carbon-autocmd-bufenter*
 
-  Group:          `Carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `BufEnter`
   Pattern:
-  Implementation: `lua require('carbon.buffer').process_enter()`
+  Implementation: `require('carbon.buffer').process_enter()`
 
   Local to Carbon buffers.
   Calls |carbon-buffer-process-enter| when entering a Carbon buffer.
@@ -152,10 +188,10 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   BufHidden                                             *carbon-autocmd-bufhidden*
 
-  Group:          `Carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `BufHidden`
   Pattern:
-  Implementation: `lua require('carbon.buffer').process_hidden()`
+  Implementation: `require('carbon.buffer').process_hidden()`
 
   Local to Carbon buffers.
   Calls |carbon-buffer-process-hidden| when the Carbon buffer is hidden.
@@ -163,7 +199,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   CursorMovedI                                       *carbon-autocmd-cursormovedi*
 
-  Group:          `Carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `CursorMovedI`
   Pattern:
   Implementation:
@@ -175,10 +211,10 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   DirChanged                                           *carbon-autocmd-dirchanged*
 
-  Group:          `Carbon`
+  Group:          |carbon-constants-augroup|
   Event:          `DirChanged`
   Pattern:        `global`
-  Implementation: `lua require('carbon').cd()`
+  Implementation: `require('carbon').cd()`
 
   Calls |carbon-buffer-cd| when changing |pwd| using |cd|.
 
@@ -573,7 +609,7 @@ UTIL                                                                 *carbon-uti
   optional, when not passed it will default to an empty table.
 
   {lhs} must be a string containing the key name for this |user-command|.
-  {rhs} must be a vim command string or a lua callback.
+  {rhs} must be a vim command string or a Lua callback.
   {options} must be a table if supplied.
 
   `------------------------------------------------------------------------------`
@@ -1032,6 +1068,9 @@ BUFFER                                                             *carbon-buffe
   milliseconds. {start} and {finish} must be values accepted by
   |vim.highlight.range|.
 
+  See |carbon-buffer-flash-bang| for more information about customizing the
+  highlighting properties when entries are revealed.
+
   `------------------------------------------------------------------------------`
   expand_to_path                                    *carbon-buffer-expand-to-path*
 
@@ -1279,7 +1318,7 @@ BUFFER                                                             *carbon-buffe
 
   `vim.api.nvim_buf_add_highlight(`
   `  buffer.handle(),`
-  `  data.ns,`
+  `  require('util.constants').hl,`
   `  highlight[1],` => `<string HighlightGroupName>`
   `  lnum - 1,`
   `  highlight[2],` => `<number start_column>`
@@ -1738,8 +1777,7 @@ WATCHER                                                           *carbon-watche
   Signature: `require('carbon.watcher').register(`{path}`)`
 
   Register an absolute {path}. Once registered, any changes made to this path
-  will emit events based on events received from Neovim's lua libuv api
-  |vim.loop|.
+  will emit events based on events received from Neovim's Lua |vim.loop| api.
 
 ================================================================================
 SETTINGS                                                         *carbon-settings*
@@ -1932,7 +1970,7 @@ SETTINGS                                                         *carbon-setting
     `  'node_modules',`
     `}`
 
-  Paths matching any lua pattern are filtered removed. For more information
+  Paths matching any Lua pattern are filtered removed. For more information
   about these patterns, see: https://www.lua.org/pil/20.2.html.
   This setting may be set to `nil` to show everything.
 
@@ -1962,6 +2000,8 @@ SETTINGS                                                         *carbon-setting
   Controls highlight {delay} and {duration} for entries revealed by
   |carbon-buffer-expand-to-path|. Setting it to `nil` will disable
   highlighting of revealed entries.
+
+  Uses |carbon-setting-highlights-CarbonFlash| to highlight the revealed entry.
 
   `------------------------------------------------------------------------------`
   float_settings                                   *carbon-setting-float-settings*

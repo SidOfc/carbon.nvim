@@ -3,8 +3,13 @@ local buffer = require('carbon.buffer')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local carbon = {}
+local data = { initialized = false }
 
 function carbon.setup(user_settings)
+  if data.initialized then
+    return
+  end
+
   if type(user_settings) == 'function' then
     user_settings(settings)
   else
@@ -19,6 +24,10 @@ function carbon.setup(user_settings)
 end
 
 function carbon.initialize()
+  if data.initialized then
+    return
+  end
+
   watcher.on('*', buffer.process_event)
 
   util.command('Carbon', carbon.explore, { bang = true })
@@ -202,21 +211,21 @@ end
 
 function carbon.up()
   if buffer.up() then
-    util.cursor(1, 0)
+    util.cursor(1, 1)
     buffer.render()
   end
 end
 
 function carbon.reset()
   if buffer.reset() then
-    util.cursor(1, 0)
+    util.cursor(1, 1)
     buffer.render()
   end
 end
 
 function carbon.down()
   if buffer.down() then
-    util.cursor(1, 0)
+    util.cursor(1, 1)
     buffer.render()
   end
 end
@@ -225,7 +234,7 @@ function carbon.cd(path)
   local destination = path and path.file or path or vim.v.event.cwd
 
   if buffer.cd(destination) then
-    util.cursor(1, 0)
+    util.cursor(1, 1)
     buffer.render()
   end
 end
