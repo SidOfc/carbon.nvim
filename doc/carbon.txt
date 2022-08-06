@@ -856,25 +856,35 @@ ENTRY                                                               *carbon-entr
   `------------------------------------------------------------------------------`
   synchronize                                           *carbon-entry-synchronize*
 
-  Signature: `entry:synchronize()`
+  Signature: `entry:synchronize(`{paths}`)`
 
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| method.
 
-  When `entry.is_directory` is `false`, nothing happens because Carbon only
-  listens to changes to and within directories.
+  Returns `nil` when `entry.is_directory` is `false`.
 
-  When `entry.is_directory` is `true` and |isdirectory| of `entry.path` is `1`,
-  synchronizes all its children with the current state of the file system
-  recursively. Files and folders that were added, removed, renamed, or had
-  their permissions changed within `entry.path` will be refreshed.
+  When `entry.path` is not an existing key in the {paths} table and
+  `entry:has_children()` is true, calls |carbon-entry-synchronize| on each
+  child in `entry:children()`.
 
-  When `entry.is_directory` is `true` and |isdirectory| of `entry.path` is `0`
-  then |carbon-entry-terminate| is called.
+  When `entry.path` is an existing key in the {paths} table the previous
+  children will be compared with the current children.
 
-  The method |carbon-watcher-release| will be called with the `path` of each
-  entry that will be removed. New entries will automatically call
-  |carbon-watcher-register| in |carbon-entry-new|.
+  This is done by collecting a list of unique paths from both previous and
+  current children and then looping over each. Each unique path may have a
+  `previous` and a `current` version. The following rules are then applied:
+
+  1. When both `previous` and `current` are available and `current.is_directory`
+     is `true` then |carbon-entry-set-open| is called on `current` with the value
+     of |carbon-entry-is-open| of `previous` and finally `entry:synchronize(`{paths}`)`
+     is called.
+
+  2. When `previous` exists but `current` does not then
+     |carbon-entry-terminate| is called on `previous`.
+
+  3. When `current` exists but `previous` does not then nothing happens. The
+     `current` entry is already an active child and `previous` has already
+     been terminated.
 
   `------------------------------------------------------------------------------`
   terminate                                               *carbon-entry-terminate*

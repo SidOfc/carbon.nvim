@@ -282,31 +282,10 @@ function buffer.lines(input_target, lines, depth)
 end
 
 function buffer.synchronize()
-  local paths = vim.tbl_keys(data.resync_paths)
-  data.resync_paths = {}
-
-  table.sort(paths, function(a, b)
-    return #a < #b
-  end)
-
-  for idx = #paths, 1, -1 do
-    local path = paths[idx]
-    local found_path = util.tbl_find(paths, function(other)
-      return path ~= other and vim.startswith(path, other)
-    end)
-
-    if not found_path then
-      local found_entry = entry.find(path)
-
-      if found_entry then
-        found_entry:synchronize()
-      elseif path == data.root.path then
-        data.root:synchronize()
-      end
-    end
-  end
-
+  data.root:synchronize(data.resync_paths)
   buffer.render()
+
+  data.resync_paths = {}
 end
 
 function buffer.up(count)

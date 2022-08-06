@@ -47,42 +47,46 @@ function entry.find(path)
   end
 end
 
-function entry:synchronize()
+function entry:synchronize(resync_paths)
   if not self.is_directory then
     return
   end
 
-  if util.is_directory(self.path) then
-    local current_paths = {}
+  if resync_paths[self.path] then
     local previous_children = data.children[self.path] or {}
-    data.children[self.path] = nil
+    local paths = { all = {}, previous = {}, current = {} }
+
+    self:set_children(nil)
 
     for _, previous in ipairs(previous_children) do
-      watcher.release(previous.path)
+      paths.all[previous.path] = true
+      paths.previous[previous.path] = previous
     end
 
-    for _, child in ipairs(self:children()) do
-      current_paths[#current_paths + 1] = child.path
-      local previous = util.tbl_find(previous_children, function(previous)
-        return previous.path == child.path
-      end)
+    for _, current in ipairs(self:children()) do
+      paths.all[current.path] = true
+      paths.current[current.path] = current
+    end
 
-      if previous then
-        child:set_open(previous:is_open())
+    for path in pairs(paths.all) do
+      local previous = paths.previous[path]
+      local current = paths.current[path]
 
-        if previous:has_children() then
-          child:synchronize()
+      if previous and current then
+        if current.is_directory then
+          current:set_open(previous:is_open())
+          current:synchronize(resync_paths)
         end
+      elseif previous then
+        previous:terminate()
       end
     end
-
-    for _, child in ipairs(previous_children) do
-      if not vim.tbl_contains(current_paths, child.path) then
-        child:terminate()
+  elseif self:has_children() then
+    for _, child in ipairs(self:children()) do
+      if child.is_directory then
+        child:synchronize(resync_paths)
       end
     end
-  else
-    self:terminate()
   end
 end
 
