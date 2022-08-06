@@ -57,7 +57,7 @@ describe('carbon', function()
     end)
   end)
 
-  describe('plug mappings', function()
+  describe('keymaps', function()
     for action in pairs(settings.actions) do
       local plug = util.plug(action)
 
@@ -67,9 +67,7 @@ describe('carbon', function()
         )
       end)
     end
-  end)
 
-  describe('action mappings', function()
     for action, key in pairs(settings.actions) do
       local plug = util.plug(action)
 
