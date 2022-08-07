@@ -8,9 +8,9 @@ describe('carbon', function()
       assert.equal('carbon', vim.fn.bufname())
     end)
 
-    it('buffer has filetype "carbon"', function()
-      assert.equal('carbon', vim.o.filetype)
-      assert.equal('carbon', vim.bo.filetype)
+    it('buffer has filetype "carbon.explorer"', function()
+      assert.equal('carbon.explorer', vim.o.filetype)
+      assert.equal('carbon.explorer', vim.bo.filetype)
     end)
 
     it('shows contents of current directory', function()
