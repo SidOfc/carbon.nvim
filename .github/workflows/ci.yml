@@ -1,7 +1,7 @@
 name: CI
 on: [push]
 jobs:
-  setup:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -12,16 +12,19 @@ jobs:
           sudo apt update
           sudo apt install -y neovim lua-check
 
-  lint:
-    runs-on: ubuntu-latest
-    needs: [setup]
-    steps:
       - name: Lint
         run: make lint
 
   test:
     runs-on: ubuntu-latest
-    needs: [setup]
     steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository ppa:neovim-ppa/unstable
+          sudo apt update
+          sudo apt install -y neovim lua-check
+
       - name: Test
         run: make test
