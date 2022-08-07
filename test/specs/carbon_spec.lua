@@ -16,6 +16,7 @@ describe('carbon', function()
     it('shows contents of current directory', function()
       assert.same({
         vim.fn.fnamemodify(vim.loop.cwd(), ':t') .. '/',
+        '  .github/workflows/ci.yml',
         '  dev/init.lua',
         '+ doc/',
         '+ lua/',
