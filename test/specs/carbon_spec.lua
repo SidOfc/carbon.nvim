@@ -4,10 +4,6 @@ local helpers = require('test.config.helpers')
 
 describe('carbon', function()
   describe('initialization', function()
-    it('shall not pass', function()
-      assert.equal(true, false)
-    end)
-
     it('buffer has name "carbon"', function()
       assert.equal('carbon', vim.fn.bufname())
     end)
