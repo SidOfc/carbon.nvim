@@ -262,3 +262,64 @@ to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion di
 or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
+
+# Development
+
+The following dependencies must be installed before you can work on carbon.nvim:
+
+- [git](https://git-scm.com/)
+- [make](https://www.gnu.org/software/make/)
+- [neovim](https://github.com/neovim/neovim)
+- [stylua](https://github.com/JohnnyMorganz/StyLua)
+- [luacheck](https://github.com/mpeterv/luacheck)
+
+## Running tasks
+
+The `make` command is used to perform various tasks such as running the tests or
+linting the code. The [Makefile](/Makefile) defines the following tasks:
+
+- [`all`](/Makefile#L2-L4)
+- [`test`](/Makefile#L6-L8)
+- [`lint`](/Makefile#L10-L12)
+- [`format`](/Makefile#L14-L16)
+
+Run `make` to execute all tasks. To execute a specific task run `make {task}`
+where `{task}` is one of the tasks listed above.
+
+### Formatting
+
+[stylua](https://github.com/JohnnyMorganz/StyLua) is used to format code.
+Please make sure it is installed and integrated into your editor or run
+`make format` before committing the code.
+
+### Linting
+
+[luacheck](https://github.com/mpeterv/luacheck) is used for linting.
+Please make sure it is installed and integrated into your editor or run
+`make lint` before committing the code.
+
+### Testing
+
+[plenary.nvim](https://github.com/nvim-lua/plenary.nvim) is used to run tests.
+You do not need to have it installed. If it is not installed the test [bootstrap](https://github.com/SidOfc/carbon.nvim/blob/master/test/config/bootstrap.lua#L7-L12)
+process will handle installing it Run `make test` and ensure tests pass
+before committing the code.
+
+The list below shows which modules have been fully tested.
+
+- [ ] [`carbon`](/lua/carbon.lua) ([specs](/test/specs/carbon_spec.lua))
+- [x] [`carbon.util`](/lua/carbon/util.lua) ([specs](/test/specs/util_spec.lua))
+- [ ] [`carbon.entry`](/lua/carbon/entry.lua)
+- [ ] [`carbon.buffer`](/lua/carbon/buffer.lua)
+- [ ] [`carbon.watcher`](/lua/carbon/watcher.lua)
+- [x] [`carbon.settings`](/lua/carbon/settings.lua) ([specs](/test/specs/settings_spec.lua))
+- [x] [`carbon.constants`](/lua/carbon/constants.lua) ([specs](/test/specs/constants_spec.lua))
+
+## Github Actions
+
+carbon.nvim uses Github Actions to run [tests](#testing) and [lint](#linting)
+the code. Pull requests must pass both these tasks before they will be considered.
+
+See [ci.yml](/.github/workflows/ci.yml)
+for more details about the workflow.
+

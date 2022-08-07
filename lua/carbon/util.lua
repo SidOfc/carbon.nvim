@@ -10,6 +10,8 @@ function util.is_excluded(path)
       end
     end
   end
+
+  return false
 end
 
 function util.cursor(row, col)
@@ -140,7 +142,18 @@ function util.confirm(options)
     end,
   }
 
-  local buf = util.create_scratch_buf({ modifiable = false, lines = lines })
+  local buf = util.create_scratch_buf({
+    modifiable = false,
+    lines = lines,
+    mappings = mappings,
+    autocmds = {
+      BufLeave = finish('cancel'),
+      CursorMoved = function()
+        util.cursor(vim.fn.line('.'), 3)
+      end,
+    },
+  })
+
   local win = vim.api.nvim_open_win(buf, true, {
     relative = 'editor',
     anchor = 'NW',
@@ -149,19 +162,12 @@ function util.confirm(options)
     row = options.row or vim.fn.line('.'),
     col = options.col or vim.fn.col('.'),
     height = #lines,
-    width = math.max(unpack(vim.tbl_map(function(line)
-      return #line + 1
+    width = 1 + math.max(unpack(vim.tbl_map(function(line)
+      return #line
     end, lines))),
   })
 
-  util.set_buf_mappings(buf, mappings)
-  util.set_buf_autocmds(buf, {
-    BufLeave = finish('cancel'),
-    CursorMoved = function()
-      util.cursor(vim.fn.line('.'), 3)
-    end,
-  })
-
+  util.cursor(1, 3)
   vim.api.nvim_set_option('guicursor', 'n-v-c:hor100')
   vim.api.nvim_win_set_option(win, 'cursorline', true)
   util.set_winhl(win, {
