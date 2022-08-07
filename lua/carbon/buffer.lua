@@ -44,7 +44,7 @@ function buffer.handle()
 
   data.handle = util.create_scratch_buf({
     name = 'carbon',
-    filetype = 'carbon',
+    filetype = 'carbon.explorer',
     modifiable = false,
     modified = false,
     bufhidden = 'hide',
