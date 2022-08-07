@@ -10,6 +10,8 @@ function util.is_excluded(path)
       end
     end
   end
+
+  return false
 end
 
 function util.cursor(row, col)
@@ -165,6 +167,7 @@ function util.confirm(options)
     end, lines))),
   })
 
+  util.cursor(1, 3)
   vim.api.nvim_set_option('guicursor', 'n-v-c:hor100')
   vim.api.nvim_win_set_option(win, 'cursorline', true)
   util.set_winhl(win, {
