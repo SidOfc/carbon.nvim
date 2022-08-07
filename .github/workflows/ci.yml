@@ -13,12 +13,14 @@ jobs:
           sudo apt install -y neovim lua-check
 
   lint:
+    runs-on: ubuntu-latest
     needs: [setup]
     steps:
       - name: Lint
         run: make lint
 
   test:
+    runs-on: ubuntu-latest
     needs: [setup]
     steps:
       - name: Test
