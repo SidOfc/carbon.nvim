@@ -1,3 +1,4 @@
+local util = require('carbon.util')
 local settings = require('carbon.settings')
 
 describe('carbon.settings', function()
@@ -136,5 +137,19 @@ describe('carbon.settings', function()
         end)
       end)
     end
+  end)
+
+  describe('defaults', function()
+    it('is same as settings', function()
+      assert.same(util.tbl_except(settings, { 'defaults' }), settings.defaults)
+    end)
+
+    it('does not change when settings change', function()
+      settings.keep_netrw = not settings.keep_netrw
+
+      assert.not_same(settings.keep_netrw, settings.defaults.keep_netrw)
+
+      settings.keep_netrw = settings.defaults.keep_netrw
+    end)
   end)
 end)
