@@ -262,3 +262,58 @@ to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion di
 or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
+
+# Development
+
+The following dependencies must be installed before you can work on carbon.nvim:
+
+- [git](https://git-scm.com/)
+- [make](https://www.gnu.org/software/make/)
+- [neovim](https://github.com/neovim/neovim)
+- [stylua](https://github.com/JohnnyMorganz/StyLua)
+- [luacheck](https://github.com/mpeterv/luacheck)
+
+## Running tasks
+
+The `make` command is used to perform various tasks such as running the tests or
+linting the code. The [Makefile](/Makefile) defines the following tasks:
+
+- [`all`](/Makefile#L2-L4)
+- [`test`](/Makefile#L6-L8)
+- [`lint`](/Makefile#L10-L12)
+- [`format`](/Makefile#L14-L16)
+
+Run `make` to execute all tasks. To execute a specific task run `make {task}`
+where `{task}` is one of the tasks listed above.
+
+### Formatting
+
+[stylua](https://github.com/JohnnyMorganz/StyLua) is used to format code.
+Please make sure it is installed and integrated into your editor or run
+`make format` before committing the code.
+
+### Linting
+
+[luacheck](https://github.com/mpeterv/luacheck) is used for linting.
+Please make sure it is installed and integrated into your editor or run
+`make lint` before committing the code.
+
+### Testing
+
+[plenary.nvim](https://github.com/nvim-lua/plenary.nvim) is used to run tests.
+You do not need to have it installed. If it is not installed the test [bootstrap](https://github.com/SidOfc/carbon.nvim/blob/master/test/config/bootstrap.lua#L7-L12)
+process will handle installing it.
+
+Make sure that the tests pass before committing by running `make test`.
+
+:construction: Lots of tests still have to be written, currently only the [`util`](https://github.com/SidOfc/carbon.nvim/blob/master/lua/carbon/util.lua)
+is fully tested. :construction:
+
+## Github Actions
+
+carbon.nvim uses Github Actions to run [tests](#testing) and [lint](#linting)
+the code. Pull requests must pass both these tasks before it will be considered.
+
+See [ci.yml](https://github.com/SidOfc/carbon.nvim/blob/master/.github/workflows/ci.yml)
+for more details about the workflow.
+
