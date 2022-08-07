@@ -1,0 +1,16 @@
+name: CI
+on: [push]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository neovim-ppa:unstable
+          sudo apt update
+          sudo apt install -y neovim luacheck
+
+      - name: Lint
+        run: make lint
