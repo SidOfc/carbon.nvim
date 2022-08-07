@@ -1,0 +1,36 @@
+name: CI
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches-ignore:
+      - master
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository ppa:neovim-ppa/unstable
+          sudo apt update
+          sudo apt install -y neovim lua-check
+
+      - name: Lint
+        run: make lint
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository ppa:neovim-ppa/unstable
+          sudo apt update
+          sudo apt install -y neovim lua-check
+
+      - name: Test
+        run: make test
