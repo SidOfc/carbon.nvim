@@ -2,7 +2,7 @@
 all:
 	make lint
 	make test
-	make format
+	make format-check
 
 .PHONY: test
 test:
@@ -12,6 +12,6 @@ test:
 lint:
 	luacheck lua
 
-.PHONY: format
-format:
-	stylua lua
+.PHONY: format-check
+format-check:
+	stylua lua --check
