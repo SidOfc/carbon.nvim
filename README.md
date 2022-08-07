@@ -302,18 +302,24 @@ Please make sure it is installed and integrated into your editor or run
 
 [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) is used to run tests.
 You do not need to have it installed. If it is not installed the test [bootstrap](https://github.com/SidOfc/carbon.nvim/blob/master/test/config/bootstrap.lua#L7-L12)
-process will handle installing it.
+process will handle installing it Run `make test` and ensure tests pass
+before committing the code.
 
-Make sure that the tests pass before committing by running `make test`.
+The list below shows which modules have been fully tested.
 
-:construction: Lots of tests still have to be written, currently only the [`util`](https://github.com/SidOfc/carbon.nvim/blob/master/lua/carbon/util.lua)
-module is fully tested. :construction:
+- [ ] [`carbon`](/lua/carbon.lua) ([specs](/test/specs/carbon_spec.lua))
+- [x] [`carbon.util`](/lua/carbon/util.lua) ([specs](/test/specs/util_spec.lua))
+- [ ] [`carbon.entry`](/lua/carbon/entry.lua)
+- [ ] [`carbon.buffer`](/lua/carbon/buffer.lua)
+- [ ] [`carbon.watcher`](/lua/carbon/watcher.lua)
+- [ ] [`carbon.settings`](/lua/carbon/settings.lua)
+- [ ] [`carbon.constants`](/lua/carbon/constants.lua)
 
 ## Github Actions
 
 carbon.nvim uses Github Actions to run [tests](#testing) and [lint](#linting)
-the code. Pull requests must pass both these tasks before it will be considered.
+the code. Pull requests must pass both these tasks before they will be considered.
 
-See [ci.yml](https://github.com/SidOfc/carbon.nvim/blob/master/.github/workflows/ci.yml)
+See [ci.yml](/.github/workflows/ci.yml)
 for more details about the workflow.
 
