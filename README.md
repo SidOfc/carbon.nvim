@@ -307,7 +307,7 @@ process will handle installing it.
 Make sure that the tests pass before committing by running `make test`.
 
 :construction: Lots of tests still have to be written, currently only the [`util`](https://github.com/SidOfc/carbon.nvim/blob/master/lua/carbon/util.lua)
-is fully tested. :construction:
+module is fully tested. :construction:
 
 ## Github Actions
 
