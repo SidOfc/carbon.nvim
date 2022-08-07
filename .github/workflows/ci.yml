@@ -8,7 +8,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo add-apt-repository neovim-ppa:unstable
+          sudo add-apt-repository ppa:neovim-ppa/unstable
           sudo apt update
           sudo apt install -y neovim luacheck
 
