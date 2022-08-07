@@ -313,7 +313,7 @@ The list below shows which modules have been fully tested.
 - [ ] [`carbon.buffer`](/lua/carbon/buffer.lua)
 - [ ] [`carbon.watcher`](/lua/carbon/watcher.lua)
 - [ ] [`carbon.settings`](/lua/carbon/settings.lua)
-- [ ] [`carbon.constants`](/lua/carbon/constants.lua)
+- [x] [`carbon.constants`](/lua/carbon/constants.lua)
 
 ## Github Actions
 
