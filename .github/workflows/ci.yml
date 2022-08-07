@@ -24,7 +24,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:neovim-ppa/unstable
           sudo apt update
-          sudo apt install -y neovim lua-check
+          sudo apt install -y neovim
 
       - name: Test
         run: make test
