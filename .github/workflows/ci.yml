@@ -10,7 +10,7 @@ jobs:
         run: |
           sudo add-apt-repository ppa:neovim-ppa/unstable
           sudo apt update
-          sudo apt install -y neovim luacheck
+          sudo apt install -y neovim lua-check
 
       - name: Lint
         run: make lint
