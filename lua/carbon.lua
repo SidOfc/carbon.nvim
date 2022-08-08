@@ -52,8 +52,8 @@ function carbon.initialize()
     vim.g.loaded_netrw = 1
     vim.g.loaded_netrwPlugin = 1
 
-    vim.api.nvim_del_augroup_by_name('FileExplorer')
-    vim.api.nvim_del_augroup_by_name('Network')
+    pcall(vim.api.nvim_del_augroup_by_name, 'FileExplorer')
+    pcall(vim.api.nvim_del_augroup_by_name, 'Network')
 
     util.command('Explore', carbon.explore, { bang = true })
     util.command('Lexplore', carbon.explore_left, { bang = true })

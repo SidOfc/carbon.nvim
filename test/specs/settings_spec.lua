@@ -24,6 +24,30 @@ describe('carbon.settings', function()
     it('is a boolean', function()
       assert.is_boolean(settings.keep_netrw)
     end)
+
+    it('sets vim.g.loaded_netrw', function()
+      assert.is_same(1, vim.g.loaded_netrw)
+    end)
+
+    it('sets vim.g.loaded_netrwPlugin', function()
+      assert.is_same(1, vim.g.loaded_netrwPlugin)
+    end)
+
+    it('deletes augroup FileExplorer', function()
+      assert.is_nil(
+        util.tbl_find(vim.api.nvim_get_autocmds({}), function(autocmd)
+          return autocmd.group_name == 'FileExplorer'
+        end)
+      )
+    end)
+
+    it('deletes augroup Network', function()
+      assert.is_nil(
+        util.tbl_find(vim.api.nvim_get_autocmds({}), function(autocmd)
+          return autocmd.group_name == 'Network'
+        end)
+      )
+    end)
   end)
 
   describe('sync_on_cd', function()
