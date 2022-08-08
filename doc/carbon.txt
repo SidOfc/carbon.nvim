@@ -1909,6 +1909,9 @@ SETTINGS                                                         *carbon-setting
 
   Default: `false`
 
+  Sets both `vim.g.loaded_netrw` and `vim.g.loaded_netrwPlugin` to `1` and
+  deletes |augroup| `FileExplorer` and `Network`.
+
   When `true` NetRW will not be harmed by Carbon. This also means that
   `Explore` and `Lexplore` are no longer aliased to `Carbon` and `Lcarbon` anymore.
 
