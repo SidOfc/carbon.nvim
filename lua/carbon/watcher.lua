@@ -57,7 +57,8 @@ function watcher.on(event, callback)
       data.events[key][callback] = callback
     end
   else
-    data.events[event] = callback
+    data.events[event] = {}
+    data.events[event][callback] = callback
   end
 end
 
