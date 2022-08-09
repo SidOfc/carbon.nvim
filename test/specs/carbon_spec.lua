@@ -22,6 +22,7 @@ describe('carbon', function()
         '+ lua/',
         '  plugin/carbon.vim',
         '+ test/',
+        '  .gitignore',
         '  .luacheckrc',
         '  LICENSE.md',
         '  Makefile',
