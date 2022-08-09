@@ -12,7 +12,19 @@ if vim.fn.isdirectory(plenary_path) == 0 then
 end
 
 vim.opt.runtimepath:prepend(plenary_path)
-require('plenary.test_harness').test_directory(
-  'test/specs',
-  { minimal_init = 'test/config/init.lua' }
-)
+
+if vim.env.only then
+  for spec in vim.fs.dir('test/specs') do
+    if string.find(spec, vim.env.only) then
+      return require('plenary.test_harness').test_directory(
+        string.format('test/specs/%s', spec),
+        { minimal_init = 'test/config/init.lua' }
+      )
+    end
+  end
+else
+  return require('plenary.test_harness').test_directory(
+    'test/specs',
+    { minimal_init = 'test/config/init.lua' }
+  )
+end

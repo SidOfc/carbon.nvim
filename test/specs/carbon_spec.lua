@@ -3,35 +3,6 @@ local settings = require('carbon.settings')
 local helpers = require('test.config.helpers')
 
 describe('carbon', function()
-  describe('initialization', function()
-    it('buffer has name "carbon"', function()
-      assert.equal('carbon', vim.fn.bufname())
-    end)
-
-    it('buffer has filetype "carbon.explorer"', function()
-      assert.equal('carbon.explorer', vim.o.filetype)
-      assert.equal('carbon.explorer', vim.bo.filetype)
-    end)
-
-    it('shows contents of current directory', function()
-      assert.same({
-        vim.fn.fnamemodify(vim.loop.cwd(), ':t') .. '/',
-        '  .github/workflows/ci.yml',
-        '  dev/init.lua',
-        '+ doc/',
-        '+ lua/',
-        '  plugin/carbon.vim',
-        '+ test/',
-        '  .gitignore',
-        '  .luacheckrc',
-        '  LICENSE.md',
-        '  Makefile',
-        '  README.md',
-        '  stylua.toml',
-      }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
-    end)
-  end)
-
   describe('autocommands', function()
     describe('DirChanged', function()
       it('exists', function()
@@ -86,18 +57,10 @@ describe('carbon', function()
     for action in pairs(settings.actions) do
       local plug = util.plug(action)
 
-      it(string.format('maps %s to carbon.%s()', plug, action), function()
+      it(string.format('binds %s to carbon.%s()', plug, action), function()
         assert.is_number(
           string.find(string.lower(vim.fn.maparg(plug, 'n')), '<lua %w+')
         )
-      end)
-    end
-
-    for action, key in pairs(settings.actions) do
-      local plug = util.plug(action)
-
-      it(string.format('maps %s to %s', key, plug), function()
-        assert.same(string.lower(vim.fn.maparg(key, 'n')), plug)
       end)
     end
   end)
