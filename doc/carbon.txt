@@ -46,32 +46,32 @@ SETUP                                                               *carbon-setu
   The behavior of this plugin can be customized by calling
   `require('carbon').setup` in your |$MYVIMRC| like this:
 
-  init.lua:
-  `require('carbon').setup({`
-  `  setting = 'value',`
-  `})`
-
-  init.vim:
-  `lua << EOF`
-  `  require('carbon').setup({`
-  `    setting = 'value',`
-  `  })`
-  `EOF`
-
+  init.lua: >
+  require('carbon').setup({
+    setting = 'value',
+  })
+<
+  init.vim: >
+  lua << EOF
+    require('carbon').setup({
+      setting = 'value',
+    })
+  EOF
+<
   If setting options directly is preferred, passing a function is also possible:
 
-  init.lua:
-  `require('carbon').setup(function(settings)`
-  `  settings.setting = 'value',`
-  `end)`
-
-  init.vim:
-  `lua << EOF`
-  `  require('carbon').setup(function(settings)`
-  `    settings.setting = 'value',`
-  `  end)`
-  `EOF`
-
+  init.lua: >
+  require('carbon').setup(function(settings)
+    settings.setting = 'value',
+  end)
+<
+  init.vim: >
+  lua << EOF
+    require('carbon').setup(function(settings)
+      settings.setting = 'value',
+    end)
+  EOF
+<
   The default settings are documented in |carbon-settings|. Any settings
   supplied to `setup` when called with a table will be deep merged with
   the defaults. When `setup` is called with a function argument, settings
@@ -758,14 +758,14 @@ UTIL                                                                 *carbon-uti
   <shift-k>, <shift-j>, <up>, <down>, and digits <0> through <9>.
 
   The {options} argument supports the following keys:
-
-  `{`
-  `  row = <number>,`
-  `  col = <number>,`
-  `  highlight = <string>,`
-  `  actions = <table<action>>,`
-  `}`
-
+>
+  {
+    row = <number>,
+    col = <number>,
+    highlight = <string>,
+    actions = <table<action>>,
+  }
+<
   Property: `row`
   Default:  `vim.fn.line('.')`
   Required: `false`
@@ -791,13 +791,13 @@ UTIL                                                                 *carbon-uti
 
   Specify popup actions via a table containing `<action>` entries.
   An `<action>` is a table with the following keys:
-
-  `{`
-  `  label = <string>,`
-  `  shortcut = <char>,`
-  `  callback = <function>,`
-  `}`
-
+>
+  {
+    label = <string>,
+    shortcut = <char>,
+    callback = <function>,
+  }
+<
   Each action specified in `actions` will be shown in the popup. The position of
   each action will be based on its index in the `actions` table. The `label` will be
   the visible text shown in the popup and the `shortcut` key will be shown before
@@ -838,15 +838,15 @@ ENTRY                                                               *carbon-entr
   for {path}.
 
   The returned entry object has the following shape:
-
-  `{`
-  `  path = '/absolute/path/to/file-or-dir',`
-  `  name = 'file-or-dir',`
-  `  is_directory = false,`
-  `  is_executable = false,`
-  `  is_symlink = nil,`
-  `}`
-
+>
+  {
+    path = '/absolute/path/to/file-or-dir',
+    name = 'file-or-dir',
+    is_directory = false,
+    is_executable = false,
+    is_symlink = nil,
+  }
+<
   - `path` is the absolute {path}.
   - `name` is the tail of given {path} as returned by |fnamemodify| `:t`.
   - `is_directory` is `true` when |isdirectory| equals `1`.
@@ -1230,13 +1230,13 @@ BUFFER                                                             *carbon-buffe
   Signature: `require('carbon.buffer').cursor(`[{opts}]`)`
 
   Returns a table with the following shape:
-
-  `{`
-  `  line = <line>,`
-  `  target = <entry>,`
-    `target_line = <line>,`
-  `}`
-
+>
+  {
+    line = <line>,
+    target = <entry>,
+    target_line = <line>,
+  }
+<
   Property: `line`
 
   An item at index `line('.')` from |carbon-buffer-lines|.
@@ -1274,16 +1274,16 @@ BUFFER                                                             *carbon-buffe
 
   Returns a table of "line objects" to render. A "line object" has the
   following data layout:
-
-  `{`
-  `  entry = <entry>,`
-  `  line = <string>,`
-  `  lnum = <number>,`
-  `  depth = <number>,`
-  `  path = <table<entry>>,`
-  `  highlights = <table<table<string, number, number>>>,`
-  `}`
-
+>
+  {
+    entry = <entry>,
+    line = <string>,
+    lnum = <number>,
+    depth = <number>,
+    path = <table<entry>>,
+    highlights = <table<table<string, number, number>>>,
+  }
+<
   Property: `entry`
 
   One of the children of {entry}.
@@ -1306,25 +1306,25 @@ BUFFER                                                             *carbon-buffe
 
   The `highlights` property provides zero or more highlights for the current
   `line`. A highlight in this context is a table with the following structure:
-
-  `{`
-  `  <string HighlightGroupName>,`
-  `  <number start_column>,`
-  `  <number end_column>,`
-  `}`
-
+>
+  {
+    <string HighlightGroupName>,
+    <number start_column>,
+    <number end_column>,
+  }
+<
   |carbon-buffer-render| uses |nvim_buf_add_highlight| to set the highlights.
   It is called the following way:
-
-  `vim.api.nvim_buf_add_highlight(`
-  `  buffer.handle(),`
-  `  require('util.constants').hl,`
-  `  highlight[1],` => `<string HighlightGroupName>`
-  `  lnum - 1,`
-  `  highlight[2],` => `<number start_column>`
-  `  highlight[3],` => `<number end_column>`
-  `)`
-
+>
+  vim.api.nvim_buf_add_highlight(
+    buffer.handle(),
+    require('util.constants').hl,
+    highlight[1],
+    lnum - 1,
+    highlight[2],
+    highlight[3],
+  )
+<
   Property: `path`
 
   When |carbon-setting-compress| is enabled, this table is filled with the
@@ -1855,43 +1855,43 @@ SETTINGS                                                         *carbon-setting
   When enabled, allows Carbon to compress deeply nested children as long as
   they only contain a single child and |carbon-entry-is-compressible| is `true`.
   For example, take the following structure:
-
-  `pwd`
-  `|-- a/`
-  `|-- |-- b/`
-  `|-- |-- |-- c/`
-  `|-- |-- |-- |-- d.txt`
-  `|-- t/`
-  `|-- |-- u/`
-  `|-- |-- |-- v.txt`
-  `|-- |-- |-- w.txt`
-  `|-- |-- x/`
-  `|-- |-- |-- y/`
-  `|-- |-- |-- |-- z.txt`
-
+>
+  pwd
+  |-- a/
+  |-- |-- b/
+  |-- |-- |-- c/
+  |-- |-- |-- |-- d.txt
+  |-- t/
+  |-- |-- u/
+  |-- |-- |-- v.txt
+  |-- |-- |-- w.txt
+  |-- |-- x/
+  |-- |-- |-- y/
+  |-- |-- |-- |-- z.txt
+<
   We see here that `a/` contains a single child `b/` which contains a
   single child `c/` which contains a single child `d.txt`. We can also see
   that `t/` contains two children, `u/` which contains `v.txt` and `w.txt`, and `x/`
   which contains a single child `y` which contains a single child `z.txt`. When
   compression is enabled, Carbon shows the above structure like this:
-
-  `pwd/`
-  `  a/b/c/d.txt`
-  `+ v/`
-
+>
+  pwd/
+    a/b/c/d.txt
+  + v/
+<
   Because `a/`, `b/`, `c/`, and `d.txt` are all only children of their parent,
   this path can be compressed to the point where we can directly see `d.txt`
   even though it is nested quite deep in the directory tree. For the other
   directory `t/` however, no compression can take place at the top level
   because `t/` itself contains two children. If we open `t/` however, you will
   see the following:
-
-  `pwd/`
-  `  a/b/c/d.txt`
-  `- t/`
-  `  + u/`
-  `    x/y/z.txt`
-
+>
+  pwd/
+    a/b/c/d.txt
+  - t/
+    + u/
+      x/y/z.txt
+<
   We see here that `u/` is not expanded because it contains two children,
   `v.txt` and `w.txt` whereas `x/`, `y/`, and `z.txt` are all only children of
   their parent which means those can be compressed.
@@ -1956,23 +1956,23 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   exclude                                                 *carbon-setting-exclude*
 
-  Default:
-    `{`
-    `  '~$',`
-    `  '#$',`
-    `  '%.git$',`
-    `  '%.bak$',`
-    `  '%.rbc$',`
-    `  '%.class$',`
-    `  '%.sw[a-p]$',`
-    `  '%.py[cod]$',`
-    `  '%.Trashes$',`
-    `  '%.DS_Store$',`
-    `  'Thumbs%.db$',`
-    `  '__pycache__',`
-    `  'node_modules',`
-    `}`
-
+  Default: >
+    {
+      '~$',
+      '#$',
+      '%.git$',
+      '%.bak$',
+      '%.rbc$',
+      '%.class$',
+      '%.sw[a-p]$',
+      '%.py[cod]$',
+      '%.Trashes$',
+      '%.DS_Store$',
+      'Thumbs%.db$',
+      '__pycache__',
+      'node_modules',
+    }
+<
   Paths matching any Lua pattern are filtered removed. For more information
   about these patterns, see: https://www.lua.org/pil/20.2.html.
   This setting may be set to `nil` to show everything.
@@ -2009,24 +2009,24 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   float_settings                                   *carbon-setting-float-settings*
 
-  Default:
-    `function()`
-      `local columns = vim.opt.columns:get()`
-      `local rows = vim.opt.lines:get()`
-      `local width = math.min(50, columns * 0.8)`
-      `local height = math.min(20, rows * 0.8)`
+  Default: >
+    function()
+      local columns = vim.opt.columns:get()
+      local rows = vim.opt.lines:get()
+      local width = math.min(50, columns * 0.8)
+      local height = math.min(20, rows * 0.8)
 
-      `return {`
-        `relative = 'editor',`
-        `style = 'minimal',`
-        `border = 'single',`
-        `width = width,`
-        `height = height,`
-        `col = math.floor(columns / 2 - width / 2),`
-        `row = math.floor(rows / 2 - height / 2 - 2),`
-      `}`
-    `end`
-
+      return {
+        relative = 'editor',
+        style = 'minimal',
+        border = 'single',
+        width = width,
+        height = height,
+        col = math.floor(columns / 2 - width / 2),
+        row = math.floor(rows / 2 - height / 2 - 2),
+      }
+    end
+<
   This setting controls the window settings used in floating windows spawned
   via |Fcarbon|. When set to a table, this table will be passed to
   |nvim_open_window| directly.
