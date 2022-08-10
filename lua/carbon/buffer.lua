@@ -416,7 +416,7 @@ function buffer.delete()
               { vim.fn.fnamemodify(target.path, ':.'), 'CarbonIndicator' },
             }, false, {})
           else
-            buffer.process_event(nil, vim.fn.fnamemodify(target.path, ':h'))
+            buffer.defer_resync(nil, vim.fn.fnamemodify(target.path, ':h'))
           end
         end,
       },
@@ -504,7 +504,7 @@ function buffer.move()
 
     vim.fn.mkdir(directory, 'p')
     vim.fn.rename(tmp_path, updated_path)
-    buffer.process_event(nil, vim.fn.fnamemodify(ctx.target.path, ':h'))
+    buffer.defer_resync(nil, vim.fn.fnamemodify(ctx.target.path, ':h'))
   end
 end
 
@@ -568,7 +568,7 @@ function buffer.set_lines(start_lnum, end_lnum, lines)
   end
 end
 
-function buffer.process_event(_, path)
+function buffer.defer_resync(_, path)
   if data.resync_timer then
     data.resync_timer:stop()
   end
@@ -606,7 +606,7 @@ function internal.create_confirm(ctx)
     end
 
     internal.create_leave(ctx)
-    buffer.process_event(nil, vim.fn.fnamemodify(parent_directory, ':h'))
+    buffer.defer_resync(nil, vim.fn.fnamemodify(parent_directory, ':h'))
   end
 end
 

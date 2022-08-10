@@ -29,14 +29,8 @@ function watcher.register(path)
     data.listeners[path]:start(
       path,
       {},
-      vim.schedule_wrap(function(error, filename, status)
-        if status.change and status.rename then
-          watcher.emit('change-and-rename', path, filename, error)
-        elseif status.change then
-          watcher.emit('change', path, filename, error)
-        elseif status.rename then
-          watcher.emit('rename', path, filename, error)
-        end
+      vim.schedule_wrap(function(error, filename)
+        watcher.emit('carbon:synchronize', path, filename, error)
       end)
     )
   end
