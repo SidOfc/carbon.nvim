@@ -1689,59 +1689,62 @@ WATCHER                                                           *carbon-watche
 
                                                       *carbon-watcher-event-names*
 
-  - `'change-and-rename'`
-  - `'change'`
-  - `'rename'`
+  - `change-and-rename`
+  - `change`
+  - `rename`
 
   `------------------------------------------------------------------------------`
   on                                                           *carbon-watcher-on*
 
   Signature: `require('carbon.watcher').on(`{event}, {callback}`)`
 
-  The {event} parameter can be given in three different forms:
+  Both {event} and {callback} are required.
 
-  When {event} is the string `'*'` then attach {callback} to all events listed
-  in |carbon-watcher-event-names|. When {event} is a table of one or more
-  |carbon-watcher-event-names| then attach {callback} to each listed event.
-  Finally, {event} can be one of |carbon-watcher-event-names|. In this case
-  {callback} will be attached only to that event.
+  - {event} can be a table of event names or a string event name.
+  - {callback} must be |vim.is_callable|.
+
+  {event} can be any arbitrary string since anything can be emitted via
+  |carbon-watcher-emit|.
+
+                                                           *carbon-watcher-on-all*
+
+  When {event} is set to `'*'` then {callback} is triggered for any event.
+  Like any other event, {callback} which are bound to `'*'` can be cleared
+  with |carbon-watcher-off|.
 
                                                       *carbon-watcher-on-callback*
 
-  The {callback} argument must be a function. It receives four arguments and
-  can be used like this:
+  {callback} will receive the {event} which triggered it, and the {path}
+  (absolute parent directory), {filename} (modified file), and {error} (if any).
 
-  `function my_callback(`{event}, {dirpath}, {filename}, {error}`)`
+  `function callback(`{event}, {dirpath}, {filename}, {error}`)`
   `  print(vim.inspect(`{event}, {dirpath}, {filename}, {error}`))`
   `end`
 
-  `require('carbon.watcher').on('*', my_callback)`
+  `require('carbon.watcher').on('*', callback)`
 
-  The {event} argument will be one of |carbon-watcher-event-names|, {dirpath}
-  will be the absolute path of the parent directory of the affected path,
-  {filename} will be the file name of the affected path and finally, {error}
-  will be the value as given by |vim.schedule_wrap()| which the watcher module
-  uses internally.
+  will listen to the `change` and `rename` events which are triggered by
+  changes to paths registered with |carbon-watcher-register|.
+  See |carbon-watcher-event-names| for a list of all built-in event names.
 
-  Another important detail is the fact that we did not pass a closure to `on`
-  but we passed a function reference. This is important because the reference
-  to the function must be reused in `off` to unbind that specific handler. To
-  unbind the above handler, we need to run:
-
-  `require('carbon.watcher').off('*', my_callback)`
-
-  At this point it becomes very clear why passing a closure will not work.
-  This design should feel similar to the `window.addEventListener` API
-  (https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener).
+  In the call to `on` the callback was not passed as a closure but as a
+  function reference, this allows clearing that specific callback with
+  |carbon-watcher-off|. Anonymous closures can only be removed by clearing
+  everything and should not be used.
 
   `------------------------------------------------------------------------------`
   off                                                         *carbon-watcher-off*
 
-  Signature: `require('carbon.watcher').off(`{event}, {callback}`)`
+  Signature: `require('carbon.watcher').off(`[{event}[, {callback}]]`)`
 
-  This method accepts the same exact arguments as |carbon-watcher-on| but
-  instead of registering {callback} for {event}, it removes {callback}
-  from all {event}. See |carbon-watcher-on-callback| for an example using `off`.
+  When called without arguments, clears all callbacks attached to any event
+  including `'*'`:
+
+  When called with just {event} clears the given event name if it is a string,
+  or calls `off` again with each value in the {event} table.
+
+  When called with {event} and {callback}, clears specified {callback} from
+  {event} as described above.
 
   `------------------------------------------------------------------------------`
   emit                                                       *carbon-watcher-emit*
@@ -1749,9 +1752,13 @@ WATCHER                                                           *carbon-watche
   Signature: `require('carbon.watcher').emit(`{event}[, {...varargs}]`)`
 
   Emits {event} with {event} as first argument and remaining {...varargs}
-  as varargs arguments to registered callbacks. The {event} can only be one of
-  |carbon-watcher-event-names|, unlike |carbon-watcher-on| or |carbon-watcher-off|
-  which support some shortcuts.
+  as varargs arguments to registered callbacks. The {event} can be any string.
+
+  After executing callbacks registered to {event}, all callbacks registered to
+  `'*'` will be executed. See |carbon-watcher-on-all|
+
+  NOTE: there are some events which carbon.nvim uses internally. See
+  |carbon-watcher-event-names| for a list of events.
 
   `------------------------------------------------------------------------------`
   keep                                                       *carbon-watcher-keep*
@@ -1766,10 +1773,10 @@ WATCHER                                                           *carbon-watche
   `------------------------------------------------------------------------------`
   release                                                 *carbon-watcher-release*
 
-  Signature: `require('carbon.watcher').release(`{path}`)`
+  Signature: `require('carbon.watcher').release(`[{path}]`)`
 
   Unregister a {path} registered by |carbon-watcher-register|. If {path} is not
-  registered this will result in a no-op.
+  registered then every registered path will be released.
 
   `------------------------------------------------------------------------------`
   register                                               *carbon-watcher-register*
@@ -1778,6 +1785,22 @@ WATCHER                                                           *carbon-watche
 
   Register an absolute {path}. Once registered, any changes made to this path
   will emit events based on events received from Neovim's Lua |vim.loop| api.
+
+  See |carbon-watcher-event-names| for a list of events.
+
+  `------------------------------------------------------------------------------`
+  has                                                         *carbon-watcher-has*
+
+  Signature: `require('carbon.watcher').has(`{event}, {callback}`)`
+
+  Returns `true` if {callback} is registered for {event} or `false` otherwise.
+
+  `------------------------------------------------------------------------------`
+  registered                                           *carbon-watcher-registered*
+
+  Signature: `require('carbon.watcher').registered()`
+
+  Returns a table of paths registered via |carbon-watcher-register|.
 
 ================================================================================
 SETTINGS                                                         *carbon-settings*
