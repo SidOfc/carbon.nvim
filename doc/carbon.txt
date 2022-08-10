@@ -1123,7 +1123,7 @@ BUFFER                                                             *carbon-buffe
   `------------------------------------------------------------------------------`
   process_event                                      *carbon-buffer-process-event*
 
-  Signature: `require('carbon.buffer').process_event()`
+  Signature: `require('carbon.buffer').defer_resync()`
 
   During |carbon-carbon-initialize| this method is attached using
   |carbon-watcher-on| to process file change events.
@@ -1681,17 +1681,21 @@ WATCHER                                                           *carbon-watche
   directory and all its children files and directories will be listened to.
   Carbon itself only listens to directories to reduce the amount of file
   watching this plugin does. A single watcher is created for each unique
-  directory.
+  directory whose children have been traversed.
 
   Finally, |carbon-watcher-on| and |carbon-watcher-off| can be used to
-  register callbacks on specific events. The possible events that get
-  triggered are:
+  register callbacks on arbitrary events.
 
-                                                      *carbon-watcher-event-names*
+  The watcher itself only emits `carbon:synchronize` events to allow the
+  buffer to respond to relevant changes to the current working directory.
 
-  - `change-and-rename`
-  - `change`
-  - `rename`
+  The `carbon:synchronize` event is a built-in event.
+  See the list of built-in commands below for details about built-in events:
+
+                                                  *carbon-watcher-built-in-events*
+
+  Name:        `carbon:synchronize`
+  Description: Used by |carbon-watcher| when listening for file system changes.
 
   `------------------------------------------------------------------------------`
   on                                                           *carbon-watcher-on*
@@ -1725,7 +1729,7 @@ WATCHER                                                           *carbon-watche
 
   will listen to the `change` and `rename` events which are triggered by
   changes to paths registered with |carbon-watcher-register|.
-  See |carbon-watcher-event-names| for a list of all built-in event names.
+  See |carbon-watcher-built-in-events| for a list of built-in events.
 
   In the call to `on` the callback was not passed as a closure but as a
   function reference, this allows clearing that specific callback with
@@ -1758,7 +1762,7 @@ WATCHER                                                           *carbon-watche
   `'*'` will be executed. See |carbon-watcher-on-all|
 
   NOTE: there are some events which carbon.nvim uses internally. See
-  |carbon-watcher-event-names| for a list of events.
+  |carbon-watcher-built-in-events| for a list of built-in events.
 
   `------------------------------------------------------------------------------`
   keep                                                       *carbon-watcher-keep*
@@ -1786,7 +1790,7 @@ WATCHER                                                           *carbon-watche
   Register an absolute {path}. Once registered, any changes made to this path
   will emit events based on events received from Neovim's Lua |vim.loop| api.
 
-  See |carbon-watcher-event-names| for a list of events.
+  See |carbon-watcher-built-in-events| for a list of built-in events.
 
   `------------------------------------------------------------------------------`
   has                                                         *carbon-watcher-has*

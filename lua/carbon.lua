@@ -28,7 +28,7 @@ function carbon.initialize()
     return
   end
 
-  watcher.on('*', buffer.process_event)
+  watcher.on('carbon:synchronize', buffer.defer_resync)
 
   util.command('Carbon', carbon.explore, { bang = true })
   util.command('Lcarbon', carbon.explore_left, { bang = true })
