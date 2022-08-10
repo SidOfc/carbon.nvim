@@ -278,10 +278,10 @@ The following dependencies must be installed before you can work on carbon.nvim:
 The `make` command is used to perform various tasks such as running the tests or
 linting the code. The [Makefile](/Makefile) defines the following tasks:
 
-- [`all`](/Makefile#L2-L4)
-- [`test`](/Makefile#L6-L8)
-- [`lint`](/Makefile#L10-L12)
-- [`format`](/Makefile#L14-L16)
+- [`all`](/Makefile#L1-L5)
+- [`test`](/Makefile#L7-L9)
+- [`lint`](/Makefile#L11-L13)
+- [`format-check`](/Makefile#L15-L17)
 
 Run `make` to execute all tasks. To execute a specific task run `make {task}`
 where `{task}` is one of the tasks listed above.
@@ -290,13 +290,13 @@ where `{task}` is one of the tasks listed above.
 
 [stylua](https://github.com/JohnnyMorganz/StyLua) is used to format code.
 Please make sure it is installed and integrated into your editor or run
-`make format` before committing the code.
+`make format-check` and fix any errors before committing the code.
 
 ### Linting
 
 [luacheck](https://github.com/mpeterv/luacheck) is used for linting.
 Please make sure it is installed and integrated into your editor or run
-`make lint` before committing the code.
+`make lint` and fix any errors before committing the code.
 
 ### Testing
 
@@ -317,9 +317,8 @@ The list below shows which modules have been fully tested.
 
 ## Github Actions
 
-carbon.nvim uses Github Actions to run [tests](#testing) and [lint](#linting)
-the code. Pull requests must pass both these tasks before they will be considered.
-
-See [ci.yml](/.github/workflows/ci.yml)
-for more details about the workflow.
+carbon.nvim uses Github Actions to run [tests](#testing), [lint](#linting), and
+[validate formatting](#formatting) of the code. Pull requests must pass both these
+tasks before they will be considered. See [ci.yml](/.github/workflows/ci.yml) for
+more details about the workflow.
 
