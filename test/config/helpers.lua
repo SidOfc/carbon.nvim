@@ -1,3 +1,4 @@
+local entry = require('carbon.entry')
 local constants = require('carbon.constants')
 local helpers = {}
 
@@ -15,6 +16,10 @@ function helpers.autocmd(event, options)
     event = event,
     buffer = options and options.buffer,
   })[1] or {}
+end
+
+function helpers.entry(relative_path)
+  return entry.find(string.format('%s/%s', vim.loop.cwd(), relative_path))
 end
 
 return helpers
