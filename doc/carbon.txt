@@ -1981,7 +1981,7 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   sync_delay                                           *carbon-setting-sync-delay*
 
-  Default: `5`
+  Default: `20`
 
   The amount of milliseconds to wait before updating and rerendering the
   buffer. Carbon debounces file system events by default to reduce the amount
