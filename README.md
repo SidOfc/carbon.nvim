@@ -318,7 +318,7 @@ The list below shows which modules have been fully tested.
 ## Github Actions
 
 carbon.nvim uses Github Actions to run [tests](#testing), [lint](#linting), and
-[validate formatting](#formatting) of the code. Pull requests must pass both these
-tasks before they will be considered. See [ci.yml](/.github/workflows/ci.yml) for
+[validate formatting](#formatting) of the code. Pull requests must pass these
+checks before they will be considered. See [ci.yml](/.github/workflows/ci.yml) for
 more details about the workflow.
 
