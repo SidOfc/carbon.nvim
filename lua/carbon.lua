@@ -26,6 +26,8 @@ end
 function carbon.initialize()
   if data.initialized then
     return
+  else
+    data.initialized = true
   end
 
   watcher.on('carbon:synchronize', buffer.defer_resync)
