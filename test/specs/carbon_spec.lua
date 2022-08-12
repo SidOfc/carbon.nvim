@@ -302,4 +302,108 @@ describe('carbon', function()
       assert.not_equal('carbon', vim.fn.bufname())
     end)
   end)
+
+  describe('create', function()
+    it('can create file', function()
+      helpers.type_keys(
+        string.format('%shello.txt<cr>', settings.actions.create)
+      )
+
+      assert.not_nil(
+        vim.loop.fs_stat(string.format('%s/hello.txt', vim.loop.cwd()))
+      )
+    end)
+
+    it('can create directory', function()
+      helpers.type_keys(string.format('%shello/<cr>', settings.actions.create))
+
+      assert.is_equal(
+        1,
+        vim.fn.isdirectory(string.format('%s/hello', vim.loop.cwd()))
+      )
+    end)
+
+    it('can create deeply nested path', function()
+      helpers.type_keys(
+        string.format('%shello/world/test.txt<cr>', settings.actions.create)
+      )
+
+      assert.not_nil(
+        vim.loop.fs_stat(
+          string.format('%s/hello/world/test.txt', vim.loop.cwd())
+        )
+      )
+    end)
+  end)
+
+  describe('delete', function()
+    it('can delete file', function()
+      helpers.ensure_path('.a/.a.txt')
+      util.cursor(2, 1)
+      helpers.type_keys(string.format('%sD', settings.actions.delete))
+
+      assert.not_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
+      assert.is_nil(
+        vim.loop.fs_stat(string.format('%s/.a/.a.txt', vim.loop.cwd()))
+      )
+    end)
+
+    it('can delete directory', function()
+      helpers.ensure_path('.a/')
+      util.cursor(2, 1)
+      helpers.type_keys(string.format('%sD', settings.actions.delete))
+
+      assert.is_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
+    end)
+
+    it('can partially delete deeply nested path using count', function()
+      helpers.ensure_path('.a/.a/a.txt')
+      util.cursor(2, 1)
+      helpers.type_keys(string.format('2%sD', settings.actions.delete))
+
+      assert.is_nil(vim.loop.fs_stat(string.format('%s/.a/.a', vim.loop.cwd())))
+      assert.not_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
+    end)
+
+    it('can completely delete deeply nested path using count', function()
+      helpers.ensure_path('.a/.a/.a.txt')
+      util.cursor(2, 1)
+      helpers.type_keys(string.format('1%sD', settings.actions.delete))
+
+      assert.is_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
+    end)
+  end)
+
+  describe('move', function()
+    it('can rename path', function()
+      helpers.ensure_path('.a/.a.txt')
+      util.cursor(2, 1)
+      helpers.type_keys(string.format('%s1<cr>', settings.actions.move))
+      helpers.wait_for_events()
+
+      assert.is_nil(
+        vim.loop.fs_stat(string.format('%s/.a/.a.txt', vim.loop.cwd()))
+      )
+      assert.not_nil(
+        vim.loop.fs_stat(string.format('%s/.a/.a.txt1', vim.loop.cwd()))
+      )
+
+      helpers.delete_path('.a/')
+    end)
+
+    it('creates intermediate directories', function()
+      helpers.ensure_path('.a/.a.txt')
+      util.cursor(2, 1)
+      helpers.type_keys(
+        string.format('%s<bs><bs><bs><bs>/b/c<cr>', settings.actions.move)
+      )
+
+      assert.is_nil(
+        vim.loop.fs_stat(string.format('%s/.a/.a.txt', vim.loop.cwd()))
+      )
+      assert.not_nil(
+        vim.loop.fs_stat(string.format('%s/.a/.a/b/c', vim.loop.cwd()))
+      )
+    end)
+  end)
 end)

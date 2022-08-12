@@ -307,7 +307,7 @@ before committing the code.
 
 The list below shows which modules have been fully tested.
 
-- [ ] [`carbon`](/lua/carbon.lua) ([specs](/test/specs/carbon_spec.lua))
+- [x] [`carbon`](/lua/carbon.lua) ([specs](/test/specs/carbon_spec.lua))
 - [x] [`carbon.util`](/lua/carbon/util.lua) ([specs](/test/specs/util_spec.lua))
 - [ ] [`carbon.entry`](/lua/carbon/entry.lua)
 - [ ] [`carbon.buffer`](/lua/carbon/buffer.lua) ([specs](/test/specs/buffer_spec.lua))
