@@ -1,10 +1,9 @@
 local entry = require('carbon.entry')
-local settings = require('carbon.settings')
 local constants = require('carbon.constants')
 local helpers = {}
 
 function helpers.wait_for_events()
-  vim.wait(settings.sync_delay * 10)
+  vim.wait(2500)
 end
 
 function helpers.change_file(relative_path)
