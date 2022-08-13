@@ -16,6 +16,20 @@ function helpers.delete_path(relative_path)
   vim.fn.delete(absolute_path, 'rf')
 end
 
+function helpers.has_path(relative_path)
+  local clean_path = string.gsub(relative_path, '/+^', '')
+  local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
+
+  return vim.loop.fs_stat(absolute_path) ~= nil
+end
+
+function helpers.is_directory(relative_path)
+  local clean_path = string.gsub(relative_path, '/+^', '')
+  local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
+
+  return vim.fn.isdirectory(absolute_path) == 1
+end
+
 function helpers.ensure_path(relative_path)
   local clean_path = string.gsub(relative_path, '/+^', '')
   local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)

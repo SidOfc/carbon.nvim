@@ -18,7 +18,7 @@ if vim.env.only then
     if string.find(spec, vim.env.only) then
       return require('plenary.test_harness').test_directory(
         string.format('test/specs/%s', spec),
-        { minimal_init = 'test/config/init.lua', sequential = true }
+        { minimal_init = 'test/config/init.lua' }
       )
     end
   end
