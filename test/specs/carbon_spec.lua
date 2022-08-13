@@ -303,7 +303,7 @@ describe('carbon', function()
     end)
   end)
 
-  describe('create', function()
+  pending('create', function()
     it('can create file', function()
       helpers.type_keys(
         string.format('%shello.txt<cr>', settings.actions.create)
@@ -336,7 +336,7 @@ describe('carbon', function()
     end)
   end)
 
-  describe('delete', function()
+  pending('delete', function()
     it('can delete file', function()
       helpers.ensure_path('.a/.a.txt')
       util.cursor(2, 1)
@@ -374,12 +374,11 @@ describe('carbon', function()
     end)
   end)
 
-  describe('move', function()
+  pending('move', function()
     it('can rename path', function()
       helpers.ensure_path('.a/.a.txt')
       util.cursor(2, 1)
       helpers.type_keys(string.format('%s1<cr>', settings.actions.move))
-      helpers.wait_for_events()
 
       assert.is_nil(
         vim.loop.fs_stat(string.format('%s/.a/.a.txt', vim.loop.cwd()))

@@ -1,18 +1,12 @@
 local entry = require('carbon.entry')
-local settings = require('carbon.settings')
 local constants = require('carbon.constants')
 local helpers = {}
-
-function helpers.wait_for_events()
-  vim.wait(settings.sync_delay * 50)
-end
 
 function helpers.change_file(relative_path)
   local clean_path = string.gsub(relative_path, '/+^', '')
   local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
 
   vim.fn.writefile({ tostring(os.clock()) }, absolute_path, 'a')
-  helpers.wait_for_events()
 end
 
 function helpers.delete_path(relative_path)
@@ -20,7 +14,6 @@ function helpers.delete_path(relative_path)
   local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
 
   vim.fn.delete(absolute_path, 'rf')
-  helpers.wait_for_events()
 end
 
 function helpers.ensure_path(relative_path)
@@ -32,8 +25,6 @@ function helpers.ensure_path(relative_path)
   if not vim.endswith(relative_path, '/') then
     vim.fn.writefile({}, absolute_path)
   end
-
-  helpers.wait_for_events()
 end
 
 function helpers.type_keys(keys_to_type)

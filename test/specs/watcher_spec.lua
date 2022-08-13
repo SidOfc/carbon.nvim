@@ -42,50 +42,52 @@ describe('carbon.watcher', function()
       assert.spy(callback2).is_called(2)
     end)
 
-    it('triggers carbon:synchronize on new file', function()
-      local callback = spy()
+    pending('carbon:synchronize', function()
+      it('triggers on new file', function()
+        local callback = spy()
 
-      watcher.register(vim.loop.cwd())
-      watcher.on('carbon:synchronize', callback)
+        watcher.register(vim.loop.cwd())
+        watcher.on('carbon:synchronize', callback)
 
-      helpers.ensure_path('check.txt')
+        helpers.ensure_path('check.txt')
 
-      assert.spy(callback).is_called()
-      assert
-        .spy(callback)
-        .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
-    end)
+        assert.spy(callback).is_called()
+        assert
+          .spy(callback)
+          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
+      end)
 
-    it('triggers carbon:synchronize on file change', function()
-      local callback = spy()
+      it('triggers on file change', function()
+        local callback = spy()
 
-      helpers.ensure_path('check.sh')
+        helpers.ensure_path('check.sh')
 
-      watcher.register(vim.loop.cwd())
-      watcher.on('carbon:synchronize', callback)
+        watcher.register(vim.loop.cwd())
+        watcher.on('carbon:synchronize', callback)
 
-      helpers.change_file('check.sh')
+        helpers.change_file('check.sh')
 
-      assert.spy(callback).is_called()
-      assert
-        .spy(callback)
-        .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
-    end)
+        assert.spy(callback).is_called()
+        assert
+          .spy(callback)
+          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+      end)
 
-    it('triggers carbon:synchronize on file remove', function()
-      local callback = spy()
+      it('triggers on file remove', function()
+        local callback = spy()
 
-      helpers.ensure_path('check.sh')
+        helpers.ensure_path('check.sh')
 
-      watcher.register(vim.loop.cwd())
-      watcher.on('carbon:synchronize', callback)
+        watcher.register(vim.loop.cwd())
+        watcher.on('carbon:synchronize', callback)
 
-      helpers.delete_path('check.sh')
+        helpers.delete_path('check.sh')
 
-      assert.spy(callback).is_called()
-      assert
-        .spy(callback)
-        .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+        assert.spy(callback).is_called()
+        assert
+          .spy(callback)
+          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+      end)
     end)
   end)
 
