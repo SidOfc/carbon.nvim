@@ -26,6 +26,8 @@ end
 function carbon.initialize()
   if data.initialized then
     return
+  else
+    data.initialized = true
   end
 
   watcher.on('carbon:synchronize', buffer.defer_resync)
@@ -147,7 +149,7 @@ function carbon.vsplit()
 end
 
 function carbon.explore(options)
-  if options.bang or settings.always_reveal then
+  if options and options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
@@ -155,7 +157,7 @@ function carbon.explore(options)
 end
 
 function carbon.explore_left(options)
-  if options.bang or settings.always_reveal then
+  if options and options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
@@ -188,7 +190,7 @@ function carbon.explore_left(options)
 end
 
 function carbon.explore_float(options)
-  if options.bang or settings.always_reveal then
+  if options and options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
@@ -197,6 +199,8 @@ function carbon.explore_float(options)
   if type(window_settings) == 'function' then
     window_settings = window_settings()
   end
+
+  window_settings = vim.deepcopy(window_settings)
 
   local carbon_fexplore_window = vim.api.nvim_get_current_win()
   local window = vim.api.nvim_open_win(buffer.handle(), 1, window_settings)

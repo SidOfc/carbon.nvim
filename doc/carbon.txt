@@ -411,22 +411,45 @@ CARBON                                                             *carbon-carbo
   `------------------------------------------------------------------------------`
   explore                                                  *carbon-carbon-explore*
 
-  Signature: `require('carbon').explore()`
+  Signature: `require('carbon').explore(`[{options}]`)`
 
   Show Carbon in the current window. Calls |carbon-buffer-show| internally.
   Used by the |Carbon| command.
 
+  When {options} is given and `options.bang` is `true` or when
+  |carbon-setting-always-reveal| is `true` then this calls
+  |carbon-buffer-expand-to-path| to expand the tree to reveal
+  the current buffer.
+
   `------------------------------------------------------------------------------`
   explore_left                                        *carbon-carbon-explore-left*
 
-  Signature: `require('carbon').explore_left()`
+  Signature: `require('carbon').explore_left(`[{options}]`)`
 
   Show Carbon in a new vertical split on the left side with a width of
   |carbon-setting-sidebar-width|. Used by the |Lcarbon| command and modifies how
   |carbon-carbon-edit| works for that window.
 
+  When {options} is given and `options.bang` is `true` or when
+  |carbon-setting-always-reveal| is `true` then this calls
+  |carbon-buffer-expand-to-path| to expand the tree to reveal
+  the current buffer.
+
   Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
   window opened via `:Lcarbon`.
+
+  `------------------------------------------------------------------------------`
+  explore_float                                      *carbon-carbon-explore-float*
+
+  Signature: `require('carbon').explore_float(`[{options}]`)`
+
+  Show Carbon in a floating window. Used by the |Fcarbon| command and modifies how
+  |carbon-carbon-edit| works for that window.
+
+  When {options} is given and `options.bang` is `true` or when
+  |carbon-setting-always-reveal| is `true` then this calls
+  |carbon-buffer-expand-to-path| to expand the tree to reveal
+  the current buffer.
 
   `------------------------------------------------------------------------------`
   up                                                            *carbon-carbon-up*
@@ -1958,7 +1981,7 @@ SETTINGS                                                         *carbon-setting
   `------------------------------------------------------------------------------`
   sync_delay                                           *carbon-setting-sync-delay*
 
-  Default: `5`
+  Default: `20`
 
   The amount of milliseconds to wait before updating and rerendering the
   buffer. Carbon debounces file system events by default to reduce the amount

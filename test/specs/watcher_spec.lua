@@ -1,6 +1,6 @@
 local spy = require('luassert.spy')
 local watcher = require('carbon.watcher')
-local settings = require('carbon.settings')
+local helpers = require('test.config.helpers')
 
 describe('carbon.watcher', function()
   before_each(function()
@@ -42,53 +42,52 @@ describe('carbon.watcher', function()
       assert.spy(callback2).is_called(2)
     end)
 
-    it('triggers carbon:synchronize on new file', function()
-      local callback = spy()
+    pending('carbon:synchronize', function()
+      it('triggers on new file', function()
+        local callback = spy()
 
-      watcher.register(vim.loop.cwd())
-      watcher.on('carbon:synchronize', callback)
+        watcher.register(vim.loop.cwd())
+        watcher.on('carbon:synchronize', callback)
 
-      vim.fn.system('touch check.txt')
-      vim.wait(settings.sync_delay * 5)
+        helpers.ensure_path('check.txt')
 
-      assert.spy(callback).is_called()
-      assert
-        .spy(callback)
-        .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
-    end)
+        assert.spy(callback).is_called()
+        assert
+          .spy(callback)
+          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
+      end)
 
-    it('triggers carbon:synchronize on new file', function()
-      local callback = spy()
+      it('triggers on file change', function()
+        local callback = spy()
 
-      vim.fn.system('touch check.sh')
+        helpers.ensure_path('check.sh')
 
-      watcher.register(vim.loop.cwd())
-      watcher.on('carbon:synchronize', callback)
+        watcher.register(vim.loop.cwd())
+        watcher.on('carbon:synchronize', callback)
 
-      vim.fn.system('chmod +x check.sh')
-      vim.wait(settings.sync_delay * 5)
+        helpers.change_file('check.sh')
 
-      assert.spy(callback).is_called()
-      assert
-        .spy(callback)
-        .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
-    end)
+        assert.spy(callback).is_called()
+        assert
+          .spy(callback)
+          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+      end)
 
-    it('triggers carbon:synchronize on new file', function()
-      local callback = spy()
+      it('triggers on file remove', function()
+        local callback = spy()
 
-      vim.fn.system('touch check.sh')
+        helpers.ensure_path('check.sh')
 
-      watcher.register(vim.loop.cwd())
-      watcher.on('carbon:synchronize', callback)
+        watcher.register(vim.loop.cwd())
+        watcher.on('carbon:synchronize', callback)
 
-      vim.fn.system('rm check.sh')
-      vim.wait(settings.sync_delay * 5)
+        helpers.delete_path('check.sh')
 
-      assert.spy(callback).is_called()
-      assert
-        .spy(callback)
-        .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+        assert.spy(callback).is_called()
+        assert
+          .spy(callback)
+          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+      end)
     end)
   end)
 
