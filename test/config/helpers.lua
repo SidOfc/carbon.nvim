@@ -4,7 +4,7 @@ local constants = require('carbon.constants')
 local helpers = {}
 
 function helpers.wait_for_events()
-  vim.wait(settings.sync_delay * 30)
+  vim.wait(settings.sync_delay * 50)
 end
 
 function helpers.change_file(relative_path)
