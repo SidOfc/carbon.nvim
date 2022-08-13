@@ -303,106 +303,95 @@ describe('carbon', function()
     end)
   end)
 
-  pending('create', function()
-    it('can create file', function()
+  -- FIXME: remove pending status after figuring out how to wait for fs events
+  describe('create', function()
+    pending('can create file', function()
       helpers.type_keys(
         string.format('%shello.txt<cr>', settings.actions.create)
       )
 
-      assert.not_nil(
-        vim.loop.fs_stat(string.format('%s/hello.txt', vim.loop.cwd()))
-      )
+      assert.is_true(helpers.has_path('hello.txt'))
     end)
 
-    it('can create directory', function()
+    pending('can create directory', function()
       helpers.type_keys(string.format('%shello/<cr>', settings.actions.create))
 
-      assert.is_equal(
-        1,
-        vim.fn.isdirectory(string.format('%s/hello', vim.loop.cwd()))
-      )
+      assert.is_true(helpers.has_path('hello/'))
+      assert.is_true(helpers.is_directory('hello/'))
     end)
 
-    it('can create deeply nested path', function()
+    pending('can create deeply nested path', function()
       helpers.type_keys(
         string.format('%shello/world/test.txt<cr>', settings.actions.create)
       )
 
-      assert.not_nil(
-        vim.loop.fs_stat(
-          string.format('%s/hello/world/test.txt', vim.loop.cwd())
-        )
-      )
+      assert.is_true(helpers.has_path('hello/world/test.txt'))
     end)
   end)
 
-  pending('delete', function()
-    it('can delete file', function()
+  -- FIXME: remove pending status after figuring out how to wait for fs events
+  describe('delete', function()
+    pending('can delete file', function()
       helpers.ensure_path('.a/.a.txt')
+
       util.cursor(2, 1)
       helpers.type_keys(string.format('%sD', settings.actions.delete))
 
-      assert.not_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
-      assert.is_nil(
-        vim.loop.fs_stat(string.format('%s/.a/.a.txt', vim.loop.cwd()))
-      )
+      assert.is_true(helpers.has_path('.a/'))
+      assert.is_false(helpers.has_path('.a/.a.txt'))
     end)
 
-    it('can delete directory', function()
+    pending('can delete directory', function()
       helpers.ensure_path('.a/')
+
       util.cursor(2, 1)
       helpers.type_keys(string.format('%sD', settings.actions.delete))
 
-      assert.is_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
+      assert.is_false(helpers.has_path('.a/'))
     end)
 
-    it('can partially delete deeply nested path using count', function()
+    pending('can partially delete deeply nested path using count', function()
       helpers.ensure_path('.a/.a/a.txt')
       util.cursor(2, 1)
       helpers.type_keys(string.format('2%sD', settings.actions.delete))
 
-      assert.is_nil(vim.loop.fs_stat(string.format('%s/.a/.a', vim.loop.cwd())))
-      assert.not_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
+      assert.is_true(helpers.has_path('.a/'))
+      assert.is_false(helpers.has_path('.a/.a/'))
     end)
 
-    it('can completely delete deeply nested path using count', function()
+    pending('can completely delete deeply nested path using count', function()
       helpers.ensure_path('.a/.a/.a.txt')
       util.cursor(2, 1)
       helpers.type_keys(string.format('1%sD', settings.actions.delete))
 
-      assert.is_nil(vim.loop.fs_stat(string.format('%s/.a', vim.loop.cwd())))
+      assert.is_false(helpers.has_path('.a/'))
     end)
   end)
 
-  pending('move', function()
-    it('can rename path', function()
+  -- FIXME: remove pending status after figuring out how to wait for fs events
+  describe('move', function()
+    pending('can rename path', function()
       helpers.ensure_path('.a/.a.txt')
+
       util.cursor(2, 1)
       helpers.type_keys(string.format('%s1<cr>', settings.actions.move))
 
-      assert.is_nil(
-        vim.loop.fs_stat(string.format('%s/.a/.a.txt', vim.loop.cwd()))
-      )
-      assert.not_nil(
-        vim.loop.fs_stat(string.format('%s/.a/.a.txt1', vim.loop.cwd()))
-      )
+      assert.is_false(helpers.has_path('.a/.a.txt'))
+      assert.is_true(helpers.has_path('.a/.a.txt1'))
 
       helpers.delete_path('.a/')
     end)
 
-    it('creates intermediate directories', function()
+    pending('creates intermediate directories', function()
       helpers.ensure_path('.a/.a.txt')
+
       util.cursor(2, 1)
       helpers.type_keys(
         string.format('%s<bs><bs><bs><bs>/b/c<cr>', settings.actions.move)
       )
 
-      assert.is_nil(
-        vim.loop.fs_stat(string.format('%s/.a/.a.txt', vim.loop.cwd()))
-      )
-      assert.not_nil(
-        vim.loop.fs_stat(string.format('%s/.a/.a/b/c', vim.loop.cwd()))
-      )
+      assert.is_false(helpers.has_path('.a/.a/.a.txt'))
+      assert.is_true(helpers.has_path('.a/.a/b/c'))
     end)
   end)
 end)
