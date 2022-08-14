@@ -305,15 +305,7 @@ You do not need to have it installed. If it is not installed the test [bootstrap
 process will handle installing it Run `make test` and ensure tests pass
 before committing the code.
 
-The list below shows which modules have been fully tested.
-
-- [x] [`carbon`](/lua/carbon.lua) ([specs](/test/specs/carbon_spec.lua))
-- [x] [`carbon.util`](/lua/carbon/util.lua) ([specs](/test/specs/util_spec.lua))
-- [ ] [`carbon.entry`](/lua/carbon/entry.lua)
-- [x] [`carbon.buffer`](/lua/carbon/buffer.lua) ([specs](/test/specs/buffer_spec.lua))
-- [x] [`carbon.watcher`](/lua/carbon/watcher.lua) ([specs](/test/specs/watcher_spec.lua))
-- [x] [`carbon.settings`](/lua/carbon/settings.lua) ([specs](/test/specs/settings_spec.lua))
-- [x] [`carbon.constants`](/lua/carbon/constants.lua) ([specs](/test/specs/constants_spec.lua))
+The tests can be found in the [`test/specs`](/test/specs) directory.
 
 ## Github Actions
 

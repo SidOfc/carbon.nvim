@@ -52,6 +52,8 @@ function entry:synchronize(paths)
     return
   end
 
+  paths = paths or {}
+
   if paths[self.path] then
     local all_paths = {}
     local current_paths = {}
@@ -137,7 +139,7 @@ end
 
 function entry:children()
   if self.is_directory and not self:has_children() then
-    data.children[self.path] = self:get_children()
+    self:set_children(self:get_children())
   end
 
   return data.children[self.path] or {}
