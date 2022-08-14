@@ -2,37 +2,34 @@ local entry = require('carbon.entry')
 local constants = require('carbon.constants')
 local helpers = {}
 
-function helpers.change_file(relative_path)
+function helpers.resolve(relative_path)
   local clean_path = string.gsub(relative_path, '/+^', '')
-  local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
 
-  vim.fn.writefile({ tostring(os.clock()) }, absolute_path, 'a')
+  return string.format('%s/%s', vim.loop.cwd(), clean_path)
+end
+
+function helpers.change_file(relative_path)
+  vim.fn.writefile(
+    { tostring(os.clock()) },
+    helpers.resolve(relative_path),
+    'a'
+  )
 end
 
 function helpers.delete_path(relative_path)
-  local clean_path = string.gsub(relative_path, '/+^', '')
-  local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
-
-  vim.fn.delete(absolute_path, 'rf')
+  vim.fn.delete(helpers.resolve(relative_path), 'rf')
 end
 
 function helpers.has_path(relative_path)
-  local clean_path = string.gsub(relative_path, '/+^', '')
-  local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
-
-  return vim.loop.fs_stat(absolute_path) ~= nil
+  return vim.loop.fs_stat(helpers.resolve(relative_path)) ~= nil
 end
 
 function helpers.is_directory(relative_path)
-  local clean_path = string.gsub(relative_path, '/+^', '')
-  local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
-
-  return vim.fn.isdirectory(absolute_path) == 1
+  return vim.fn.isdirectory(helpers.resolve(relative_path)) == 1
 end
 
 function helpers.ensure_path(relative_path)
-  local clean_path = string.gsub(relative_path, '/+^', '')
-  local absolute_path = string.format('%s/%s', vim.loop.cwd(), clean_path)
+  local absolute_path = helpers.resolve(relative_path)
 
   vim.fn.mkdir(vim.fn.fnamemodify(absolute_path, ':h'), 'p')
 

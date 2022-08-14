@@ -1,3 +1,6 @@
+require('test.config.assertions')
+
+local spy = require('luassert.spy')
 local util = require('carbon.util')
 local carbon = require('carbon')
 local buffer = require('carbon.buffer')
@@ -303,95 +306,36 @@ describe('carbon', function()
     end)
   end)
 
-  -- FIXME: remove pending status after figuring out how to wait for fs events
   describe('create', function()
-    pending('can create file', function()
-      helpers.type_keys(
-        string.format('%shello.txt<cr>', settings.actions.create)
-      )
+    it('calls buffer.create', function()
+      local buffer_create = spy.on(buffer, 'create')
 
-      assert.is_true(helpers.has_path('hello.txt'))
-    end)
+      carbon.create()
+      helpers.type_keys('<esc>')
 
-    pending('can create directory', function()
-      helpers.type_keys(string.format('%shello/<cr>', settings.actions.create))
-
-      assert.is_true(helpers.has_path('hello/'))
-      assert.is_true(helpers.is_directory('hello/'))
-    end)
-
-    pending('can create deeply nested path', function()
-      helpers.type_keys(
-        string.format('%shello/world/test.txt<cr>', settings.actions.create)
-      )
-
-      assert.is_true(helpers.has_path('hello/world/test.txt'))
+      assert.spy(buffer_create).is_called()
     end)
   end)
 
-  -- FIXME: remove pending status after figuring out how to wait for fs events
   describe('delete', function()
-    pending('can delete file', function()
-      helpers.ensure_path('.a/.a.txt')
+    it('calls buffer.delete', function()
+      local buffer_delete = spy.on(buffer, 'delete')
 
-      util.cursor(2, 1)
-      helpers.type_keys(string.format('%sD', settings.actions.delete))
+      carbon.delete()
+      helpers.type_keys('<esc>')
 
-      assert.is_true(helpers.has_path('.a/'))
-      assert.is_false(helpers.has_path('.a/.a.txt'))
-    end)
-
-    pending('can delete directory', function()
-      helpers.ensure_path('.a/')
-
-      util.cursor(2, 1)
-      helpers.type_keys(string.format('%sD', settings.actions.delete))
-
-      assert.is_false(helpers.has_path('.a/'))
-    end)
-
-    pending('can partially delete deeply nested path using count', function()
-      helpers.ensure_path('.a/.a/a.txt')
-      util.cursor(2, 1)
-      helpers.type_keys(string.format('2%sD', settings.actions.delete))
-
-      assert.is_true(helpers.has_path('.a/'))
-      assert.is_false(helpers.has_path('.a/.a/'))
-    end)
-
-    pending('can completely delete deeply nested path using count', function()
-      helpers.ensure_path('.a/.a/.a.txt')
-      util.cursor(2, 1)
-      helpers.type_keys(string.format('1%sD', settings.actions.delete))
-
-      assert.is_false(helpers.has_path('.a/'))
+      assert.spy(buffer_delete).is_called()
     end)
   end)
 
-  -- FIXME: remove pending status after figuring out how to wait for fs events
   describe('move', function()
-    pending('can rename path', function()
-      helpers.ensure_path('.a/.a.txt')
+    it('calls buffer.move', function()
+      local buffer_move = spy.on(buffer, 'move')
 
-      util.cursor(2, 1)
-      helpers.type_keys(string.format('%s1<cr>', settings.actions.move))
+      carbon.move()
+      helpers.type_keys('<esc>')
 
-      assert.is_false(helpers.has_path('.a/.a.txt'))
-      assert.is_true(helpers.has_path('.a/.a.txt1'))
-
-      helpers.delete_path('.a/')
-    end)
-
-    pending('creates intermediate directories', function()
-      helpers.ensure_path('.a/.a.txt')
-
-      util.cursor(2, 1)
-      helpers.type_keys(
-        string.format('%s<bs><bs><bs><bs>/b/c<cr>', settings.actions.move)
-      )
-
-      assert.is_false(helpers.has_path('.a/.a/.a.txt'))
-      assert.is_true(helpers.has_path('.a/.a/b/c'))
+      assert.spy(buffer_move).is_called()
     end)
   end)
 end)

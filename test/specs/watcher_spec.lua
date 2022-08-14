@@ -1,3 +1,5 @@
+require('test.config.assertions')
+
 local spy = require('luassert.spy')
 local watcher = require('carbon.watcher')
 local helpers = require('test.config.helpers')
