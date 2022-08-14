@@ -134,7 +134,11 @@ function buffer.expand_to_path(input_path)
 
     if current and current.path == path then
       data.flash = current
+
+      return true
     end
+
+    return false
   end
 end
 
@@ -350,7 +354,13 @@ function buffer.set_root(target)
 end
 
 function buffer.reset()
-  return buffer.cd(open_cwd)
+  local rerender = buffer.cd(open_cwd)
+
+  if rerender and not settings.sync_pwd then
+    vim.api.nvim_set_current_dir(open_cwd)
+  end
+
+  return rerender
 end
 
 function buffer.cd(path)

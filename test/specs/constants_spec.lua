@@ -1,3 +1,5 @@
+require('test.config.assertions')
+
 local util = require('carbon.util')
 local constants = require('carbon.constants')
 
