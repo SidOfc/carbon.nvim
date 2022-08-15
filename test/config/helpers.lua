@@ -66,4 +66,18 @@ function helpers.entry(relative_path)
   return entry.find(string.format('%s/%s', vim.loop.cwd(), relative_path))
 end
 
+function helpers.help_info(absolute_path)
+  local content = table.concat(vim.fn.readfile(absolute_path), '\n')
+  local result = { path = absolute_path, tags = {}, refs = {} }
+
+  for tag in string.gmatch(content, '[*|]%S+[*|]') do
+    local key = string.sub(tag, 2, -2)
+    local type = vim.startswith(tag, '*') and 'tags' or 'refs'
+
+    result[type][key] = (result[type][key] or 0) + 1
+  end
+
+  return result
+end
+
 return helpers

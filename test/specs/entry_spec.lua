@@ -6,7 +6,7 @@ local entry = require('carbon.entry')
 local watcher = require('carbon.watcher')
 local helpers = require('test.config.helpers')
 
-describe('entry', function()
+describe('carbon.entry', function()
   describe('new', function()
     it('returns table with metatable of carbon.entry', function()
       assert.is_entry(entry.new(helpers.resolve('lua')))
