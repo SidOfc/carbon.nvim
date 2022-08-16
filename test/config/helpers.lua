@@ -2,6 +2,19 @@ local entry = require('carbon.entry')
 local constants = require('carbon.constants')
 local helpers = {}
 
+function helpers.github_anchor(header)
+  header = string.gsub(header, '^#+ ?', '')
+  header = string.gsub(header, '<([%w-]+).->(.-)</%1>', '%2')
+  header = string.gsub(header, '[^%w%s]', '')
+  header = string.gsub(header, '%s', '-')
+
+  return string.lower(header)
+end
+
+function helpers.repo_path(relative_path)
+  return string.format('%s/%s', vim.env.CARBON_REPO_ROOT, relative_path)
+end
+
 function helpers.resolve(relative_path)
   local clean_path = string.gsub(relative_path, '/+^', '')
 
@@ -66,9 +79,37 @@ function helpers.entry(relative_path)
   return entry.find(string.format('%s/%s', vim.loop.cwd(), relative_path))
 end
 
+function helpers.markdown_info(absolute_path)
+  local result = { tags = {}, refs = {}, header_tags = {}, header_refs = {} }
+  local lines = vim.fn.readfile(absolute_path)
+  local content = table.concat(lines, '\n')
+
+  for tag in string.gmatch(content, '`:h %S+`') do
+    local key = string.sub(tag, 5, -2)
+
+    result.refs[key] = (result.refs[key] or 0) + 1
+  end
+
+  for tag in string.gmatch(content, '%(#%S+%)') do
+    local key = string.sub(tag, 3, -2)
+
+    result.header_refs[key] = (result.header_refs[key] or 0) + 1
+  end
+
+  for _, line in ipairs(lines) do
+    if vim.startswith(line, '#') then
+      local key = helpers.github_anchor(line)
+
+      result.header_tags[key] = (result.header_tags[key] or 0) + 1
+    end
+  end
+
+  return result
+end
+
 function helpers.help_info(absolute_path)
+  local result = { tags = {}, refs = {} }
   local content = table.concat(vim.fn.readfile(absolute_path), '\n')
-  local result = { path = absolute_path, tags = {}, refs = {} }
 
   for tag in string.gmatch(content, '[*|]%S+[*|]') do
     local key = string.sub(tag, 2, -2)
