@@ -113,9 +113,8 @@ customization options.
 All commands also support bang (`!`) versions which will make Carbon expand the
 tree to reveal the current buffer path if possible. When successful, the cursor
 will be moved to the entry and it will be highlighted for a short time as well.
-
-See `:h carbon-buffer-flash-bang` for more information.
-This behavior can also be enabled by default by setting: `:h carbon-setting-always-reveal`.
+See `:h carbon-buffer-flash-bang` for more information. This behavior can also
+be enabled by default by setting: `:h carbon-setting-always-reveal`.
 
 ### `:Carbon` / `:Explore`
 
@@ -129,10 +128,8 @@ command is aliased to `:Carbon`.
 
 The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
 current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
-`:Lexplore` command is aliased to `:Lcarbon`.
-
-Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
-window opened via `:Lcarbon`.
+`:Lexplore` command is aliased to `:Lcarbon`. Subsequent calls to `:Lcarbon`
+will attempt to navigate to an existing window opened via `:Lcarbon`.
 
 ![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
 
@@ -228,7 +225,7 @@ Does nothing when on a directory. Edit a file in a new vertical split. See
 
 ![Carbon vsplit example](/doc/assets/carbon-vsplit.gif)
 
-### <kbd>q</kbd> / <kbd>escape</kbd> Close a Carbon buffer
+### <kbd>q</kbd> Close a Carbon buffer
 
 Close a Carbon buffer, useful for closing Carbon buffers which were
 opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
@@ -302,7 +299,7 @@ Please make sure it is installed and integrated into your editor or run
 
 [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) is used to run tests.
 You do not need to have it installed. If it is not installed the test [bootstrap](https://github.com/SidOfc/carbon.nvim/blob/master/test/config/bootstrap.lua#L7-L12)
-process will handle installing it Run `make test` and ensure tests pass
+process will handle installing it. Run `make test` and ensure tests pass
 before committing the code.
 
 The tests can be found in the [`test/specs`](/test/specs) directory.
