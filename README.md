@@ -23,9 +23,9 @@ Special file types such as symlinks, broken symlinks, and executables are highli
 and deeply nested files and folders are compressed as much as possible to reduce the need to
 manually traverse directories to be able to open files.
 
-Carbon provides the ability to [add](#creating-files-and-directories),
-[move/rename](#moving-files-and-directories), and [delete](#deleting-files-and-directories)
-files and directories, supports mappings to view [parent](#move-root-up) or [child](#move-root-down)
+Carbon provides the ability to [add](#c-creating-files-and-directories),
+[move/rename](#m-moving-files-and-directories), and [delete](#d-deleting-files-and-directories)
+files and directories, supports mappings to view [parent](#-move-root-up) or [child](#-move-root-down)
 directories, settings to control Neovim's pwd (`:h carbon-setting-sync-pwd`) and lock Carbon's root
 to Neovim's pwd (`:h carbon-setting-sync-on-cd`) and much more!
 
