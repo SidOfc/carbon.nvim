@@ -39,7 +39,7 @@ local defaults = {
     return {
       relative = 'editor',
       style = 'minimal',
-      border = 'single',
+      border = 'rounded',
       width = width,
       height = height,
       col = math.floor(columns / 2 - width / 2),
@@ -68,6 +68,7 @@ local defaults = {
     CarbonIndicator = { fg = 'Gray', ctermfg = 'DarkGray', bold = true },
     CarbonDanger = { fg = '#ff3333', ctermfg = 'Red', bold = true },
     CarbonPending = { fg = '#ffee00', ctermfg = 'Yellow', bold = true },
+    CarbonFloat = { bg = '#111111', ctermbg = 'black' },
     CarbonFlash = { link = 'Visual' },
   },
 }
