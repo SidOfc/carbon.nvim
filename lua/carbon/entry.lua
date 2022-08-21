@@ -137,6 +137,10 @@ function entry:is_open()
   return data.open[self.path] and true or false
 end
 
+function entry:toggle_open(recursive)
+  self:set_open(not self:is_open(), recursive)
+end
+
 function entry:children()
   if self.is_directory and not self:has_children() then
     self:set_children(self:get_children())

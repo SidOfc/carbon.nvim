@@ -6,7 +6,7 @@ vim.opt.runtimepath:prepend(repo_root)
 vim.fn.system(string.format('cp -R %s %s', repo_root, tmp_dir))
 vim.fn.chdir(tmp_dir)
 
-require('carbon').initialize()
+require('carbon').setup()
 
 vim.api.nvim_create_autocmd('VimLeavePre', {
   pattern = '*',

@@ -2,6 +2,12 @@ local constants = require('carbon.constants')
 local settings = require('carbon.settings')
 local util = {}
 
+function util.resolve(path)
+  local normalized = vim.fs.normalize(path)
+
+  return string.gsub(vim.fn.fnamemodify(normalized, ':p'), '/+$', '')
+end
+
 function util.is_excluded(path)
   if settings.exclude then
     for _, pattern in ipairs(settings.exclude) do
@@ -243,6 +249,18 @@ function util.set_winhl(win, highlights)
   end
 
   vim.api.nvim_win_set_option(win, 'winhl', table.concat(winhls, ','))
+end
+
+function util.clear_extmarks(buf, ...)
+  local extmarks = vim.api.nvim_buf_get_extmarks(buf, constants.hl, ...)
+
+  for _, extmark in ipairs(extmarks) do
+    vim.api.nvim_buf_del_extmark(buf, constants.hl, extmark[1])
+  end
+end
+
+function util.add_highlight(buf, ...)
+  vim.api.nvim_buf_add_highlight(buf, constants.hl, ...)
 end
 
 return util
