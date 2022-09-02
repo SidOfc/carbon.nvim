@@ -1,7 +1,7 @@
 local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local entry = {}
-local data = { children = {}, open = {}, compressible = {} }
+local data = { children = {} }
 
 entry.__index = entry
 entry.__lt = function(a, b)
@@ -78,7 +78,6 @@ function entry:synchronize(paths)
 
       if previous and current then
         if current.is_directory then
-          current:set_open(previous:is_open())
           current:synchronize(paths)
         end
       elseif previous then
@@ -110,35 +109,6 @@ function entry:terminate()
       return sibling.path ~= self.path
     end, data.children[self.parent.path]))
   end
-end
-
-function entry:set_compressible(value)
-  data.compressible[self.path] = value
-end
-
-function entry:is_compressible()
-  return data.compressible[self.path] == nil and true
-    or data.compressible[self.path]
-end
-
-function entry:set_open(value, recursive)
-  if self.is_directory then
-    data.open[self.path] = value
-
-    if recursive and self:has_children() then
-      for _, child in ipairs(self:children()) do
-        child:set_open(value, recursive)
-      end
-    end
-  end
-end
-
-function entry:is_open()
-  return data.open[self.path] and true or false
-end
-
-function entry:toggle_open(recursive)
-  self:set_open(not self:is_open(), recursive)
 end
 
 function entry:children()

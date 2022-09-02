@@ -66,89 +66,107 @@ function carbon.setup(user_settings)
 end
 
 function carbon.toggle_recursive()
-  view.execute(function(context)
-    if context.cursor.line.entry.is_directory then
-      context.cursor.line.entry:toggle_open(true)
-      context.view:update()
-      context.view:render()
+  view.execute(function(ctx)
+    if ctx.cursor.line.entry.is_directory then
+      local function toggle_recursive(target, value)
+        if target.is_directory then
+          ctx.view:set_path_attr(target.path, 'open', value)
+
+          if target:has_children() then
+            for _, child in ipairs(target:children()) do
+              toggle_recursive(child, value)
+            end
+          end
+        end
+      end
+
+      toggle_recursive(
+        ctx.cursor.line.entry,
+        not ctx.view:get_path_attr(ctx.cursor.line.entry.path, 'open')
+      )
+
+      ctx.view:update()
+      ctx.view:render()
     end
   end)
 end
 
 function carbon.edit()
-  view.execute(function(context)
-    if context.cursor.line.entry.is_directory then
-      context.cursor.line.entry:toggle_open()
-      context.view:update()
-      context.view:render()
+  view.execute(function(ctx)
+    if ctx.cursor.line.entry.is_directory then
+      local open = ctx.view:get_path_attr(ctx.cursor.line.entry.path, 'open')
+
+      ctx.view:set_path_attr(ctx.cursor.line.entry.path, 'open', not open)
+      ctx.view:update()
+      ctx.view:render()
     else
       view.handle_sidebar_or_float()
-      vim.cmd.edit(context.cursor.line.entry.path)
+      vim.cmd.edit(ctx.cursor.line.entry.path)
     end
   end)
 end
 
 function carbon.split()
-  view.execute(function(context)
-    if not context.cursor.line.entry.is_directory then
+  view.execute(function(ctx)
+    if not ctx.cursor.line.entry.is_directory then
       if vim.w.carbon_fexplore_window then
         vim.api.nvim_win_close(0, 1)
       end
 
-      vim.cmd.split(context.cursor.line.entry.path)
+      vim.cmd.split(ctx.cursor.line.entry.path)
     end
   end)
 end
 
 function carbon.vsplit()
-  view.execute(function(context)
-    if not context.cursor.line.entry.is_directory then
+  view.execute(function(ctx)
+    if not ctx.cursor.line.entry.is_directory then
       if vim.w.carbon_fexplore_window then
         vim.api.nvim_win_close(0, 1)
       end
 
-      vim.cmd.vsplit(context.cursor.line.entry.path)
+      vim.cmd.vsplit(ctx.cursor.line.entry.path)
     end
   end)
 end
 
 function carbon.up()
-  view.execute(function(context)
-    if context.view:up() then
-      context.view:update()
-      context.view:render()
+  view.execute(function(ctx)
+    if ctx.view:up() then
+      ctx.view:update()
+      ctx.view:render()
       util.cursor(1, 1)
     end
   end)
 end
 
 function carbon.reset()
-  view.execute(function(context)
-    if context.view:reset() then
-      context.view:update()
-      context.view:render()
+  view.execute(function(ctx)
+    if ctx.view:reset() then
+      ctx.view:update()
+      ctx.view:render()
       util.cursor(1, 1)
     end
   end)
 end
 
 function carbon.down()
-  view.execute(function(context)
-    if context.view:down() then
-      context.view:update()
-      context.view:render()
+  view.execute(function(ctx)
+    if ctx.view:down() then
+      ctx.view:update()
+      ctx.view:render()
       util.cursor(1, 1)
     end
   end)
 end
 
 function carbon.cd(path)
-  view.execute(function(context)
+  view.execute(function(ctx)
     local destination = path and path.file or path or vim.v.event.cwd
 
-    if context.view:cd(destination) then
-      context.view:update()
-      context.view:render()
+    if ctx.view:cd(destination) then
+      ctx.view:update()
+      ctx.view:render()
       util.cursor(1, 1)
     end
   end)
@@ -196,20 +214,20 @@ function carbon.quit()
 end
 
 function carbon.create()
-  view.execute(function(context)
-    context.view:create()
+  view.execute(function(ctx)
+    ctx.view:create()
   end)
 end
 
 function carbon.delete()
-  view.execute(function(context)
-    context.view:delete()
+  view.execute(function(ctx)
+    ctx.view:delete()
   end)
 end
 
 function carbon.move()
-  view.execute(function(context)
-    context.view:move()
+  view.execute(function(ctx)
+    ctx.view:move()
   end)
 end
 
