@@ -13,7 +13,7 @@ view.resync_paths = {}
 
 local function create_leave(ctx)
   vim.cmd({ cmd = 'stopinsert' })
-  ctx.target:set_compressible(ctx.prev_compressible)
+  ctx.view:set_path_attr(ctx.target.path, 'compressible', ctx.prev_compressible)
   util.cursor(ctx.target_line.lnum, 1)
   vim.keymap.del('i', '<cr>', { buffer = 0 })
   vim.keymap.del('i', '<esc>', { buffer = 0 })
@@ -43,7 +43,7 @@ end
 
 local function create_cancel(ctx)
   return function()
-    ctx.target:set_open(ctx.prev_open)
+    ctx.view:set_path_attr(ctx.target.path, 'open', ctx.prev_open)
     create_leave(ctx)
   end
 end
@@ -73,10 +73,12 @@ function view.get(path)
   end
 
   local index = #views + 1
-  local instance = setmetatable(
-    { index = index, initial = resolved, root = entry.new(resolved) },
-    view
-  )
+  local instance = setmetatable({
+    index = index,
+    initial = resolved,
+    states = {},
+    root = entry.new(resolved),
+  }, view)
 
   views[index] = instance
   instance.index = index
@@ -91,6 +93,7 @@ function view.activate(options_param)
   local original_buffer_valid = vim.api.nvim_buf_is_valid(original_buffer)
   local current_view = (options.path and view.get(options.path))
     or view.current()
+    or view.get(vim.loop.cwd())
 
   if options.reveal or settings.always_reveal then
     current_view:expand_to_path(vim.fn.expand('%'))
@@ -153,35 +156,6 @@ function view.handle_sidebar_or_float()
   end
 end
 
-function view:expand_to_path(path)
-  local resolved = util.resolve(path)
-
-  if vim.startswith(resolved, self.root.path) then
-    local dirs = vim.split(string.sub(resolved, #self.root.path + 2), '/')
-    local current = self.root
-
-    for _, dir in ipairs(dirs) do
-      current:children()
-
-      current = entry.find(string.format('%s/%s', current.path, dir))
-
-      if current then
-        current:set_open(true)
-      else
-        break
-      end
-    end
-
-    if current and current.path == resolved then
-      self.flash = current
-
-      return true
-    end
-
-    return false
-  end
-end
-
 function view.exists(index)
   return views[index] and true or false
 end
@@ -205,7 +179,7 @@ function view.list()
   return views
 end
 
-function view.resync(path) -- luacheck:ignore unused argument path
+function view.resync(path)
   view.resync_paths[path] = true
 
   if view.resync_timer and not view.resync_timer:is_closing() then
@@ -228,8 +202,49 @@ function view.resync(path) -- luacheck:ignore unused argument path
   end, settings.sync_delay)
 end
 
-function view:update()
-  self.cached_lines = nil
+function view:expand_to_path(path)
+  local resolved = util.resolve(path)
+
+  if vim.startswith(resolved, self.root.path) then
+    local dirs = vim.split(string.sub(resolved, #self.root.path + 2), '/')
+    local current = self.root
+
+    for _, dir in ipairs(dirs) do
+      current:children()
+
+      current = entry.find(string.format('%s/%s', current.path, dir))
+
+      if current then
+        self:set_path_attr(current.path, 'open', true)
+      else
+        break
+      end
+    end
+
+    if current and current.path == resolved then
+      self.flash = current
+
+      return true
+    end
+
+    return false
+  end
+end
+
+function view:get_path_attr(path, attr)
+  local state = self.states[path]
+
+  return state and state[attr]
+end
+
+function view:set_path_attr(path, attr, value)
+  if not self.states[path] then
+    self.states[path] = {}
+  end
+
+  self.states[path][attr] = value
+
+  return value
 end
 
 function view:buffers()
@@ -238,6 +253,10 @@ function view:buffers()
 
     return ref and ref.index == self.index
   end, vim.api.nvim_list_bufs())
+end
+
+function view:update()
+  self.cached_lines = nil
 end
 
 function view:render()
@@ -388,7 +407,7 @@ function view:up(count)
 
       new_root:set_children(vim.tbl_map(function(child)
         if child.path == self.root.path then
-          child:set_open(true)
+          self:set_path_attr(child.path, 'open', true)
         end
 
         return child
@@ -429,7 +448,7 @@ function view:down(count)
   end
 
   if new_root.path ~= self.root.path then
-    self.root:set_open(true)
+    self:set_path_attr(self.root.path, 'open', true)
 
     return self:set_root(new_root)
   end
@@ -509,7 +528,7 @@ function view:lines(input_target, lines, depth)
       while
         tmp.is_directory
         and #tmp:children() == 1
-        and tmp:is_compressible()
+        and self:get_path_attr(tmp.path, 'compressible')
       do
         watcher.register(tmp.path)
 
@@ -524,7 +543,7 @@ function view:lines(input_target, lines, depth)
       is_empty = #tmp:children() == 0
       path_suffix = '/'
 
-      if not is_empty and tmp:is_open() then
+      if not is_empty and self:get_path_attr(tmp.path, 'open') then
         indicator = collapse_indicator
       elseif not is_empty then
         indicator = expand_indicator
@@ -578,7 +597,7 @@ function view:lines(input_target, lines, depth)
       path = path,
     }
 
-    if tmp.is_directory and tmp:is_open() then
+    if tmp.is_directory and self:get_path_attr(tmp.path, 'open') then
       self:lines(tmp, lines, depth + 1)
     end
   end
@@ -618,11 +637,11 @@ function view:create()
 
   ctx.view = self
   ctx.compact = ctx.target.is_directory and #ctx.target:children() == 0
-  ctx.prev_open = ctx.target:is_open()
-  ctx.prev_compressible = ctx.target:is_compressible()
+  ctx.prev_open = self:get_path_attr(ctx.target.path, 'open')
+  ctx.prev_compressible = self:get_path_attr(ctx.target.path, 'compressible')
 
-  ctx.target:set_open(true)
-  ctx.target:set_compressible(false)
+  self:set_path_attr(ctx.target.path, 'open', true)
+  self:set_path_attr(ctx.target.path, 'compressible', false)
 
   if ctx.compact then
     ctx.edit_prefix = ctx.line.line
