@@ -156,7 +156,7 @@ end
 
 function carbon.explore(options_param)
   local options = options_param or {}
-  local path = options.fargs and string.gsub(options.fargs[1], '%s', '') or ''
+  local path = options.fargs and string.gsub(options.fargs[1] or '', '%s', '')
 
   if path == '' then
     path = vim.loop.cwd()
@@ -167,7 +167,7 @@ end
 
 function carbon.explore_left(options_param)
   local options = options_param or {}
-  local path = options.fargs and string.gsub(options.fargs[1], '%s', '') or ''
+  local path = options.fargs and string.gsub(options.fargs[1] or '', '%s', '')
 
   if path == '' then
     path = vim.loop.cwd()
@@ -178,7 +178,7 @@ end
 
 function carbon.explore_float(options_param)
   local options = options_param or {}
-  local path = options.fargs and string.gsub(options.fargs[1], '%s', '') or ''
+  local path = options.fargs and string.gsub(options.fargs[1] or '', '%s', '')
 
   if path == '' then
     path = vim.loop.cwd()

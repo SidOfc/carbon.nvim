@@ -9,6 +9,7 @@ local views = {}
 view.__index = view
 view.sidebar = { origin = -1, target = -1 }
 view.float = { origin = -1, target = -1 }
+view.resync_paths = {}
 
 local function create_leave(ctx)
   vim.cmd({ cmd = 'stopinsert' })
@@ -205,7 +206,26 @@ function view.list()
 end
 
 function view.resync(path) -- luacheck:ignore unused argument path
-  -- print(string.format("view.resync('%s')", path))
+  view.resync_paths[path] = true
+
+  if view.resync_timer and not view.resync_timer:is_closing() then
+    view.resync_timer:close()
+  end
+
+  view.resync_timer = vim.defer_fn(function()
+    for _, current_view in ipairs(views) do
+      current_view.root:synchronize(view.resync_paths)
+      current_view:update()
+      current_view:render()
+    end
+
+    if not view.resync_timer:is_closing() then
+      view.resync_timer:close()
+    end
+
+    view.resync_timer = nil
+    view.resync_paths = {}
+  end, settings.sync_delay)
 end
 
 function view:update()
