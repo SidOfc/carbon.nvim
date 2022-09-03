@@ -90,7 +90,6 @@ function view.activate(options_param)
   local options = options_param or {}
   local original_window = vim.api.nvim_get_current_win()
   local original_buffer = vim.api.nvim_get_current_buf()
-  local original_buffer_valid = vim.api.nvim_buf_is_valid(original_buffer)
   local current_view = (options.path and view.get(options.path))
     or view.current()
     or view.get(vim.loop.cwd())
@@ -134,8 +133,8 @@ function view.activate(options_param)
     vim.api.nvim_win_set_buf(0, current_view:buffer())
   end
 
-  if original_buffer_valid and options.delete_current_buf then
-    vim.api.nvim_buf_delete(original_buffer, { force = true })
+  if options.delete_current_buf then
+    pcall(vim.api.nvim_buf_delete, original_buffer, { force = true })
   end
 end
 
@@ -361,7 +360,7 @@ function view:buffer()
   end
 
   local buffer = util.create_scratch_buf({
-    name = vim.fn.fnamemodify(self.root.path, ':t'),
+    name = string.format('carbon[%d]', self.index),
     filetype = 'carbon.explorer',
     modifiable = false,
     modified = false,
@@ -469,11 +468,6 @@ function view:set_root(target)
   end
 
   self.root = target
-
-  vim.api.nvim_buf_set_name(
-    self:buffer(),
-    vim.fn.fnamemodify(self.root.path, ':t')
-  )
 
   watcher.keep(function(path)
     return vim.startswith(path, self.root.path)
