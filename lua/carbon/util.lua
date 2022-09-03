@@ -161,7 +161,7 @@ function util.confirm(options)
   })
 
   local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'editor',
+    relative = 'win',
     anchor = 'NW',
     border = 'single',
     style = 'minimal',
