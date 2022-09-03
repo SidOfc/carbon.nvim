@@ -55,6 +55,8 @@ function entry:synchronize(paths)
   paths = paths or {}
 
   if paths[self.path] then
+    paths[self.path] = nil
+
     local all_paths = {}
     local current_paths = {}
     local previous_paths = {}
