@@ -16,12 +16,6 @@ describe('carbon', function()
 
   describe('autocommands', function()
     describe('DirChanged', function()
-      it('exists', function()
-        local autocmd = helpers.autocmd('DirChanged')
-
-        assert.is_number(autocmd.id)
-      end)
-
       it('is not buffer local', function()
         local autocmd = helpers.autocmd('DirChanged')
 
@@ -36,26 +30,23 @@ describe('carbon', function()
     end)
 
     describe('BufWinEnter', function()
-      it('exists', function()
-        local autocmd = helpers.autocmd('BufWinEnter')
-
-        assert.is_number(autocmd.id)
-      end)
-
-      it('is buffer local', function()
-        local autocmd = helpers.autocmd('BufWinEnter')
+      it('has buffer local event', function()
+        local autocmd = helpers.autocmd(
+          'BufWinEnter',
+          { buffer = vim.api.nvim_get_current_buf() }
+        )
 
         assert.is_true(autocmd.buflocal)
+      end)
+
+      it('has a global event', function()
+        local autocmd = helpers.autocmd('BufWinEnter')
+
+        assert.is_false(autocmd.buflocal)
       end)
     end)
 
     describe('BufHidden', function()
-      it('exists', function()
-        local autocmd = helpers.autocmd('BufHidden')
-
-        assert.is_number(autocmd.id)
-      end)
-
       it('is buffer local', function()
         local autocmd = helpers.autocmd('BufHidden')
 
