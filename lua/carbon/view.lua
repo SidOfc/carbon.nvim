@@ -12,7 +12,7 @@ view.float = { origin = -1, target = -1 }
 view.resync_paths = {}
 
 local function create_leave(ctx)
-  vim.cmd({ cmd = 'stopinsert' })
+  vim.cmd.stopinsert()
   ctx.view:set_path_attr(ctx.target.path, 'compressible', ctx.prev_compressible)
   util.cursor(ctx.target_line.lnum, 1)
   vim.keymap.del('i', '<cr>', { buffer = 0 })
