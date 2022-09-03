@@ -280,28 +280,27 @@ function view:render()
     end
   end
 
-  for _, buf in ipairs(self:buffers()) do
-    local current_mode = string.lower(vim.api.nvim_get_mode().mode)
+  local buf = self:buffer()
+  local current_mode = string.lower(vim.api.nvim_get_mode().mode)
 
-    vim.api.nvim_buf_clear_namespace(buf, constants.hl, 0, -1)
-    vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-    vim.api.nvim_buf_set_lines(buf, 0, -1, 1, lines)
-    vim.api.nvim_buf_set_option(buf, 'modified', false)
+  vim.api.nvim_buf_clear_namespace(buf, constants.hl, 0, -1)
+  vim.api.nvim_buf_set_option(buf, 'modifiable', true)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, 1, lines)
+  vim.api.nvim_buf_set_option(buf, 'modified', false)
 
-    if not string.find(current_mode, 'i') then
-      vim.api.nvim_buf_set_option(buf, 'modifiable', false)
-    end
+  if not string.find(current_mode, 'i') then
+    vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+  end
 
-    for _, hl in ipairs(hls) do
-      vim.api.nvim_buf_add_highlight(
-        buf,
-        constants.hl,
-        hl[1],
-        hl[2],
-        hl[3],
-        hl[4]
-      )
-    end
+  for _, hl in ipairs(hls) do
+    vim.api.nvim_buf_add_highlight(
+      buf,
+      constants.hl,
+      hl[1],
+      hl[2],
+      hl[3],
+      hl[4]
+    )
   end
 
   if cursor then
@@ -323,15 +322,13 @@ function view:render()
 end
 
 function view:focus_flash(duration, group, start, finish)
-  for _, buf in ipairs(self:buffers()) do
-    vim.highlight.range(buf, constants.hl_tmp, group, start, finish, {})
-  end
+  local buf = self:buffer()
+
+  vim.highlight.range(buf, constants.hl_tmp, group, start, finish, {})
 
   vim.defer_fn(function()
-    for _, buf in ipairs(self:buffers()) do
-      if vim.api.nvim_buf_is_valid(buf) then
-        vim.api.nvim_buf_clear_namespace(buf, constants.hl_tmp, 0, -1)
-      end
+    if vim.api.nvim_buf_is_valid(buf) then
+      vim.api.nvim_buf_clear_namespace(buf, constants.hl_tmp, 0, -1)
     end
   end, duration)
 end
@@ -376,7 +373,11 @@ function view:buffer()
     },
   })
 
-  vim.api.nvim_buf_set_var(buffer, 'carbon', { index = self.index })
+  vim.api.nvim_buf_set_var(
+    buffer,
+    'carbon',
+    { index = self.index, name = self.root.name }
+  )
 
   return buffer
 end
@@ -468,6 +469,11 @@ function view:set_root(target)
   end
 
   self.root = target
+  vim.api.nvim_buf_set_var(
+    self:buffer(),
+    'carbon',
+    { index = self.index, name = self.root.name }
+  )
 
   watcher.keep(function(path)
     return vim.startswith(path, self.root.path)
