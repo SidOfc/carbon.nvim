@@ -1,6 +1,6 @@
 require('test.config.assertions')
 
--- local spy = require('luassert.spy')
+local spy = require('luassert.spy')
 local util = require('carbon.util')
 local carbon = require('carbon')
 local view = require('carbon.view')
@@ -120,13 +120,15 @@ describe('carbon', function()
   end)
 
   describe('split', function()
-    pending('open file in horizontal split', function()
+    it('open file in horizontal split', function()
       assert.equal('carbon.explorer', vim.bo.filetype)
 
-      util.cursor(3, 1)
-      carbon.split()
+      local file_line = helpers.line_with_file()
 
-      helpers.inspect_buffer()
+      assert.not_nil(file_line)
+
+      util.cursor(file_line.lnum, 1)
+      carbon.split()
 
       assert.not_equal('carbon.explorer', vim.bo.filetype)
 
@@ -137,10 +139,14 @@ describe('carbon', function()
   end)
 
   describe('vsplit', function()
-    pending('open file in vertical split', function()
+    it('open file in vertical split', function()
       assert.equal('carbon.explorer', vim.bo.filetype)
 
-      util.cursor(3, 1)
+      local file_line = helpers.line_with_file()
+
+      assert.not_nil(file_line)
+
+      util.cursor(file_line.lnum, 1)
       carbon.vsplit()
 
       assert.not_equal('carbon.explorer', vim.bo.filetype)
@@ -152,21 +158,21 @@ describe('carbon', function()
   end)
 
   describe('toggle_recursive', function()
-    pending('toggles recursively opened directory', function()
+    it('toggles recursively opened directory', function()
       local assets_entry = helpers.entry('doc/assets')
 
       util.cursor(4, 1)
       assert.not_nil(assets_entry)
 
       carbon.toggle_recursive()
-      assert.is_true(assets_entry:is_open())
+      assert.is_true(helpers.is_open(assets_entry.path))
       assert.same(
         { '- doc/', '  - assets/' },
         vim.api.nvim_buf_get_lines(0, 3, 5, true)
       )
 
       carbon.toggle_recursive()
-      assert.is_false(assets_entry:is_open())
+      assert.is_false(helpers.is_open(assets_entry.path))
       assert.same(
         { '+ doc/', '+ lua/' },
         vim.api.nvim_buf_get_lines(0, 3, 5, true)
@@ -175,8 +181,12 @@ describe('carbon', function()
   end)
 
   describe('explore', function()
-    pending('shows the buffer', function()
-      util.cursor(12, 1)
+    it('shows the buffer', function()
+      local file_line = helpers.line_with_file()
+
+      assert.not_nil(file_line)
+
+      util.cursor(file_line.lnum, 1)
       carbon.edit()
       carbon.explore()
 
@@ -185,8 +195,12 @@ describe('carbon', function()
   end)
 
   describe('explore_left', function()
-    pending('shows the buffer to the left of the current buffer', function()
-      util.cursor(12, 1)
+    it('shows the buffer to the left of the current buffer', function()
+      local file_line = helpers.line_with_file()
+
+      assert.not_nil(file_line)
+
+      util.cursor(file_line.lnum, 1)
       carbon.edit()
 
       local before_bufname = vim.fn.bufname()
@@ -201,7 +215,7 @@ describe('carbon', function()
   end)
 
   describe('explore_float', function()
-    pending('shows the buffer in a floating window', function()
+    it('shows the buffer in a floating window', function()
       carbon.explore_float()
 
       assert.is_number(
@@ -213,7 +227,7 @@ describe('carbon', function()
   end)
 
   describe('up', function()
-    pending('sets cwd to parent directory', function()
+    it('sets cwd to parent directory', function()
       local original_cwd = vim.loop.cwd()
 
       settings.sync_pwd = true
@@ -225,7 +239,7 @@ describe('carbon', function()
       settings.sync_pwd = settings.defaults.sync_pwd
     end)
 
-    pending('registers new directory listeners', function()
+    it('registers new directory listeners', function()
       local original_listeners = watcher.registered()
 
       carbon.up()
@@ -233,7 +247,7 @@ describe('carbon', function()
       assert.not_same(original_listeners, watcher.registered())
     end)
 
-    pending('automatically opens previous cwd', function()
+    it('automatically opens previous cwd', function()
       util.cursor(1, 1)
 
       assert.is_equal('carbon.explorer', vim.bo.filetype)
@@ -242,7 +256,7 @@ describe('carbon', function()
         local root = ctx.view.root
 
         carbon.up()
-        assert.is_true(ctx.view:get_path_attr(root.path))
+        assert.is_true(ctx.view:get_path_attr(root.path, 'open'))
       end)
 
       carbon.reset()
@@ -250,7 +264,7 @@ describe('carbon', function()
   end)
 
   describe('reset', function()
-    pending('reset to original cwd during startup', function()
+    it('reset to original cwd during startup', function()
       local original_cwd = vim.loop.cwd()
 
       settings.sync_pwd = true
@@ -263,7 +277,7 @@ describe('carbon', function()
   end)
 
   describe('down', function()
-    pending('sets cwd to cursor directory', function()
+    it('sets cwd to cursor directory', function()
       local original_cwd = vim.loop.cwd()
 
       settings.sync_pwd = true
@@ -276,7 +290,7 @@ describe('carbon', function()
       settings.sync_pwd = settings.defaults.sync_pwd
     end)
 
-    pending('releases registered listeners not in new cwd', function()
+    it('releases registered listeners not in new cwd', function()
       local original_listeners = watcher.registered()
 
       util.cursor(2, 1)
@@ -289,7 +303,7 @@ describe('carbon', function()
   end)
 
   describe('cd', function()
-    pending('sets cwd to target path', function()
+    it('sets cwd to target path', function()
       local jump_cwd = string.format('%s/test/specs', vim.loop.cwd())
 
       settings.sync_pwd = true
@@ -304,45 +318,45 @@ describe('carbon', function()
   end)
 
   describe('quit', function()
-    pending('closes the buffer', function()
+    it('closes the buffer', function()
       vim.cmd.edit('README.md')
       carbon.explore()
       helpers.type_keys(settings.actions.quit)
 
-      assert.not_equal('carbon', vim.fn.bufname())
+      assert.not_equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
   describe('create', function()
-    pending('calls buffer.create', function()
-      -- local buffer_create = spy.on(buffer, 'create')
+    it('calls buffer.create', function()
+      local view_create = spy.on(view, 'create')
 
-      -- carbon.create()
-      -- helpers.type_keys('<esc>')
+      carbon.create()
+      helpers.type_keys('<esc>')
 
-      -- assert.spy(buffer_create).is_called()
+      assert.spy(view_create).is_called()
     end)
   end)
 
   describe('delete', function()
-    pending('calls buffer.delete', function()
-      -- local buffer_delete = spy.on(buffer, 'delete')
+    it('calls buffer.delete', function()
+      local view_delete = spy.on(view, 'delete')
 
-      -- carbon.delete()
-      -- helpers.type_keys('<esc>')
+      carbon.delete()
+      helpers.type_keys('<esc>')
 
-      -- assert.spy(buffer_delete).is_called()
+      assert.spy(view_delete).is_called()
     end)
   end)
 
   describe('move', function()
-    pending('calls buffer.move', function()
-      -- local buffer_move = spy.on(buffer, 'move')
+    it('calls buffer.move', function()
+      local view_move = spy.on(view, 'move')
 
-      -- carbon.move()
-      -- helpers.type_keys('<esc>')
+      carbon.move()
+      helpers.type_keys('<esc>')
 
-      -- assert.spy(buffer_move).is_called()
+      assert.spy(view_move).is_called()
     end)
   end)
 end)
