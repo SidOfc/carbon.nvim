@@ -1,3 +1,5 @@
+local util = require('carbon.util')
+local view = require('carbon.view')
 local entry = require('carbon.entry')
 local constants = require('carbon.constants')
 local helpers = {}
@@ -77,6 +79,20 @@ end
 
 function helpers.entry(relative_path)
   return entry.find(string.format('%s/%s', vim.loop.cwd(), relative_path))
+end
+
+function helpers.is_open(path)
+  return view.execute(function(ctx)
+    return ctx.view:get_path_attr(path, 'open')
+  end)
+end
+
+function helpers.line_with_file()
+  return view.execute(function(ctx)
+    return util.tbl_find(ctx.view:current_lines(), function(line)
+      return not line.entry.is_directory
+    end)
+  end)
 end
 
 function helpers.markdown_info(absolute_path)
