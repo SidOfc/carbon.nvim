@@ -233,8 +233,13 @@ end
 
 function view:get_path_attr(path, attr)
   local state = self.states[path]
+  local value = state and state[attr]
 
-  return state and state[attr]
+  if attr == 'compressible' and value == nil then
+    return true
+  end
+
+  return value
 end
 
 function view:set_path_attr(path, attr, value)
