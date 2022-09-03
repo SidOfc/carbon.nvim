@@ -28,6 +28,10 @@ function carbon.setup(user_settings)
     util.command('Lcarbon', carbon.explore_left, command_opts)
     util.command('Fcarbon', carbon.explore_float, command_opts)
 
+    if settings.open_on_dir then
+      util.autocmd('BufWinEnter', carbon.maybe_explore, { pattern = '*' })
+    end
+
     if settings.sync_on_cd then
       util.autocmd('DirChanged', carbon.cd, { pattern = 'global' })
     end
@@ -170,6 +174,19 @@ function carbon.cd(path)
       util.cursor(1, 1)
     end
   end)
+end
+
+function carbon.maybe_explore(params)
+  if vim.bo.filetype == 'carbon.explorer' then
+    return
+  end
+
+  if params and params.file and util.is_directory(params.file) then
+    view.activate({ path = params.file, delete_current_buf = true })
+    view.execute(function(ctx)
+      ctx.view:show()
+    end)
+  end
 end
 
 function carbon.explore(options_param)

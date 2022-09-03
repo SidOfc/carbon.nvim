@@ -5,8 +5,9 @@ local defaults = {
   keep_netrw = false,
   sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 20,
-  sidebar_width = 30,
+  open_on_dir = true,
   always_reveal = false,
+  sidebar_width = 30,
   exclude = {
     '~$',
     '#$',
@@ -33,8 +34,8 @@ local defaults = {
   float_settings = function()
     local columns = vim.opt.columns:get()
     local rows = vim.opt.lines:get()
-    local width = math.min(50, math.floor(columns * 0.8))
-    local height = math.min(20, math.floor(rows * 0.8))
+    local width = math.min(40, math.floor(columns * 0.9))
+    local height = math.min(20, math.floor(rows * 0.9))
 
     return {
       relative = 'editor',
