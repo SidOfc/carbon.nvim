@@ -81,7 +81,6 @@ function view.get(path)
   }, view)
 
   views[index] = instance
-  instance.index = index
 
   return instance
 end
@@ -376,7 +375,7 @@ function view:buffer()
   vim.api.nvim_buf_set_var(
     buffer,
     'carbon',
-    { index = self.index, name = self.root.name }
+    { index = self.index, path = self.root.path }
   )
 
   return buffer
@@ -460,6 +459,8 @@ function view:down(count)
 end
 
 function view:set_root(target)
+  local is_cwd = self.root.path == vim.loop.cwd()
+
   if type(target) == 'string' then
     target = entry.new(target)
   end
@@ -472,14 +473,14 @@ function view:set_root(target)
   vim.api.nvim_buf_set_var(
     self:buffer(),
     'carbon',
-    { index = self.index, name = self.root.name }
+    { index = self.index, path = self.root.path }
   )
 
   watcher.keep(function(path)
     return vim.startswith(path, self.root.path)
   end)
 
-  if settings.sync_pwd then
+  if settings.sync_pwd and is_cwd then
     vim.api.nvim_set_current_dir(self.root.path)
   end
 
