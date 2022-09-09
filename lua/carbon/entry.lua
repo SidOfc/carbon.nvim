@@ -155,17 +155,24 @@ end
 
 function entry:get_children()
   local entries = {}
+  local handle = vim.loop.fs_scandir(self.path)
 
-  for name in vim.fs.dir(self.path) do
-    local absolute_path = self.path .. '/' .. name
-    local relative_path = vim.fn.fnamemodify(absolute_path, ':.')
-
-    if not util.is_excluded(relative_path) then
-      entries[#entries + 1] = entry.new(absolute_path, self)
+  if type(handle) == 'userdata' then
+    local function iterator()
+      return vim.loop.fs_scandir_next(handle)
     end
-  end
 
-  table.sort(entries)
+    for name in iterator do
+      local absolute_path = self.path .. '/' .. name
+      local relative_path = vim.fn.fnamemodify(absolute_path, ':.')
+
+      if not util.is_excluded(relative_path) then
+        entries[#entries + 1] = entry.new(absolute_path, self)
+      end
+    end
+
+    table.sort(entries)
+  end
 
   return entries
 end
