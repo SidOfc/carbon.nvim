@@ -74,9 +74,9 @@ describe('carbon.settings', function()
     end)
   end)
 
-  describe('always_reveal', function()
+  describe('auto_reveal', function()
     it('is a boolean', function()
-      assert.is_boolean(settings.always_reveal)
+      assert.is_boolean(settings.auto_reveal)
     end)
   end)
 

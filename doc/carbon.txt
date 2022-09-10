@@ -122,7 +122,7 @@ COMMANDS                                                         *carbon-command
   Alias:          `Explore` unless |carbon-setting-keep-netrw| is enabled.
 
   Replaces the current buffer with the Carbon buffer.
-  When called with a <bang> (`Carbon!`) or |carbon-setting-always-reveal| enabled,
+  When called with a <bang> (`Carbon!`) or |carbon-setting-auto-reveal| enabled,
   the tree will expand to show the current buffer path and
   |carbon-buffer-flash-bang| it if possible. This also works for its alias.
 
@@ -139,7 +139,7 @@ COMMANDS                                                         *carbon-command
   Subsequent calls will reuse a window previously opened via `Lcarbon` if this
   window still exists and valid.
 
-  When called with a <bang> (`Carbon!`) or |carbon-setting-always-reveal| enabled,
+  When called with a <bang> (`Carbon!`) or |carbon-setting-auto-reveal| enabled,
   the tree will expand to show the current buffer path and
   |carbon-buffer-flash-bang| it if possible. This also works for its alias.
 
@@ -161,7 +161,7 @@ COMMANDS                                                         *carbon-command
   in a vertical split relative to the current window.
 
 
-  When called with a <bang> (`Carbon!`) or |carbon-setting-always-reveal| enabled,
+  When called with a <bang> (`Carbon!`) or |carbon-setting-auto-reveal| enabled,
   the tree will expand to show the current buffer path and
   |carbon-buffer-flash-bang| it if possible.
 
@@ -416,7 +416,7 @@ CARBON                                                             *carbon-carbo
   Used by the |carbon-command-Carbon| command.
 
   When {options} is given and `options.bang` is `true` or when
-  |carbon-setting-always-reveal| is `true` then this calls
+  |carbon-setting-auto-reveal| is `true` then this calls
   |carbon-buffer-expand-to-path| to expand the tree to reveal
   the current buffer.
 
@@ -430,7 +430,7 @@ CARBON                                                             *carbon-carbo
   modifies how |carbon-carbon-edit| works for that window.
 
   When {options} is given and `options.bang` is `true` or when
-  |carbon-setting-always-reveal| is `true` then this calls
+  |carbon-setting-auto-reveal| is `true` then this calls
   |carbon-buffer-expand-to-path| to expand the tree to reveal
   the current buffer.
 
@@ -446,7 +446,7 @@ CARBON                                                             *carbon-carbo
   and modifies how |carbon-carbon-edit| works for that window.
 
   When {options} is given and `options.bang` is `true` or when
-  |carbon-setting-always-reveal| is `true` then this calls
+  |carbon-setting-auto-reveal| is `true` then this calls
   |carbon-buffer-expand-to-path| to expand the tree to reveal
   the current buffer.
 
@@ -1847,7 +1847,7 @@ SETTINGS                                                         *carbon-setting
   `  sync_on_cd    = `|carbon-setting-sync-on-cd|`,`
   `  sync_delay    = `|carbon-setting-sync-delay|`,`
   `  sidebar_width = `|carbon-setting-sidebar-width|`,`
-  `  always_reveal = `|carbon-setting-always-reveal|`,`
+  `  auto_reveal   = `|carbon-setting-auto-reveal|`,`
   `  exclude       = `|carbon-setting-exclude|`,`
 
   `  indicators = {`
@@ -1995,7 +1995,7 @@ SETTINGS                                                         *carbon-setting
   The width in columns of the sidebar window opened by |carbon-command-Lcarbon|.
 
   `------------------------------------------------------------------------------`
-  always_reveal                                     *carbon-setting-always-reveal*
+  auto_reveal                                         *carbon-setting-auto-reveal*
 
   Default: `false`
 

@@ -93,7 +93,7 @@ function view.activate(options_param)
     or view.current()
     or view.get(vim.loop.cwd())
 
-  if options.reveal or settings.always_reveal then
+  if options.reveal or settings.auto_reveal then
     current_view:expand_to_path(vim.fn.expand('%'))
   end
 
