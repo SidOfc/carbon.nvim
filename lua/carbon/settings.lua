@@ -60,8 +60,8 @@ local defaults = {
     toggle_recursive = '!',
   },
   highlights = {
-    CarbonDir = { fg = '#00aaff', ctermfg = 'DarkBlue', bold = true },
-    CarbonFile = { fg = '#f8f8f8', ctermfg = 'LightGray', bold = true },
+    CarbonDir = { link = 'Directory' },
+    CarbonFile = { link = 'Text' },
     CarbonExe = { fg = '#22cc22', ctermfg = 'Green', bold = true },
     CarbonSymlink = { fg = '#d77ee0', ctermfg = 'Magenta', bold = true },
     CarbonBrokenSymlink = { fg = '#ea871e', ctermfg = 'Brown', bold = true },
