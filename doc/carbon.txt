@@ -336,6 +336,15 @@ PLUGS                                                               *carbon-plug
   For more information see |carbon-buffer-delete|.
 
   `------------------------------------------------------------------------------`
+  <Plug>(carbon-close-parent)                           *carbon-plug-close-parent*
+
+  Implementation: `require('carbon').close_parent()`
+  Mapping:        |carbon-setting-actions-close-parent|
+
+  Closes the parent directory of the entry the cursor is on. Accepts a [count]
+  to allow closing multiple parents at once.
+
+  `------------------------------------------------------------------------------`
   <Plug>(carbon-toggle-recursive)                   *carbon-plug-toggle-recursive*
 
   Implementation: `require('carbon').toggle_recursive()`
@@ -531,6 +540,16 @@ CARBON                                                             *carbon-carbo
   Recursively opens or closes the entry under the cursor. If the entry is not
   a directory nothing happens.
 
+  `------------------------------------------------------------------------------`
+  close_parent                                        *carbon-carbon-close-parent*
+
+  Signature: `require('carbon').close_parent()`
+
+  Close the first parent directory under the cursor which can be collapsed. Closes
+  `vim.v.count1` amount of collapsible parent directories.
+
+  A parent of any entry is not "collapsible" if it is part of a compressed
+  path (|carbon-setting-compress|).
 ================================================================================
 UTIL                                                                 *carbon-util*
 
@@ -1871,6 +1890,7 @@ SETTINGS                                                         *carbon-setting
   `    create           = `|carbon-setting-actions-create|`,`
   `    move             = `|carbon-setting-actions-move|`,`
   `    delete           = `|carbon-setting-actions-delete|`,`
+  `    close_parent     = `|carbon-setting-close-parent|`,`
   `    toggle_recursive = `|carbon-setting-actions-toggle-recursive|`,`
   `  },`
 
@@ -2106,6 +2126,7 @@ SETTINGS                                                         *carbon-setting
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
     `  create = 'c',`                                *carbon-setting-actions-create*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
+    `  close_parent = '-',`                    *carbon-setting-actions-close-parent*
     `  toggle_recursive = '!',`            *carbon-setting-actions-toggle-recursive*
     `}`
 
@@ -2131,6 +2152,7 @@ SETTINGS                                                         *carbon-setting
   `vsplit`           => |carbon-plug-vsplit|
   `create`           => |carbon-plug-create|
   `delete`           => |carbon-plug-delete|
+  `close_parent`     => |carbon-plug-close-parent|
   `toggle_recursive` => |carbon-plug-toggle-recursive|
 
   `------------------------------------------------------------------------------`
