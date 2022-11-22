@@ -2139,14 +2139,10 @@ SETTINGS                                                         *carbon-setting
   Default:
     `{`
     `  CarbonDir = {`                          *carbon-setting-highlights-CarbonDir*
-    `    fg = '#00aaff',`
-    `    ctermfg = 'DarkBlue',`
-    `    bold = true,`
+    `    link = 'Directory',`
     `  },`
     `  CarbonFile = {`                        *carbon-setting-highlights-CarbonFile*
-    `    fg = '#f8f8f8',`
-    `    ctermfg = 'LightGray',`
-    `    bold = true,`
+    `    link = 'Text',`
     `  },`
     `  CarbonExe = {`                          *carbon-setting-highlights-CarbonExe*
     `    fg = '#22cc22',`
