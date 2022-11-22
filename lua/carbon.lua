@@ -268,7 +268,7 @@ end
 
 function carbon.close_parent()
   local count = 0
-  local lines = buffer.lines()
+  local lines = { unpack(buffer.lines(), 2) }
   local entry = buffer.cursor().line.entry
   local line
 
