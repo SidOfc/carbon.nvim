@@ -1890,7 +1890,7 @@ SETTINGS                                                         *carbon-setting
   `    create           = `|carbon-setting-actions-create|`,`
   `    move             = `|carbon-setting-actions-move|`,`
   `    delete           = `|carbon-setting-actions-delete|`,`
-  `    close_parent     = `|carbon-setting-close-parent|`,`
+  `    close_parent     = `|carbon-setting-actions-close-parent|`,`
   `    toggle_recursive = `|carbon-setting-actions-toggle-recursive|`,`
   `  },`
 
