@@ -2101,10 +2101,10 @@ SETTINGS                                                         *carbon-setting
     `  quit = 'q',`                                    *carbon-setting-actions-quit*
     `  edit = '<cr>',`                                 *carbon-setting-actions-edit*
     `  move = 'm',`                                    *carbon-setting-actions-move*
-    `  reset = '.',`                                  *carbon-setting-actions-reset*
-    `  split = '<c-x>',`                              *carbon-setting-actions-split*
+    `  reset = 'u',`                                  *carbon-setting-actions-reset*
+    `  split = { '<c-x>', '<c-s>' },`                              *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
-    `  create = 'c',`                                *carbon-setting-actions-create*
+    `  create = { 'c', '%' },`                                *carbon-setting-actions-create*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
     `  toggle_recursive = '!',`            *carbon-setting-actions-toggle-recursive*
     `}`
@@ -2145,19 +2145,13 @@ SETTINGS                                                         *carbon-setting
     `    link = 'Text',`
     `  },`
     `  CarbonExe = {`                          *carbon-setting-highlights-CarbonExe*
-    `    fg = '#22cc22',`
-    `    ctermfg = 'Green',`
-    `    bold = true,`
+    `    link = 'NetrwExe',`
     `  },`
     `  CarbonSymlink = {`                  *carbon-setting-highlights-CarbonSymlink*
-    `    fg = '#d77ee0',`
-    `    ctermfg = 'Magenta',`
-    `    bold = true,`
+    `    link = 'NetrwSymLink',`
     `  },`
     `  CarbonBrokenSymlink = {`      *carbon-setting-highlights-CarbonBrokenSymlink*
-    `    fg = '#ea871e',`
-    `    ctermfg = 'Brown',`
-    `    bold = true,`
+    `    link = 'ErrorMsg'`
     `  },`
     `  CarbonIndicator = {`              *carbon-setting-highlights-CarbonIndicator*
     `    fg = 'Gray',`
@@ -2165,14 +2159,10 @@ SETTINGS                                                         *carbon-setting
     `    bold = true,`
     `  },`
     `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
-    `    fg = '#ff3333',`
-    `    ctermfg = 'Red',`
-    `    bold = true,`
+    `    link = 'Error',`
     `  },`
     `  CarbonPending = {`                  *carbon-setting-highlights-CarbonPending*
-    `    fg = '#ffee00',`
-    `    ctermfg = 'Yellow',`
-    `    bold = true,`
+    `    link = 'Search',`
     `  },`
     `  CarbonFlash = {`                      *carbon-setting-highlights-CarbonFlash*
     `    link = 'Visual',`
