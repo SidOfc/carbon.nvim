@@ -143,8 +143,7 @@ describe('carbon.settings', function()
 
     for action, mapping in pairs(settings.actions) do
       describe(string.format('actions.%s', action), function()
-        it('is a non-empty string', function()
-          assert.is_string(mapping)
+        it('is not empty', function()
           assert.is_true(#mapping > 0)
         end)
       end)

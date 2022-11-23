@@ -23,7 +23,7 @@ Special file types such as symlinks, broken symlinks, and executables are highli
 and deeply nested files and folders are compressed as much as possible to reduce the need to
 manually traverse directories to be able to open files.
 
-Carbon provides the ability to [add](#c-creating-files-and-directories),
+Carbon provides the ability to [add](#c-or--creating-files-and-directories),
 [move/rename](#m-moving-files-and-directories), and [delete](#d-deleting-files-and-directories)
 files and directories, supports mappings to view [parent](#-move-root-up) or [child](#-move-root-down)
 directories, settings to control Neovim's pwd (`:h carbon-setting-sync-pwd`) and lock Carbon's root
@@ -160,7 +160,7 @@ a **count** to go down multiple levels at once on compressed paths.
 
 ![Carbon down example](/doc/assets/carbon-down.gif)
 
-### <kbd>.</kbd> Reset root
+### <kbd>u</kbd> Reset root
 
 Resets Carbon's root directory back to the directory Neovim is opened with.
 See `:h carbon-plug-reset` for more information and customization options.
@@ -225,7 +225,7 @@ Does nothing when on a directory. Edit a file in a new horizontal split. See
 
 ![Carbon split example](/doc/assets/carbon-split.gif)
 
-### <kbd>ctrl</kbd>+<kbd>v</kbd> Edit file in vertical split
+### <kbd>ctrl</kbd>+<kbd>v</kbd> or <kbd>ctrl</kbd>+<kbd>s</kbd> Edit file in vertical split
 
 Does nothing when on a directory. Edit a file in a new vertical split. See
 `:h carbon-plug-vsplit` for more information and customization points.
@@ -239,7 +239,7 @@ opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
 
-### <kbd>c</kbd> Creating files and directories
+### <kbd>c</kbd> or <kbd>%</kbd> Creating files and directories
 
 ![Creating files and directories example](/doc/assets/carbon-create-action.gif)
 

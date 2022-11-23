@@ -53,12 +53,15 @@ describe('carbon.buffer', function()
   end)
 
   describe('keymaps', function()
-    for action, key in pairs(settings.actions) do
+    for action, maps in pairs(settings.actions) do
       local plug = util.plug(action)
+      local keys = type(maps) == 'string' and { maps } or maps
 
-      it(string.format('binds %s to %s', key, plug), function()
-        assert.same(string.lower(vim.fn.maparg(key, 'n')), plug)
-      end)
+      for _, key in ipairs(keys) do
+        it(string.format('binds %s to %s', key, plug), function()
+          assert.same(string.lower(vim.fn.maparg(key, 'n')), plug)
+        end)
+      end
     end
   end)
 
