@@ -176,6 +176,14 @@ information and customization options.
 
 ![Carbon edit example](/doc/assets/carbon-edit.gif)
 
+### <kbd>-</kbd> Close parent directories
+
+Closes one or more parent directories of the entry which the cursor is on.
+Prepending a `count` will close one extra level of nesting. The cursor will
+be positioned on the last closed parent.
+
+![Carbon close parent example](/doc/assets/carbon-close-parent-action.gif)
+
 ### <kbd>!</kbd> Recursively toggle directories
 
 When on a directory, expand or collapse that directory recursively. When on a

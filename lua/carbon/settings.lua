@@ -57,6 +57,7 @@ local defaults = {
     vsplit = '<c-v>',
     create = { 'c', '%' },
     delete = 'd',
+    close_parent = '-',
     toggle_recursive = '!',
   },
   highlights = {
