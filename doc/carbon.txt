@@ -2122,9 +2122,9 @@ SETTINGS                                                         *carbon-setting
     `  edit = '<cr>',`                                 *carbon-setting-actions-edit*
     `  move = 'm',`                                    *carbon-setting-actions-move*
     `  reset = 'u',`                                  *carbon-setting-actions-reset*
-    `  split = { '<c-x>', '<c-s>' },`                              *carbon-setting-actions-split*
+    `  split = { '<c-x>', '<c-s>' },`                 *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
-    `  create = { 'c', '%' },`                                *carbon-setting-actions-create*
+    `  create = { 'c', '%' },`                       *carbon-setting-actions-create*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
     `  close_parent = '-',`                    *carbon-setting-actions-close-parent*
     `  toggle_recursive = '!',`            *carbon-setting-actions-toggle-recursive*
