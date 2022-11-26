@@ -23,8 +23,16 @@ function entry.new(path, parent)
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
-  if is_symlink and not select(2, pcall(vim.loop.fs_stat, clean)) then
-    is_symlink = 2
+  if is_symlink then
+    local stat = select(2, pcall(vim.loop.fs_stat, clean))
+
+    if stat then
+      is_executable = lstat.mode == 33261
+      is_directory = stat.type == 'directory'
+      is_symlink = 1
+    else
+      is_symlink = 2
+    end
   end
 
   return setmetatable({
