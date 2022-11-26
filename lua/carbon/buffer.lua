@@ -230,10 +230,10 @@ function buffer.lines(input_target, lines, depth)
       end
     end
 
+    local link_group
     local full_path = tmp.name .. path_suffix
     local indent_end = #indent
     local path_start = indent_end + #indicator + 1
-    local file_group = 'CarbonFile'
     local dir_path = table.concat(
       vim.tbl_map(function(parent)
         return parent.name
@@ -246,11 +246,11 @@ function buffer.lines(input_target, lines, depth)
     end
 
     if tmp.is_symlink == 1 then
-      file_group = 'CarbonSymlink'
+      link_group = 'CarbonSymlink'
     elseif tmp.is_symlink == 2 then
-      file_group = 'CarbonBrokenSymlink'
+      link_group = 'CarbonBrokenSymlink'
     elseif tmp.is_executable then
-      file_group = 'CarbonExe'
+      link_group = 'CarbonExe'
     end
 
     if not is_empty then
@@ -258,14 +258,14 @@ function buffer.lines(input_target, lines, depth)
     end
 
     if tmp.is_directory then
-      hls[#hls + 1] = { 'CarbonDir', path_start, -1 }
+      hls[#hls + 1] = { link_group or 'CarbonDir', path_start, -1 }
     elseif path[1] then
       local dir_end = path_start + #dir_path + 1
 
-      hls[#hls + 1] = { 'CarbonDir', path_start, dir_end }
-      hls[#hls + 1] = { file_group, dir_end, -1 }
+      hls[#hls + 1] = { link_group or 'CarbonDir', path_start, dir_end }
+      hls[#hls + 1] = { link_group or 'CarbonFile', dir_end, -1 }
     else
-      hls[#hls + 1] = { file_group, path_start, -1 }
+      hls[#hls + 1] = { link_group or 'CarbonFile', path_start, -1 }
     end
 
     lines[#lines + 1] = {
