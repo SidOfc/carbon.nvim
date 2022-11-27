@@ -18,6 +18,11 @@ function carbon.setup(user_settings)
     for setting, value in pairs(next) do
       settings[setting] = value
     end
+
+    if type(user_settings.highlights) == 'table' then
+      settings.highlights =
+        vim.tbl_extend('force', settings.highlights, user_settings.highlights)
+    end
   end
 
   return settings
