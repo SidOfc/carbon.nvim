@@ -5,6 +5,10 @@ local view = require('carbon.view')
 local carbon = {}
 
 function carbon.setup(user_settings)
+  if type(user_settings) ~= 'table' then
+    user_settings = {}
+  end
+
   if not vim.g.carbon_initialized then
     if type(user_settings) == 'function' then
       user_settings(settings)
@@ -254,36 +258,39 @@ function carbon.move()
 end
 
 function carbon.close_parent()
-  local count = 0
-  local lines = { unpack(buffer.lines(), 2) }
-  local entry = buffer.cursor().line.entry
-  local line
+  view.execute(function(ctx)
+    local count = 0
+    local lines = { unpack(ctx.view:current_lines(), 2) }
+    local entry = ctx.cursor.line.entry
+    local line
 
-  while count < vim.v.count1 do
+    while count < vim.v.count1 do
+      line = util.tbl_find(lines, function(current)
+        return current.entry == entry.parent
+          or vim.tbl_contains(current.path, entry.parent)
+      end)
+
+      if line then
+        count = count + 1
+        entry = line.path[1] and line.path[1].parent or line.entry
+
+        ctx.view:set_path_attr(entry.path, 'open', false)
+      else
+        break
+      end
+    end
+
     line = util.tbl_find(lines, function(current)
-      return current.entry == entry.parent
-        or vim.tbl_contains(current.path, entry.parent)
+      return current.entry == entry or vim.tbl_contains(current.path, entry)
     end)
 
     if line then
-      count = count + 1
-      entry = line.path[1] and line.path[1].parent or line.entry
-
-      entry:set_open(false)
-    else
-      break
+      vim.fn.cursor(line.lnum, (line.depth + 1) * 2 + 1)
     end
-  end
 
-  line = util.tbl_find(lines, function(current)
-    return current.entry == entry or vim.tbl_contains(current.path, entry)
+    ctx.view:update()
+    ctx.view:render()
   end)
-
-  if line then
-    vim.fn.cursor(line.lnum, (line.depth + 1) * 2 + 1)
-  end
-
-  buffer.render()
 end
 
 return carbon
