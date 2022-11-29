@@ -171,6 +171,18 @@ describe('carbon', function()
     end)
   end)
 
+  describe('close_parent', function()
+    it('closes parent of cursor entry and moves cursor', function()
+      util.cursor(7, 1)
+      carbon.edit()
+      util.cursor(9, 1)
+      carbon.close_parent()
+
+      assert.equal(7, vim.fn.line('.'))
+      assert.equal(3, vim.fn.col('.'))
+    end)
+  end)
+
   describe('explore', function()
     it('shows the buffer', function()
       local file_line = helpers.line_with_file()

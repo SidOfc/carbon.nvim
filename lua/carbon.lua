@@ -16,6 +16,11 @@ function carbon.setup(user_settings)
       end
     end
 
+    if type(user_settings.highlights) == 'table' then
+      settings.highlights =
+        vim.tbl_extend('force', settings.highlights, user_settings.highlights)
+    end
+
     local argv = vim.fn.argv()
     local open = argv[1] and vim.fn.fnamemodify(argv[1], ':p') or vim.loop.cwd()
     local command_opts = { bang = true, nargs = '?', complete = 'dir' }
@@ -246,6 +251,39 @@ function carbon.move()
   view.execute(function(ctx)
     ctx.view:move()
   end)
+end
+
+function carbon.close_parent()
+  local count = 0
+  local lines = { unpack(buffer.lines(), 2) }
+  local entry = buffer.cursor().line.entry
+  local line
+
+  while count < vim.v.count1 do
+    line = util.tbl_find(lines, function(current)
+      return current.entry == entry.parent
+        or vim.tbl_contains(current.path, entry.parent)
+    end)
+
+    if line then
+      count = count + 1
+      entry = line.path[1] and line.path[1].parent or line.entry
+
+      entry:set_open(false)
+    else
+      break
+    end
+  end
+
+  line = util.tbl_find(lines, function(current)
+    return current.entry == entry or vim.tbl_contains(current.path, entry)
+  end)
+
+  if line then
+    vim.fn.cursor(line.lnum, (line.depth + 1) * 2 + 1)
+  end
+
+  buffer.render()
 end
 
 return carbon

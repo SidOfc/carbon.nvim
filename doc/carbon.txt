@@ -1,7 +1,7 @@
 *carbon.nvim.txt*      The simple directory tree viewer for Neovim written in Lua.
 *carbon.txt*
 
-  `Version: 0.15.0`
+  `Version: 0.16.1`
   `Licence: MIT`
   `Source:  https://github.com/SidOfc/carbon.nvim`
   `Author:  Sidney Liebrand <sidneyliebrand@gmail.com>`
@@ -336,6 +336,15 @@ PLUGS                                                               *carbon-plug
   For more information see |carbon-buffer-delete|.
 
   `------------------------------------------------------------------------------`
+  <Plug>(carbon-close-parent)                           *carbon-plug-close-parent*
+
+  Implementation: `require('carbon').close_parent()`
+  Mapping:        |carbon-setting-actions-close-parent|
+
+  Closes the parent directory of the entry the cursor is on. Accepts a [count]
+  to allow closing multiple parents at once.
+
+  `------------------------------------------------------------------------------`
   <Plug>(carbon-toggle-recursive)                   *carbon-plug-toggle-recursive*
 
   Implementation: `require('carbon').toggle_recursive()`
@@ -531,6 +540,16 @@ CARBON                                                             *carbon-carbo
   Recursively opens or closes the entry under the cursor. If the entry is not
   a directory nothing happens.
 
+  `------------------------------------------------------------------------------`
+  close_parent                                        *carbon-carbon-close-parent*
+
+  Signature: `require('carbon').close_parent()`
+
+  Close the first parent directory under the cursor which can be collapsed. Closes
+  `vim.v.count1` amount of collapsible parent directories.
+
+  A parent of any entry is not "collapsible" if it is part of a compressed
+  path (|carbon-setting-compress|).
 ================================================================================
 UTIL                                                                 *carbon-util*
 
@@ -1871,6 +1890,7 @@ SETTINGS                                                         *carbon-setting
   `    create           = `|carbon-setting-actions-create|`,`
   `    move             = `|carbon-setting-actions-move|`,`
   `    delete           = `|carbon-setting-actions-delete|`,`
+  `    close_parent     = `|carbon-setting-actions-close-parent|`,`
   `    toggle_recursive = `|carbon-setting-actions-toggle-recursive|`,`
   `  },`
 
@@ -2101,11 +2121,12 @@ SETTINGS                                                         *carbon-setting
     `  quit = 'q',`                                    *carbon-setting-actions-quit*
     `  edit = '<cr>',`                                 *carbon-setting-actions-edit*
     `  move = 'm',`                                    *carbon-setting-actions-move*
-    `  reset = '.',`                                  *carbon-setting-actions-reset*
-    `  split = '<c-x>',`                              *carbon-setting-actions-split*
+    `  reset = 'u',`                                  *carbon-setting-actions-reset*
+    `  split = { '<c-x>', '<c-s>' },`                 *carbon-setting-actions-split*
     `  vsplit = '<c-v>',`                            *carbon-setting-actions-vsplit*
-    `  create = 'c',`                                *carbon-setting-actions-create*
+    `  create = { 'c', '%' },`                       *carbon-setting-actions-create*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
+    `  close_parent = '-',`                    *carbon-setting-actions-close-parent*
     `  toggle_recursive = '!',`            *carbon-setting-actions-toggle-recursive*
     `}`
 
@@ -2131,6 +2152,7 @@ SETTINGS                                                         *carbon-setting
   `vsplit`           => |carbon-plug-vsplit|
   `create`           => |carbon-plug-create|
   `delete`           => |carbon-plug-delete|
+  `close_parent`     => |carbon-plug-close-parent|
   `toggle_recursive` => |carbon-plug-toggle-recursive|
 
   `------------------------------------------------------------------------------`
@@ -2139,29 +2161,19 @@ SETTINGS                                                         *carbon-setting
   Default:
     `{`
     `  CarbonDir = {`                          *carbon-setting-highlights-CarbonDir*
-    `    fg = '#00aaff',`
-    `    ctermfg = 'DarkBlue',`
-    `    bold = true,`
+    `    link = 'Directory',`
     `  },`
     `  CarbonFile = {`                        *carbon-setting-highlights-CarbonFile*
-    `    fg = '#f8f8f8',`
-    `    ctermfg = 'LightGray',`
-    `    bold = true,`
+    `    link = 'Text',`
     `  },`
     `  CarbonExe = {`                          *carbon-setting-highlights-CarbonExe*
-    `    fg = '#22cc22',`
-    `    ctermfg = 'Green',`
-    `    bold = true,`
+    `    link = 'NetrwExe',`
     `  },`
     `  CarbonSymlink = {`                  *carbon-setting-highlights-CarbonSymlink*
-    `    fg = '#d77ee0',`
-    `    ctermfg = 'Magenta',`
-    `    bold = true,`
+    `    link = 'NetrwSymLink',`
     `  },`
     `  CarbonBrokenSymlink = {`      *carbon-setting-highlights-CarbonBrokenSymlink*
-    `    fg = '#ea871e',`
-    `    ctermfg = 'Brown',`
-    `    bold = true,`
+    `    link = 'ErrorMsg'`
     `  },`
     `  CarbonIndicator = {`              *carbon-setting-highlights-CarbonIndicator*
     `    fg = 'Gray',`
@@ -2169,14 +2181,10 @@ SETTINGS                                                         *carbon-setting
     `    bold = true,`
     `  },`
     `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
-    `    fg = '#ff3333',`
-    `    ctermfg = 'Red',`
-    `    bold = true,`
+    `    link = 'Error',`
     `  },`
     `  CarbonPending = {`                  *carbon-setting-highlights-CarbonPending*
-    `    fg = '#ffee00',`
-    `    ctermfg = 'Yellow',`
-    `    bold = true,`
+    `    link = 'Search',`
     `  },`
     `  CarbonFlash = {`                      *carbon-setting-highlights-CarbonFlash*
     `    link = 'Visual',`
