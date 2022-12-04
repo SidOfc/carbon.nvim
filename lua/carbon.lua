@@ -40,6 +40,7 @@ function carbon.initialize()
   util.command('Carbon', carbon.explore, { bang = true })
   util.command('Lcarbon', carbon.explore_left, { bang = true })
   util.command('Fcarbon', carbon.explore_float, { bang = true })
+  util.command('ToggleLcarbon', carbon.toggle_left, { bang = true })
 
   for action in pairs(settings.defaults.actions) do
     vim.keymap.set('', util.plug(action), carbon[action])
@@ -64,6 +65,7 @@ function carbon.initialize()
 
     util.command('Explore', carbon.explore, { bang = true })
     util.command('Lexplore', carbon.explore_left, { bang = true })
+    util.command('ToggleLexplore', carbon.toggle_left, { bang = true })
   end
 
   local argv = vim.fn.argv()
@@ -161,22 +163,27 @@ function carbon.explore(options)
   buffer.show()
 end
 
+function carbon.toggle_left(options)
+  local current_win = vim.api.nvim_get_current_win()
+  local existing_win = buffer.lexplore_window_id()
+
+  if existing_win then
+    vim.api.nvim_win_close(existing_win, 1)
+  else
+    carbon.explore_left(options)
+
+    if not settings.sidebar_toggle_focus then
+      vim.api.nvim_set_current_win(current_win)
+    end
+  end
+end
+
 function carbon.explore_left(options)
   if options and options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
-  local existing_win
-
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if pcall(vim.api.nvim_win_get_var, win, 'carbon_lexplore_window') then
-      if vim.api.nvim_win_is_valid(win) then
-        existing_win = win
-      end
-
-      break
-    end
-  end
+  local existing_win = buffer.lexplore_window_id()
 
   if existing_win then
     vim.api.nvim_set_current_win(existing_win)
