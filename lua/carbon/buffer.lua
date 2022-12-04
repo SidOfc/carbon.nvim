@@ -62,6 +62,22 @@ function buffer.handle()
   return data.handle
 end
 
+function buffer.lexplore_window_id()
+  local existing_win
+
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if pcall(vim.api.nvim_win_get_var, win, 'carbon_lexplore_window') then
+      if vim.api.nvim_win_is_valid(win) then
+        existing_win = win
+      end
+
+      break
+    end
+  end
+
+  return existing_win
+end
+
 function buffer.show()
   vim.api.nvim_win_set_buf(0, buffer.handle())
   buffer.render()
