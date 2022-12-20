@@ -100,6 +100,7 @@ end
 
 function carbon.edit()
   local line = buffer.cursor().line
+  local keepalt = #vim.fn.getreg('#') ~= 0
 
   if line.entry.is_directory then
     line.entry:set_open(not line.entry:is_open())
@@ -120,14 +121,14 @@ function carbon.edit()
         settings.sidebar_width
       )
     else
-      vim.cmd({ cmd = 'edit', args = { line.entry.path } })
+      vim.cmd({ cmd = 'edit', args = { line.entry.path }, mods = { keepalt = keepalt } })
     end
   else
     if vim.w.carbon_fexplore_window then
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd({ cmd = 'edit', args = { line.entry.path } })
+    vim.cmd({ cmd = 'edit', args = { line.entry.path }, mods = { keepalt = keepalt } })
   end
 end
 
