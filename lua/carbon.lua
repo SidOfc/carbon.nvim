@@ -121,14 +121,22 @@ function carbon.edit()
         settings.sidebar_width
       )
     else
-      vim.cmd({ cmd = 'edit', args = { line.entry.path }, mods = { keepalt = keepalt } })
+      vim.cmd({
+        cmd = 'edit',
+        args = { line.entry.path },
+        mods = { keepalt = keepalt },
+      })
     end
   else
     if vim.w.carbon_fexplore_window then
       vim.api.nvim_win_close(0, 1)
     end
 
-    vim.cmd({ cmd = 'edit', args = { line.entry.path }, mods = { keepalt = keepalt } })
+    vim.cmd({
+      cmd = 'edit',
+      args = { line.entry.path },
+      mods = { keepalt = keepalt },
+    })
   end
 end
 
