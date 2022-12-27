@@ -3,7 +3,7 @@ Carbon.nvim
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![GitHub issues](https://img.shields.io/github/issues/SidOfc/carbon.nvim.svg?color=4b1)](https://github.com/SidOfc/carbon.nvim/issues)
 [![GitHub last commit](https://img.shields.io/github/last-commit/sidofc/carbon.nvim?color=4b1)](https://github.com/SidOfc/carbon.nvim/commits)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/SidOfc/carbon.nvim/CI)](https://github.com/SidOfc/carbon.nvim/actions/workflows/ci.yml)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/SidOfc/carbon.nvim/ci.yml?branch=master)](https://github.com/SidOfc/carbon.nvim/actions/workflows/ci.yml)
 ===========
 
 ![Carbon logo](/doc/assets/logo.svg)
