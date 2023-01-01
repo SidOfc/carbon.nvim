@@ -25,6 +25,10 @@ function carbon.setup(user_settings)
     end
   end
 
+  if vim.g.carbon_lazy_init ~= nil then
+    carbon.initialize()
+  end
+
   return settings
 end
 
