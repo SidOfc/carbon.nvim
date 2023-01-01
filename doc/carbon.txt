@@ -386,6 +386,9 @@ CARBON                                                             *carbon-carbo
   |carbon-settings-table| as argument. The callback can modify the settings
   freely. See |carbon-setup| for init.vim / init.lua setup call examples.
 
+  See |carbon-lazy-init| when experiencing issues related to {preferences} not
+  being respected.
+
   `------------------------------------------------------------------------------`
   initialize                                            *carbon-carbon-initialize*
 
@@ -400,6 +403,16 @@ CARBON                                                             *carbon-carbo
 
   This method should be called only once per Neovim instance and must be called
   before any buffer is created otherwise such buffer will not function properly.
+
+                                                                *carbon-lazy-init*
+
+  NOTE: When using a package manager such as https://github.com/folke/lazy.nvim
+        You may want to set `vim.g.carbon_lazy_init = true` or
+        `let g:carbon_lazy_init = 1` in your configuration to ensure that
+        `require('carbon').setup({ ... })` is executed before Carbon executes
+        `require('carbon').initialize()` (which is executed behind the
+        scenes). When this is not done, you might notice settings not
+        being respected.
 
   `------------------------------------------------------------------------------`
   edit                                                        *carbon-carbon-edit*
