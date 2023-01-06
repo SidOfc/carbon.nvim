@@ -43,8 +43,9 @@ function carbon.initialize()
 
   util.command('Carbon', carbon.explore, { bang = true })
   util.command('Lcarbon', carbon.explore_left, { bang = true })
+  util.command('Rcarbon', carbon.explore_right, { bang = true })
   util.command('Fcarbon', carbon.explore_float, { bang = true })
-  util.command('ToggleLcarbon', carbon.toggle_left, { bang = true })
+  util.command('ToggleSidebarCarbon', carbon.toggle_sidebar, { bang = true })
 
   for action in pairs(settings.defaults.actions) do
     vim.keymap.set('', util.plug(action), carbon[action])
@@ -69,7 +70,8 @@ function carbon.initialize()
 
     util.command('Explore', carbon.explore, { bang = true })
     util.command('Lexplore', carbon.explore_left, { bang = true })
-    util.command('ToggleLexplore', carbon.toggle_left, { bang = true })
+    util.command('Rexplore', carbon.explore_right, { bang = true })
+    util.command('ToggleSidebarExplore', carbon.toggle_sidebar, { bang = true })
   end
 
   local argv = vim.fn.argv()
@@ -110,14 +112,18 @@ function carbon.edit()
     line.entry:set_open(not line.entry:is_open())
 
     buffer.render()
-  elseif vim.w.carbon_lexplore_window then
-    vim.cmd({ cmd = 'wincmd', args = { 'l' } })
+  elseif vim.w.carbon_sidebar_window then
+    local split_right = vim.w.carbon_sidebar_split == 'botright'
+    local split = split_right and 'topleft' or 'botright'
+    local check_position = split_right and 'h' or 'l'
 
-    if vim.w.carbon_lexplore_window == vim.api.nvim_get_current_win() then
+    vim.cmd({ cmd = 'wincmd', args = { check_position } })
+
+    if vim.w.carbon_sidebar_window == vim.api.nvim_get_current_win() then
       vim.cmd({
         cmd = 'split',
         args = { line.entry.path },
-        mods = { vertical = true, split = 'belowright' },
+        mods = { vertical = true, split = split },
       })
 
       vim.api.nvim_win_set_width(
@@ -176,14 +182,20 @@ function carbon.explore(options)
   buffer.show()
 end
 
-function carbon.toggle_left(options)
+function carbon.toggle_sidebar(options)
   local current_win = vim.api.nvim_get_current_win()
-  local existing_win = buffer.lexplore_window_id()
+  local existing_win = buffer.sidebar_window_id()
 
   if existing_win then
     vim.api.nvim_win_close(existing_win, 1)
   else
-    carbon.explore_left(options)
+    local explore_options = vim.tbl_extend(
+      'force',
+      options or {},
+      { position = settings.sidebar_position }
+    )
+
+    carbon.explore_sidebar(explore_options)
 
     if not settings.sidebar_toggle_focus then
       vim.api.nvim_set_current_win(current_win)
@@ -191,27 +203,54 @@ function carbon.toggle_left(options)
   end
 end
 
-function carbon.explore_left(options)
-  if options and options.bang or settings.always_reveal then
+function carbon.explore_sidebar(options)
+  if type(options) ~= 'table' then
+    options = {}
+  end
+
+  if options.bang or settings.always_reveal then
     buffer.expand_to_path(vim.fn.expand('%'))
   end
 
-  local existing_win = buffer.lexplore_window_id()
+  local existing_win = buffer.sidebar_window_id()
+  local position = options.position or settings.sidebar_position
+  local split = position == 'right' and 'botright' or 'topleft'
 
   if existing_win then
     vim.api.nvim_set_current_win(existing_win)
     buffer.show()
   else
-    vim.cmd({ cmd = 'split', mods = { vertical = true, split = 'leftabove' } })
+    vim.cmd({ cmd = 'split', mods = { vertical = true, split = split } })
     buffer.show()
+    vim.api.nvim_win_set_width(0, settings.sidebar_width)
 
-    vim.api.nvim_win_set_width(
-      util.bufwinid(buffer.handle()),
-      settings.sidebar_width
-    )
-
-    vim.w.carbon_lexplore_window = vim.api.nvim_get_current_win()
+    vim.w.carbon_sidebar_window = vim.api.nvim_get_current_win()
+    vim.w.carbon_sidebar_split = split
   end
+end
+
+function carbon.explore_left(options)
+  local existing_win = buffer.sidebar_window_id()
+
+  if existing_win and buffer.sidebar_window_split() ~= 'topleft' then
+    vim.api.nvim_win_close(existing_win, 1)
+  end
+
+  carbon.explore_sidebar(
+    vim.tbl_extend('force', options or {}, { position = 'left' })
+  )
+end
+
+function carbon.explore_right(options)
+  local existing_win = buffer.sidebar_window_id()
+
+  if existing_win and buffer.sidebar_window_split() ~= 'botright' then
+    vim.api.nvim_win_close(existing_win, 1)
+  end
+
+  carbon.explore_sidebar(
+    vim.tbl_extend('force', options or {}, { position = 'right' })
+  )
 end
 
 function carbon.explore_float(options)

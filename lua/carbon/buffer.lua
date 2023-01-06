@@ -62,11 +62,11 @@ function buffer.handle()
   return data.handle
 end
 
-function buffer.lexplore_window_id()
+function buffer.sidebar_window_id()
   local existing_win
 
   for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if pcall(vim.api.nvim_win_get_var, win, 'carbon_lexplore_window') then
+    if pcall(vim.api.nvim_win_get_var, win, 'carbon_sidebar_window') then
       if vim.api.nvim_win_is_valid(win) then
         existing_win = win
       end
@@ -76,6 +76,14 @@ function buffer.lexplore_window_id()
   end
 
   return existing_win
+end
+
+function buffer.sidebar_window_split()
+  local existing_win = buffer.sidebar_window_id()
+
+  if existing_win then
+    return vim.api.nvim_win_get_var(existing_win, 'carbon_sidebar_split')
+  end
 end
 
 function buffer.show()
@@ -613,7 +621,8 @@ function buffer.process_hidden()
   vim.opt_local.wrap = vim.opt_global.wrap:get()
   vim.opt_local.spell = vim.opt_global.spell:get()
   vim.opt_local.fillchars = vim.opt_global.fillchars:get()
-  vim.w.carbon_lexplore_window = nil
+  vim.w.carbon_sidebar_split = nil
+  vim.w.carbon_sidebar_window = nil
   vim.w.carbon_fexplore_window = nil
 end
 

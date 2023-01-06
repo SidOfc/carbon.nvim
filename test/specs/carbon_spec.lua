@@ -12,6 +12,7 @@ describe('carbon', function()
   before_each(function()
     carbon.explore()
     util.cursor(1, 1)
+    vim.cmd.only()
   end)
 
   describe('autocommands', function()
@@ -190,20 +191,23 @@ describe('carbon', function()
     end)
   end)
 
-  describe('explore_left', function()
-    it('shows the buffer to the left of the current buffer', function()
-      util.cursor(12, 1)
-      carbon.edit()
+  describe('explore_sidebar', function()
+    it(
+      'shows the buffer to the left of the current buffer by default',
+      function()
+        util.cursor(12, 1)
+        carbon.edit()
 
-      local before_bufname = vim.fn.bufname()
+        local before_bufname = vim.fn.bufname()
 
-      carbon.explore_left()
-      vim.cmd.wincmd('l')
+        carbon.explore_sidebar()
+        vim.cmd.wincmd('l')
 
-      assert.equal(before_bufname, vim.fn.bufname())
+        assert.equal(before_bufname, vim.fn.bufname())
 
-      vim.cmd.bdelete()
-    end)
+        vim.cmd.bdelete()
+      end
+    )
   end)
 
   describe('explore_float', function()
