@@ -1931,6 +1931,7 @@ SETTINGS                                                         *carbon-setting
   `  sync_delay           = `|carbon-setting-sync-delay|`,`
   `  sidebar_width        = `|carbon-setting-sidebar-width|`,`
   `  sidebar_toggle_focus = `|carbon-setting-sidebar-toggle-focus|`,`
+  `  sidebar_position     = `|carbon-setting-sidebar-position|`,`
   `  always_reveal        = `|carbon-setting-always-reveal|`,`
   `  exclude              = `|carbon-setting-exclude|`,`
 
@@ -2085,6 +2086,13 @@ SETTINGS                                                         *carbon-setting
   Default: `true`
 
   Whether or not to focus `:Lcarbon` window opened via `:ToggleLcarbon`.
+
+  `------------------------------------------------------------------------------`
+  sidebar_position                               *carbon-setting-sidebar-position*
+
+  Default: `'left'`
+
+  Default sidebar position, see |carbon-carbon-explore-sidebar| for context.
 
   `------------------------------------------------------------------------------`
   always_reveal                                     *carbon-setting-always-reveal*
