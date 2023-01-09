@@ -478,7 +478,7 @@ CARBON                                                             *carbon-carbo
   Currently, the position can either be `'left'` or `'right'`.
   The position of the sidebar is resolved in following order:
   1. `options.position`
-  2. `settings.sidebar_position`
+  2. |carbon-setting-sidebar-position|
   3. `'left'`
 
   When {options} is given and `options.bang` is `true` or when
@@ -488,6 +488,22 @@ CARBON                                                             *carbon-carbo
 
   Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
   window opened via `:Lcarbon`.
+
+  `------------------------------------------------------------------------------`
+  explore_left                                        *carbon-carbon-explore-left*
+
+  Signature: `require('carbon').explore_left(`[{options}]`)`
+
+  Calls |carbon-carbon-explore-sidebar| with `options.position` set to `'left'`.
+  All other options are passed through as-is.
+
+  `------------------------------------------------------------------------------`
+  explore_right                                      *carbon-carbon-explore-right*
+
+  Signature: `require('carbon').explore_right(`[{options}]`)`
+
+  Calls |carbon-carbon-explore-sidebar| with `options.position` set to `'right'`.
+  All other options are passed through as-is.
 
   `------------------------------------------------------------------------------`
   toggle_sidebar                                    *carbon-carbon-toggle-sidebar*
