@@ -239,7 +239,7 @@ Does nothing when on a directory. Edit a file in a new vertical split. See
 ### <kbd>q</kbd> Close a Carbon buffer
 
 Close a Carbon buffer, useful for closing Carbon buffers which were
-opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
+opened with [`Fcarbon`](#fcarbon) or [`Lcarbon` / `Rcarbon`](#lcarbon--lexplore--rcarbon--rexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
 
