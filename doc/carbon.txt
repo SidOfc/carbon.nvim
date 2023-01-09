@@ -2101,7 +2101,7 @@ SETTINGS                                                         *carbon-setting
 
   Default: `true`
 
-  Whether or not to focus `:Lcarbon` window opened via `:ToggleLcarbon`.
+  Whether or not to focus sidebar windows opened via `:ToggleSidebarCarbon`.
 
   `------------------------------------------------------------------------------`
   sidebar_position                               *carbon-setting-sidebar-position*
