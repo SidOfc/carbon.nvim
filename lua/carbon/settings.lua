@@ -3,6 +3,7 @@ local defaults = {
   compress = true,
   auto_open = true,
   keep_netrw = false,
+  file_icons = pcall(require, 'nvim-web-devicons'),
   sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 20,
   sidebar_width = 30,
