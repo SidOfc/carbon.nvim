@@ -7,6 +7,7 @@ local defaults = {
   sync_delay = 20,
   sidebar_width = 30,
   sidebar_toggle_focus = true,
+  sidebar_position = 'left',
   always_reveal = false,
   exclude = {
     '~$',

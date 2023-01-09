@@ -123,12 +123,16 @@ command is aliased to `:Carbon`.
 
 ![Carbon / Explore command example](/doc/assets/carbon-explore.gif)
 
-### `:Lcarbon` / `:Lexplore`
+### `:Lcarbon` / `:Lexplore` / `:Rcarbon` / `':Rexplore`
 
-The `:Lcarbon` command opens a Carbon buffer in a split to the left of the
-current buffer. When `:h carbon-setting-keep-netrw` is `false` then NetRW's
-`:Lexplore` command is aliased to `:Lcarbon`. Subsequent calls to `:Lcarbon`
-will attempt to navigate to an existing window opened via `:Lcarbon`.
+The `:Lcarbon` and `:Rcarbon` commands open a Carbon buffer in a vertical split
+left of the current buffer. When `:h carbon-setting-keep-netrw` is `false` then
+commands `Lexplore` and `Rexplore` are aliased to `Lcarbon` and `Rcarbon`
+respectively. Subsequent calls to `:Lcarbon` / `Rcarbon`
+will attempt to navigate to an existing window opened via these commands.
+
+Additionally, there is a command called `ToggleSidebarCarbon` which
+opens the sidebar to the side determined by `settings.sidebar_position`.
 
 ![Lcarbon / Lexplore command example](/doc/assets/carbon-lexplore.gif)
 
@@ -235,7 +239,7 @@ Does nothing when on a directory. Edit a file in a new vertical split. See
 ### <kbd>q</kbd> Close a Carbon buffer
 
 Close a Carbon buffer, useful for closing Carbon buffers which were
-opened with [`Fcarbon`](#fcarbon) or [`Lcarbon`](#lcarbon--lexplore).
+opened with [`Fcarbon`](#fcarbon) or [`Lcarbon` / `Rcarbon`](#lcarbon--lexplore--rcarbon--rexplore).
 
 ![Close Carbon buffer example](/doc/assets/carbon-quit.gif)
 

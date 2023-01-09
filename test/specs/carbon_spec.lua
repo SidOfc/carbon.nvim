@@ -12,6 +12,7 @@ describe('carbon', function()
   before_each(function()
     carbon.explore()
     util.cursor(1, 1)
+    vim.cmd.only()
   end)
 
   describe('autocommands', function()
@@ -190,8 +191,43 @@ describe('carbon', function()
     end)
   end)
 
+  describe('explore_sidebar', function()
+    it(
+      'shows the buffer to the left of the current buffer by default',
+      function()
+        util.cursor(12, 1)
+        carbon.edit()
+
+        local before_bufname = vim.fn.bufname()
+
+        carbon.explore_sidebar()
+        vim.cmd.wincmd('l')
+
+        assert.equal(before_bufname, vim.fn.bufname())
+
+        vim.cmd.bdelete()
+      end
+    )
+  end)
+
+  describe('explore_right', function()
+    it('opens on the right side', function()
+      util.cursor(12, 1)
+      carbon.edit()
+
+      local before_bufname = vim.fn.bufname()
+
+      carbon.explore_right()
+      vim.cmd.wincmd('h')
+
+      assert.equal(before_bufname, vim.fn.bufname())
+
+      vim.cmd.bdelete()
+    end)
+  end)
+
   describe('explore_left', function()
-    it('shows the buffer to the left of the current buffer', function()
+    it('opens on the left side', function()
       util.cursor(12, 1)
       carbon.edit()
 
