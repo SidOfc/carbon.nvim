@@ -261,7 +261,9 @@ function buffer.lines(input_target, lines, depth)
       elseif not is_empty then
         indicator = expand_indicator
       end
-    else
+    end
+
+    if is_empty then
       indent = indent .. '  '
     end
 
