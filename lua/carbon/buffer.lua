@@ -7,6 +7,15 @@ local buffer = {}
 local internal = {}
 local open_cwd = vim.loop.cwd()
 local data = { root = entry.new(open_cwd), resync_paths = {}, handle = -1 }
+local file_icons
+
+if settings.file_icons then
+  local ok, module = pcall(require, 'nvim-web-devicons')
+
+  if ok then
+    file_icons = module
+  end
+end
 
 function buffer.launch(target)
   buffer.set_root(target)
@@ -225,7 +234,7 @@ function buffer.lines(input_target, lines, depth)
     local lnum = 1 + #lines
     local indent = string.rep('  ', depth)
     local is_empty = true
-    local indicator = ' '
+    local indicator = ''
     local path_suffix = ''
 
     if settings.compress then
@@ -254,10 +263,32 @@ function buffer.lines(input_target, lines, depth)
       end
     end
 
+    if is_empty then
+      indent = indent .. '  '
+    end
+
+    local icon = ''
+    local icon_highlight
+
+    if file_icons and settings.file_icons and not tmp.is_directory then
+      local info = {
+        file_icons.get_icon(
+          tmp.name .. path_suffix,
+          vim.fn.fnamemodify(tmp.name, ':e'),
+          { default = true }
+        ),
+      }
+
+      icon = info[1] or ' '
+      icon_highlight = info[2]
+    end
+
     local link_group
     local full_path = tmp.name .. path_suffix
     local indent_end = #indent
-    local path_start = indent_end + #indicator + 1
+    local icon_width = #icon ~= 0 and #icon + 1 or 0
+    local indicator_width = #indicator ~= 0 and #indicator + 1 or 0
+    local path_start = indent_end + icon_width + indicator_width
     local dir_path = table.concat(
       vim.tbl_map(function(parent)
         return parent.name
@@ -277,8 +308,14 @@ function buffer.lines(input_target, lines, depth)
       link_group = 'CarbonExe'
     end
 
-    if not is_empty then
-      hls[#hls + 1] = { 'CarbonIndicator', indent_end, path_start - 1 }
+    if indicator_width ~= 0 and not is_empty then
+      hls[#hls + 1] =
+        { 'CarbonIndicator', indent_end, indent_end + indicator_width }
+    end
+
+    if icon and icon_highlight then
+      hls[#hls + 1] =
+        { icon_highlight, indent_end + indicator_width, path_start - 1 }
     end
 
     if tmp.is_directory then
@@ -292,11 +329,22 @@ function buffer.lines(input_target, lines, depth)
       hls[#hls + 1] = { link_group or 'CarbonFile', path_start, -1 }
     end
 
+    local line_prefix = indent
+
+    if indicator_width ~= 0 then
+      line_prefix = line_prefix .. indicator .. ' '
+    end
+
+    if icon_width ~= 0 then
+      line_prefix = line_prefix .. icon .. ' '
+    end
+
     lines[#lines + 1] = {
       lnum = lnum,
       depth = depth,
       entry = tmp,
-      line = indent .. indicator .. ' ' .. full_path,
+      line = line_prefix .. full_path,
+      icon_width = icon_width,
       highlights = hls,
       path = path,
     }
@@ -416,7 +464,8 @@ function buffer.delete()
   local count = vim.v.count == 0 and #targets or vim.v.count1
   local path_idx = math.min(count, #targets)
   local target = targets[path_idx]
-  local highlight = { 'CarbonFile', 2 + line.depth * 2, lnum_idx }
+  local highlight =
+    { 'CarbonFile', line.depth * 2 + 2 + (line.icon_width or 0), lnum_idx }
 
   if targets[path_idx].path == data.root.path then
     return
@@ -486,7 +535,7 @@ function buffer.move()
     return
   end
 
-  local path_start = target_line.depth * 2 + 2
+  local path_start = target_line.depth * 2 + 2 + target_line.icon_width
   local lnum_idx = target_line.lnum - 1
   local target_idx = util.tbl_key(targets, ctx.target)
   local clamped_names = { unpack(target_names, 1, target_idx - 1) }
