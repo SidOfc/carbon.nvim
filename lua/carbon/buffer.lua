@@ -465,7 +465,7 @@ function buffer.delete()
   local path_idx = math.min(count, #targets)
   local target = targets[path_idx]
   local highlight =
-    { 'CarbonFile', line.depth * 2 + 2 + line.icon_width, lnum_idx }
+    { 'CarbonFile', line.depth * 2 + 2 + (line.icon_width or 0), lnum_idx }
 
   if targets[path_idx].path == data.root.path then
     return
