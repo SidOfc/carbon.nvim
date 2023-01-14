@@ -273,6 +273,11 @@ or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
 
+# File icons
+
+Carbon provides builtin support for [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons).
+See `:h carbon-setting-file-icons` for more information.
+
 # Development
 
 The following dependencies must be installed before you can work on carbon.nvim:
