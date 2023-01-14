@@ -1,7 +1,7 @@
 *carbon.nvim.txt*      The simple directory tree viewer for Neovim written in Lua.
 *carbon.txt*
 
-  `Version: 0.18.1`
+  `Version: 0.18.2`
   `Licence: MIT`
   `Source:  https://github.com/SidOfc/carbon.nvim`
   `Author:  Sidney Liebrand <sidneyliebrand@gmail.com>`
