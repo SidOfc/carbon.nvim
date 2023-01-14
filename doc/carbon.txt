@@ -1,7 +1,7 @@
 *carbon.nvim.txt*      The simple directory tree viewer for Neovim written in Lua.
 *carbon.txt*
 
-  `Version: 0.18.0`
+  `Version: 0.18.1`
   `Licence: MIT`
   `Source:  https://github.com/SidOfc/carbon.nvim`
   `Author:  Sidney Liebrand <sidneyliebrand@gmail.com>`
@@ -1403,6 +1403,7 @@ BUFFER                                                             *carbon-buffe
     lnum = <number>,
     depth = <number>,
     path = <table<entry>>,
+    icon_width = <number>,
     highlights = <table<table<string, number, number>>>,
   }
 <
@@ -1423,6 +1424,11 @@ BUFFER                                                             *carbon-buffe
 
   The indent depth of the entry. Used by |carbon-buffer-create| to determine
   the start column to move to for editing.
+
+  Property: `icon_width`
+
+  Width of file icons shown before a path. Used by |carbon-buffer-create| to
+  determine the start column to move to for editing.
 
   Property: `highlights`
 
@@ -1943,6 +1949,7 @@ SETTINGS                                                         *carbon-setting
   `  compress             = `|carbon-setting-compress|`,`
   `  auto_open            = `|carbon-setting-auto-open|`,`
   `  keep_netrw           = `|carbon-setting-keep-netrw|`,`
+  `  file_icons           = `|carbon-setting-file-icons|`,`
   `  sync_on_cd           = `|carbon-setting-sync-on-cd|`,`
   `  sync_delay           = `|carbon-setting-sync-delay|`,`
   `  sidebar_width        = `|carbon-setting-sidebar-width|`,`
@@ -2069,6 +2076,16 @@ SETTINGS                                                         *carbon-setting
 
   This does not prevent Carbon from showing on vim startup instead of NetRW.
   To control this behavior, see |carbon-setting-auto-open|.
+
+  `------------------------------------------------------------------------------`
+  file_icons                                           *carbon-setting-file-icons*
+
+  Default: `pcall(require, 'nvim-web-devicons')`
+
+  Uses `pcall` to see if `nvim-web-devicons` can be required successfully.
+  When `true`, Carbon will automatically start showing file icons.
+
+  This can be disabled by setting it to `false` explicitly in your configuration.
 
   `------------------------------------------------------------------------------`
   sync_on_cd                                           *carbon-setting-sync-on-cd*
