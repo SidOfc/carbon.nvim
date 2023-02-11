@@ -55,6 +55,8 @@ function carbon.initialize()
     util.autocmd('DirChanged', carbon.cd, { pattern = 'global' })
   end
 
+  util.autocmd('SessionLoadPost', carbon.session_load_post, { pattern = '*' })
+
   if type(settings.highlights) == 'table' then
     for group, properties in pairs(settings.highlights) do
       util.highlight(group, properties)
@@ -92,6 +94,20 @@ function carbon.initialize()
   end
 
   return carbon
+end
+
+function carbon.session_load_post(event)
+  local buffer_name = vim.api.nvim_buf_get_name(event.buf)
+
+  if string.match(buffer_name, 'carbon$') then
+    vim.api.nvim_buf_set_name(event.buf, '_carbon')
+    buffer.show()
+    vim.api.nvim_buf_delete(event.buf, { force = true })
+
+    if vim.api.nvim_win_get_width(0) == settings.sidebar_width then
+      vim.w.carbon_sidebar_window = vim.api.nvim_get_current_win()
+    end
+  end
 end
 
 function carbon.toggle_recursive()
