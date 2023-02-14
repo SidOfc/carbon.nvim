@@ -26,7 +26,7 @@ function carbon.setup(user_settings)
   end
 
   if vim.g.carbon_lazy_init ~= nil then
-    carbon.initialize()
+    vim.schedule(carbon.initialize)
   end
 
   return settings
