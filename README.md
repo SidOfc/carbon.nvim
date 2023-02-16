@@ -47,6 +47,8 @@ Install on Nightly Neovim (0.8.0+) using your favorite plugin manager:
 | **[paq-nvim](https://github.com/savq/paq-nvim)**             | `{ 'SidOfc/carbon.nvim', }`             |
 | **[lazy.nvim](https://github.com/folke/lazy.nvim)**          | `{ 'SidOfc/carbon.nvim' }`              |
 
+**NOTE**: when using `lazy.nvim` please read `:h carbon-lazy-init`.
+
 # Configuration
 
 Configuration can be supplied like this:
