@@ -88,7 +88,6 @@ function util.highlight(group, opts)
 end
 
 function util.confirm(options)
-  local guicursor = vim.o.guicursor
   local finished = false
   local actions = {}
   local mappings = {}
@@ -107,7 +106,6 @@ function util.confirm(options)
         callback()
       end
 
-      vim.api.nvim_set_option('guicursor', guicursor)
       vim.cmd.close()
     end
 
@@ -174,10 +172,9 @@ function util.confirm(options)
   })
 
   util.cursor(1, 3)
-  vim.api.nvim_set_option('guicursor', 'n-v-c:hor100')
   vim.api.nvim_win_set_option(win, 'cursorline', true)
   util.set_winhl(win, {
-    Normal = 'CarbonIndicator',
+    Normal = options.highlight or 'CarbonIndicator',
     FloatBorder = options.highlight or 'Normal',
     CursorLine = options.highlight or 'Normal',
   })
