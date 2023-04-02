@@ -37,14 +37,15 @@ See the [releases](https://github.com/SidOfc/carbon.nvim/releases) page for more
 
 Install on Nightly Neovim (0.8.0+) using your favorite plugin manager:
 
-| Name                                                         | Code                                          |
-|:-------------------------------------------------------------|:----------------------------------------------|
-| **[Vundle.vim](https://github.com/VundleVim/Vundle.vim)**    | `Plugin 'SidOfc/carbon.nvim'`                 |
-| **[vim-plug](https://github.com/junegunn/vim-plug)**         | `Plug 'SidOfc/carbon.nvim'`                   |
-| **[dein.vim](https://github.com/Shougo/dein.vim)**           | `call dein#add('SidOfc/carbon.nvim')`         |
-| **[minpac](https://github.com/k-takata/minpac)**             | `call minpac#add('SidOfc/carbon.nvim')`       |
-| **[packer.nvim](https://github.com/wbthomason/packer.nvim)** | `use 'SidOfc/carbon.nvim'`                    |
-| **[paq-nvim](https://github.com/savq/paq-nvim)**             | `{ 'SidOfc/carbon.nvim', }`                   |
+| Name                                                         | Code                                    |
+| :----------------------------------------------------------- | :-------------------------------------- |
+| **[Vundle.vim](https://github.com/VundleVim/Vundle.vim)**    | `Plugin 'SidOfc/carbon.nvim'`           |
+| **[vim-plug](https://github.com/junegunn/vim-plug)**         | `Plug 'SidOfc/carbon.nvim'`             |
+| **[dein.vim](https://github.com/Shougo/dein.vim)**           | `call dein#add('SidOfc/carbon.nvim')`   |
+| **[minpac](https://github.com/k-takata/minpac)**             | `call minpac#add('SidOfc/carbon.nvim')` |
+| **[packer.nvim](https://github.com/wbthomason/packer.nvim)** | `use 'SidOfc/carbon.nvim'`              |
+| **[paq-nvim](https://github.com/savq/paq-nvim)**             | `{ 'SidOfc/carbon.nvim', }`             |
+| **[lazy.nvim](https://github.com/folke/lazy.nvim)**          | `{ 'SidOfc/carbon.nvim' }`              |
 
 # Configuration
 
@@ -207,6 +208,7 @@ them manually for your emulator. Included from this [SO answer](https://stackove
 > _(Adding <kbd>Ctrl</kbd>+<kbd>Enter</kbd> as a bonus!)_
 >
 > **[iTerm2](https://www.iterm2.com/)**, open _Preferences_ → _Profiles_ → _Keys_ → _[+] (Add)_ →
+>
 > - _Keyboard shortcut:_ (Hit <kbd>Shift</kbd>+<kbd>Enter</kbd>)
 > - _Action:_ _Send Escape Sequence_
 > - _Esc+_ `[[13;2u`
@@ -271,6 +273,11 @@ or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
 the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
 for more details.
 
+# File icons
+
+Carbon provides builtin support for [nvim-tree/nvim-web-devicons](https://github.com/nvim-tree/nvim-web-devicons).
+See `:h carbon-setting-file-icons` for more information.
+
 # Development
 
 The following dependencies must be installed before you can work on carbon.nvim:
@@ -321,4 +328,3 @@ carbon.nvim uses Github Actions to run [tests](#testing), [lint](#linting), and
 [validate formatting](#formatting) of the code. Pull requests must pass these
 checks before they will be considered. See [ci.yml](/.github/workflows/ci.yml) for
 more details about the workflow.
-
