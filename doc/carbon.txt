@@ -1,7 +1,7 @@
 *carbon.nvim.txt*      The simple directory tree viewer for Neovim written in Lua.
 *carbon.txt*
 
-  `Version: 0.17.3`
+  `Version: 0.18.0`
   `Licence: MIT`
   `Source:  https://github.com/SidOfc/carbon.nvim`
   `Author:  Sidney Liebrand <sidneyliebrand@gmail.com>`
@@ -475,6 +475,22 @@ CARBON                                                             *carbon-carbo
 
   Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
   window opened via `:Lcarbon`.
+
+  `------------------------------------------------------------------------------`
+  explore_left                                        *carbon-carbon-explore-left*
+
+  Signature: `require('carbon').explore_left(`[{options}]`)`
+
+  Calls |carbon-carbon-explore-sidebar| with `options.position` set to `'left'`.
+  All other options are passed through as-is.
+
+  `------------------------------------------------------------------------------`
+  explore_right                                      *carbon-carbon-explore-right*
+
+  Signature: `require('carbon').explore_right(`[{options}]`)`
+
+  Calls |carbon-carbon-explore-sidebar| with `options.position` set to `'right'`.
+  All other options are passed through as-is.
 
   `------------------------------------------------------------------------------`
   toggle_sidebar                                    *carbon-carbon-toggle-sidebar*
@@ -2072,7 +2088,7 @@ SETTINGS                                                         *carbon-setting
 
   Default: `true`
 
-  Whether or not to focus `:Lcarbon` window opened via `:ToggleLcarbon`.
+  Whether or not to focus sidebar windows opened via `:ToggleSidebarCarbon`.
 
   `------------------------------------------------------------------------------`
   sidebar_position                               *carbon-setting-sidebar-position*

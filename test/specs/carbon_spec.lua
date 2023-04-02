@@ -217,6 +217,38 @@ describe('carbon', function()
     )
   end)
 
+  describe('explore_right', function()
+    it('opens on the right side', function()
+      util.cursor(12, 1)
+      carbon.edit()
+
+      local before_bufname = vim.fn.bufname()
+
+      carbon.explore_right()
+      vim.cmd.wincmd('h')
+
+      assert.equal(before_bufname, vim.fn.bufname())
+
+      vim.cmd.bdelete()
+    end)
+  end)
+
+  describe('explore_left', function()
+    it('opens on the left side', function()
+      util.cursor(12, 1)
+      carbon.edit()
+
+      local before_bufname = vim.fn.bufname()
+
+      carbon.explore_left()
+      vim.cmd.wincmd('l')
+
+      assert.equal(before_bufname, vim.fn.bufname())
+
+      vim.cmd.bdelete()
+    end)
+  end)
+
   describe('explore_float', function()
     it('shows the buffer in a floating window', function()
       carbon.explore_float()
