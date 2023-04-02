@@ -347,11 +347,15 @@ function view:buffer()
   }
 
   for action, mapping in pairs(settings.actions or {}) do
-    mapping = type(mapping) == 'string' and { mapping } or mapping or {}
+    if type(mapping) == 'string' then
+      mapping = { mapping }
+    end
 
-    for _, key in ipairs(mapping) do
-      mappings[#mappings + 1] =
-        { 'n', key, util.plug(action), { nowait = true } }
+    if type(mapping) == 'table' then
+      for _, key in ipairs(mapping) do
+        mappings[#mappings + 1] =
+          { 'n', key, util.plug(action), { nowait = true } }
+      end
     end
   end
 

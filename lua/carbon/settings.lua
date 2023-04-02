@@ -8,6 +8,7 @@ local defaults = {
   open_on_dir = true,
   auto_reveal = false,
   sidebar_width = 30,
+  sidebar_toggle_focus = true,
   exclude = {
     '~$',
     '#$',

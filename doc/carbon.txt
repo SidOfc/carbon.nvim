@@ -1,7 +1,7 @@
 *carbon.nvim.txt*      The simple directory tree viewer for Neovim written in Lua.
 *carbon.txt*
 
-  `Version: 0.16.1`
+  `Version: 0.17.0`
   `Licence: MIT`
   `Source:  https://github.com/SidOfc/carbon.nvim`
   `Author:  Sidney Liebrand <sidneyliebrand@gmail.com>`
@@ -142,6 +142,19 @@ COMMANDS                                                         *carbon-command
   When called with a <bang> (`Carbon!`) or |carbon-setting-auto-reveal| enabled,
   the tree will expand to show the current buffer path and
   |carbon-buffer-flash-bang| it if possible. This also works for its alias.
+
+  `------------------------------------------------------------------------------`
+  ToggleLcarbon                                     *carbon-command-ToggleLcarbon*
+
+  Implementation: `require('carbon').toggle_left()`
+  Alias:          `ToggleLexplore` unless |carbon-setting-keep-netrw| is enabled.
+
+  Calls |carbon-carbon-explore-left| if no `:Lcarbon` window exists. Otherwise
+  the existing `:Lcarbon` window will be closed.
+
+  When a new `:Lcarbon` window is spawned it is also focussed automatically.
+  This behavior can be disabled by setting |carbon-setting-sidebar-toggle-focus|
+  to `false`.
 
   `------------------------------------------------------------------------------`
   Fcarbon                                                 *carbon-command-Fcarbon*
@@ -445,6 +458,18 @@ CARBON                                                             *carbon-carbo
 
   Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
   window opened via `:Lcarbon`.
+
+  `------------------------------------------------------------------------------`
+  toggle_left                                          *carbon-carbon-toggle-left*
+
+  Signature: `require('carbon').toggle_left(`[{options}]`)`
+
+  When an `:Lcarbon` window exists, it will be closed, otherwise
+  |carbon-carbon-explore-left| will be called and the new `:LCarbon` window
+  will be focussed automatically.
+
+  This automatic focus switch can be disabled by setting
+  |carbon-setting-sidebar-toggle-focus| to `false`.
 
   `------------------------------------------------------------------------------`
   explore_float                                      *carbon-carbon-explore-float*
@@ -1099,6 +1124,14 @@ BUFFER                                                             *carbon-buffe
   |carbon-buffer-cd| can manipulate to enable navigating up from the current
   working directory, down into a child, reset back to the original
   directory Neovim was opened with, or set to an arbitrary path.
+
+  `------------------------------------------------------------------------------`
+  lexplore_window_id                            *carbon-buffer-lexplore-window-id*
+
+  Signature: `require('carbon.buffer').lexplore_window_id()`
+
+  Returns the |winid| of the window opened by |carbon-command-Lcarbon|.
+  Returns `nil` when no such window exists.
 
   `------------------------------------------------------------------------------`
   focus_flash                                          *carbon-buffer-focus-flash*
@@ -1859,15 +1892,16 @@ SETTINGS                                                         *carbon-setting
                                                            *carbon-settings-table*
 
   `{`
-    `sync_pwd      = `|carbon-setting-sync-pwd|`,`
-  `  compress      = `|carbon-setting-compress|`,`
-  `  auto_open     = `|carbon-setting-auto-open|`,`
-  `  keep_netrw    = `|carbon-setting-keep-netrw|`,`
-  `  sync_on_cd    = `|carbon-setting-sync-on-cd|`,`
-  `  sync_delay    = `|carbon-setting-sync-delay|`,`
-  `  sidebar_width = `|carbon-setting-sidebar-width|`,`
-  `  auto_reveal   = `|carbon-setting-auto-reveal|`,`
-  `  exclude       = `|carbon-setting-exclude|`,`
+    `sync_pwd             = `|carbon-setting-sync-pwd|`,`
+  `  compress             = `|carbon-setting-compress|`,`
+  `  auto_open            = `|carbon-setting-auto-open|`,`
+  `  keep_netrw           = `|carbon-setting-keep-netrw|`,`
+  `  sync_on_cd           = `|carbon-setting-sync-on-cd|`,`
+  `  sync_delay           = `|carbon-setting-sync-delay|`,`
+  `  sidebar_width        = `|carbon-setting-sidebar-width|`,`
+  `  sidebar_toggle_focus = `|carbon-setting-sidebar-toggle-focus|`,`
+  `  auto_reveal          = `|carbon-setting-auto-reveal|`,`
+  `  exclude              = `|carbon-setting-exclude|`,`
 
   `  indicators = {`
   `    expand   = `|carbon-setting-indicators-expand|`,`
@@ -2013,6 +2047,13 @@ SETTINGS                                                         *carbon-setting
   Default: `30`
 
   The width in columns of the sidebar window opened by |carbon-command-Lcarbon|.
+
+  `------------------------------------------------------------------------------`
+  sidebar_toggle_focus                       *carbon-setting-sidebar-toggle-focus*
+
+  Default: `true`
+
+  Whether or not to focus `:Lcarbon` window opened via `:ToggleLcarbon`.
 
   `------------------------------------------------------------------------------`
   auto_reveal                                         *carbon-setting-auto-reveal*

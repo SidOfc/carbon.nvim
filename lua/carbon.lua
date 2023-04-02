@@ -36,6 +36,7 @@ function carbon.setup(user_settings)
     util.command('Carbon', carbon.explore, command_opts)
     util.command('Lcarbon', carbon.explore_left, command_opts)
     util.command('Fcarbon', carbon.explore_float, command_opts)
+    util.command('ToggleLcarbon', carbon.toggle_left, command_opts)
 
     if settings.open_on_dir then
       util.autocmd('BufWinEnter', carbon.explore_buf_dir, { pattern = '*' })
@@ -54,6 +55,7 @@ function carbon.setup(user_settings)
 
       util.command('Explore', carbon.explore, command_opts)
       util.command('Lexplore', carbon.explore_left, command_opts)
+      util.command('ToggleLexplore', carbon.toggle_left, command_opts)
     end
 
     for action in pairs(settings.defaults.actions) do
@@ -194,6 +196,20 @@ function carbon.explore(options_param)
   end
 
   view.activate({ path = path, reveal = options.bang })
+end
+
+function carbon.toggle_left(options)
+  local current_win = vim.api.nvim_get_current_win()
+
+  if vim.api.nvim_win_is_valid(view.sidebar.origin) then
+    vim.api.nvim_win_close(view.sidebar.origin, 1)
+  else
+    carbon.explore_left(options)
+
+    if not settings.sidebar_toggle_focus then
+      vim.api.nvim_set_current_win(current_win)
+    end
+  end
 end
 
 function carbon.explore_left(options_param)
