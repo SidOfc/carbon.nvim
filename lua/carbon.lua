@@ -116,7 +116,10 @@ function carbon.edit()
       ctx.view:render()
     else
       view.handle_sidebar_or_float()
-      vim.cmd.edit(ctx.cursor.line.entry.path)
+      vim.cmd.edit({
+        ctx.cursor.line.entry.path,
+        mods = { keepalt = #vim.fn.getreg('#') ~= 0 },
+      })
     end
   end)
 end
