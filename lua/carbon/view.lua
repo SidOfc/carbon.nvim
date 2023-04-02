@@ -101,9 +101,12 @@ function view.activate(options_param)
     if vim.api.nvim_win_is_valid(view.sidebar.origin) then
       vim.api.nvim_set_current_win(view.sidebar.origin)
     else
-      vim.cmd.split({ mods = { vertical = true, split = 'leftabove' } })
+      local split = options.sidebar == 'right' and 'rightbelow' or 'leftabove'
+
+      vim.cmd.split({ mods = { vertical = true, split = split } })
 
       view.sidebar = {
+        position = options.sidebar,
         origin = vim.api.nvim_get_current_win(),
         target = original_window,
       }
@@ -137,6 +140,22 @@ function view.activate(options_param)
   end
 end
 
+function view.close_sidebar()
+  if vim.api.nvim_win_is_valid(view.sidebar.origin) then
+    vim.api.nvim_win_close(view.sidebar.origin, true)
+  end
+
+  view.sidebar = { origin = -1, target = -1 }
+end
+
+function view.close_float()
+  if vim.api.nvim_win_is_valid(view.float.origin) then
+    vim.api.nvim_win_close(view.float.origin, true)
+  end
+
+  view.float = { origin = -1, target = -1 }
+end
+
 function view.handle_sidebar_or_float()
   local current_window = vim.api.nvim_get_current_win()
 
@@ -144,13 +163,16 @@ function view.handle_sidebar_or_float()
     if vim.api.nvim_win_is_valid(view.sidebar.target) then
       vim.api.nvim_set_current_win(view.sidebar.target)
     else
-      vim.cmd.split({ mods = { vertical = true, split = 'belowright' } })
+      local split = view.sidebar.position == 'right' and 'aboveleft'
+        or 'belowright'
+
+      vim.cmd.split({ mods = { vertical = true, split = split } })
 
       view.sidebar.target = vim.api.nvim_get_current_win()
       vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
     end
   elseif current_window == view.float.origin then
-    vim.api.nvim_win_close(0, true)
+    view.close_float()
   end
 end
 

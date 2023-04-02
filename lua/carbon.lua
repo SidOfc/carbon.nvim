@@ -34,9 +34,10 @@ function carbon.setup(user_settings)
     end)
 
     util.command('Carbon', carbon.explore, command_opts)
+    util.command('Rcarbon', carbon.explore_right, command_opts)
     util.command('Lcarbon', carbon.explore_left, command_opts)
     util.command('Fcarbon', carbon.explore_float, command_opts)
-    util.command('ToggleLcarbon', carbon.toggle_left, command_opts)
+    util.command('ToggleSidebarCarbon', carbon.toggle_sidebar, command_opts)
 
     if settings.open_on_dir then
       util.autocmd('BufWinEnter', carbon.explore_buf_dir, { pattern = '*' })
@@ -54,8 +55,9 @@ function carbon.setup(user_settings)
       pcall(vim.api.nvim_del_augroup_by_name, 'Network')
 
       util.command('Explore', carbon.explore, command_opts)
+      util.command('Rexplore', carbon.explore_right, command_opts)
       util.command('Lexplore', carbon.explore_left, command_opts)
-      util.command('ToggleLexplore', carbon.toggle_left, command_opts)
+      util.command('ToggleSidebarExplore', carbon.toggle_sidebar, command_opts)
     end
 
     for action in pairs(settings.defaults.actions) do
@@ -201,13 +203,19 @@ function carbon.explore(options_param)
   view.activate({ path = path, reveal = options.bang })
 end
 
-function carbon.toggle_left(options)
+function carbon.toggle_sidebar(options)
   local current_win = vim.api.nvim_get_current_win()
 
   if vim.api.nvim_win_is_valid(view.sidebar.origin) then
     vim.api.nvim_win_close(view.sidebar.origin, 1)
   else
-    carbon.explore_left(options)
+    local explore_options = vim.tbl_extend(
+      'force',
+      options or {},
+      { sidebar = settings.sidebar_position }
+    )
+
+    carbon.explore_sidebar(explore_options)
 
     if not settings.sidebar_toggle_focus then
       vim.api.nvim_set_current_win(current_win)
@@ -215,15 +223,36 @@ function carbon.toggle_left(options)
   end
 end
 
-function carbon.explore_left(options_param)
+function carbon.explore_sidebar(options_param)
   local options = options_param or {}
   local path = options.fargs and string.gsub(options.fargs[1] or '', '%s', '')
+  local sidebar = options.sidebar or settings.sidebar_position
 
   if path == '' then
     path = vim.loop.cwd()
   end
 
-  view.activate({ path = path, reveal = options.bang, sidebar = true })
+  view.activate({ path = path, reveal = options.bang, sidebar = sidebar })
+end
+
+function carbon.explore_left(options_param)
+  if view.sidebar.position ~= 'left' then
+    view.close_sidebar()
+  end
+
+  carbon.explore_sidebar(
+    vim.tbl_extend('force', options_param or {}, { sidebar = 'left' })
+  )
+end
+
+function carbon.explore_right(options_param)
+  if view.sidebar.position ~= 'right' then
+    view.close_sidebar()
+  end
+
+  carbon.explore_sidebar(
+    vim.tbl_extend('force', options_param or {}, { sidebar = 'right' })
+  )
 end
 
 function carbon.explore_float(options_param)

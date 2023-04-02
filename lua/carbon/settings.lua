@@ -9,6 +9,7 @@ local defaults = {
   auto_reveal = false,
   sidebar_width = 30,
   sidebar_toggle_focus = true,
+  sidebar_position = 'left',
   exclude = {
     '~$',
     '#$',

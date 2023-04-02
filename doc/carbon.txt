@@ -144,15 +144,24 @@ COMMANDS                                                         *carbon-command
   |carbon-buffer-flash-bang| it if possible. This also works for its alias.
 
   `------------------------------------------------------------------------------`
-  ToggleLcarbon                                     *carbon-command-ToggleLcarbon*
+  Rcarbon                                                 *carbon-command-Rcarbon*
 
-  Implementation: `require('carbon').toggle_left()`
-  Alias:          `ToggleLexplore` unless |carbon-setting-keep-netrw| is enabled.
+  Implementation: `require('carbon').explore_right()`
+  Alias:          `Rexplore` unless |carbon-setting-keep-netrw| is enabled.
 
-  Calls |carbon-carbon-explore-left| if no `:Lcarbon` window exists. Otherwise
-  the existing `:Lcarbon` window will be closed.
+  Like |carbon-command-Lcarbon| but on the right side.
 
-  When a new `:Lcarbon` window is spawned it is also focussed automatically.
+  `------------------------------------------------------------------------------`
+  ToggleSidebarCarbon                         *carbon-command-ToggleSidebarCarbon*
+
+  Implementation: `require('carbon').toggle_sidebar()`
+  Alias:          `ToggleSidebarExplore` unless |carbon-setting-keep-netrw|
+                  is enabled.
+
+  Calls |carbon-carbon-explore-sidebar| if no sidebar window exists. Otherwise
+  the existing sidebar window will be closed.
+
+  When a new sidebar window is spawned it is also focussed automatically.
   This behavior can be disabled by setting |carbon-setting-sidebar-toggle-focus|
   to `false`.
 
@@ -408,9 +417,10 @@ CARBON                                                             *carbon-carbo
 
   If the entry which the cursor is on is a directory then this method expands
   or collapses it depending on its current state. If it is a file and the
-  current buffer was opened using |carbon-carbon-explore-left| then the file will
-  be opened in a new split to the right. A split will be created if it does not
-  exist. Otherwise if it is a file it will be edited in the current window.
+  current buffer was opened using |carbon-carbon-explore-sidebar| then the file
+  will be opened in a new split. A split will be created if it does not exist.
+
+  When this fails the file will be edited in the current window instead.
 
   `------------------------------------------------------------------------------`
   split                                                      *carbon-carbon-split*
@@ -443,13 +453,20 @@ CARBON                                                             *carbon-carbo
   the current buffer.
 
   `------------------------------------------------------------------------------`
-  explore_left                                        *carbon-carbon-explore-left*
+  explore_sidebar                                  *carbon-carbon-explore-sidebar*
 
-  Signature: `require('carbon').explore_left(`[{options}]`)`
+  Signature: `require('carbon').explore_sidebar(`[{options}]`)`
 
-  Show Carbon in a new vertical split on the left side with a width of
-  |carbon-setting-sidebar-width|. Used by the |carbon-command-Lcarbon| command and
-  modifies how |carbon-carbon-edit| works for that window.
+  Show Carbon in a new vertical split with a width of
+  |carbon-setting-sidebar-width|. Used by the |carbon-command-Lcarbon| and
+  |carbon-command-Rcarbon| commands and modifies how |carbon-carbon-edit| works
+  for that window.
+
+  Currently, the position can either be `'left'` or `'right'`.
+  The position of the sidebar is resolved in following order:
+  1. `options.position`
+  2. |carbon-setting-sidebar-position|
+  3. `'left'`
 
   When {options} is given and `options.bang` is `true` or when
   |carbon-setting-auto-reveal| is `true` then this calls
@@ -460,12 +477,12 @@ CARBON                                                             *carbon-carbo
   window opened via `:Lcarbon`.
 
   `------------------------------------------------------------------------------`
-  toggle_left                                          *carbon-carbon-toggle-left*
+  toggle_sidebar                                    *carbon-carbon-toggle-sidebar*
 
-  Signature: `require('carbon').toggle_left(`[{options}]`)`
+  Signature: `require('carbon').toggle_sidebar(`[{options}]`)`
 
-  When an `:Lcarbon` window exists, it will be closed, otherwise
-  |carbon-carbon-explore-left| will be called and the new `:LCarbon` window
+  When a sidebar window exists, it will be closed, otherwise
+  |carbon-carbon-explore-sidebar| will be called and the new sidebar window
   will be focussed automatically.
 
   This automatic focus switch can be disabled by setting
@@ -1126,11 +1143,13 @@ BUFFER                                                             *carbon-buffe
   directory Neovim was opened with, or set to an arbitrary path.
 
   `------------------------------------------------------------------------------`
-  lexplore_window_id                            *carbon-buffer-lexplore-window-id*
+  sidebar_window_id                              *carbon-buffer-sidebar-window-id*
 
-  Signature: `require('carbon.buffer').lexplore_window_id()`
+  Signature: `require('carbon.buffer').sidebar_window_id()`
 
-  Returns the |winid| of the window opened by |carbon-command-Lcarbon|.
+  Returns the |winid| of the window opened by |carbon-command-Lcarbon|,
+  |carbon-command-Rcarbon|, or |carbon-command-ToggleSidebarCarbon|.
+
   Returns `nil` when no such window exists.
 
   `------------------------------------------------------------------------------`
@@ -1226,9 +1245,8 @@ BUFFER                                                             *carbon-buffe
   This method restores |fillchars| and |wrap| back to their original values
   before |carbon-buffer-process-enter| was called.
 
-  It also `nils` out both `vim.w.carbon_lexplore_window` and
-  `vim.w.carbon_fexplore_window` window-local variables which are used internally
-  by |carbon-command-Lcarbon| and |carbon-command-Fcarbon| respectively.
+  It also `nils` out any `vim.w.carbon_*` window-local variables which are used
+  internally by some of Carbon's commands.
 
   `------------------------------------------------------------------------------`
   is_loaded                                              *carbon-buffer-is-loaded*
@@ -1900,6 +1918,7 @@ SETTINGS                                                         *carbon-setting
   `  sync_delay           = `|carbon-setting-sync-delay|`,`
   `  sidebar_width        = `|carbon-setting-sidebar-width|`,`
   `  sidebar_toggle_focus = `|carbon-setting-sidebar-toggle-focus|`,`
+  `  sidebar_position     = `|carbon-setting-sidebar-position|`,`
   `  auto_reveal          = `|carbon-setting-auto-reveal|`,`
   `  exclude              = `|carbon-setting-exclude|`,`
 
@@ -2054,6 +2073,13 @@ SETTINGS                                                         *carbon-setting
   Default: `true`
 
   Whether or not to focus `:Lcarbon` window opened via `:ToggleLcarbon`.
+
+  `------------------------------------------------------------------------------`
+  sidebar_position                               *carbon-setting-sidebar-position*
+
+  Default: `'left'`
+
+  Default sidebar position, see |carbon-carbon-explore-sidebar| for context.
 
   `------------------------------------------------------------------------------`
   auto_reveal                                         *carbon-setting-auto-reveal*
