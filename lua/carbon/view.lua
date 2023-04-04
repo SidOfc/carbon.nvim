@@ -144,10 +144,6 @@ function view.activate(options_param)
   else
     vim.api.nvim_win_set_buf(0, current_view:buffer())
   end
-
-  if options.delete_current_buf then
-    pcall(vim.api.nvim_buf_delete, original_buffer, { force = true })
-  end
 end
 
 function view.close_sidebar()

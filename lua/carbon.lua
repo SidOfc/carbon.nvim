@@ -91,7 +91,9 @@ function carbon.session_load_post(event)
     local is_sidebar = window_width == settings.sidebar_width
 
     view.activate({ path = event.file })
-    vim.cmd.doautocmd({ 'BufWinEnter', event.file })
+    view.execute(function(ctx)
+      ctx.view:show()
+    end)
 
     if is_sidebar then
       local neighbor = util.tbl_find(
@@ -298,7 +300,7 @@ function carbon.explore_buf_dir(params)
   end
 
   if params and params.file and util.is_directory(params.file) then
-    view.activate({ path = params.file, delete_current_buf = true })
+    view.activate({ path = params.file })
     view.execute(function(ctx)
       ctx.view:show()
     end)
