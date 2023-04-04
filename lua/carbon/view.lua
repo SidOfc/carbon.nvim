@@ -392,11 +392,11 @@ function view:buffer()
   end
 
   local buffer = util.create_scratch_buf({
-    name = string.format('carbon[%d]', self.index),
+    name = self.root.path,
     filetype = 'carbon.explorer',
     modifiable = false,
     modified = false,
-    bufhidden = 'hide',
+    bufhidden = 'wipe',
     mappings = mappings,
     autocmds = {
       BufHidden = function()

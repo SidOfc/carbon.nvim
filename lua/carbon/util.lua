@@ -188,9 +188,16 @@ function util.bufwinid(buf)
   end
 end
 
+function util.find_buf_by_name(name)
+  return util.tbl_find(vim.api.nvim_list_bufs(), function(bufnr)
+    return name == vim.api.nvim_buf_get_name(bufnr)
+  end)
+end
+
 function util.create_scratch_buf(options)
   options = options or {}
-  local buf = vim.api.nvim_create_buf(false, true)
+  local found = util.find_buf_by_name(options.name)
+  local buf = found or vim.api.nvim_create_buf(false, true)
   local buffer_options = vim.tbl_extend('force', {
     bufhidden = 'wipe',
     buftype = 'nofile',
@@ -258,6 +265,29 @@ end
 
 function util.add_highlight(buf, ...)
   vim.api.nvim_buf_add_highlight(buf, constants.hl, ...)
+end
+
+function util.window_neighbors(window_id, sides)
+  local original_window = vim.api.nvim_get_current_win()
+  local result = {}
+
+  for _, side in ipairs(sides or {}) do
+    vim.api.nvim_set_current_win(window_id)
+    vim.cmd.wincmd(constants.directions[side])
+
+    local side_id = vim.api.nvim_get_current_win()
+    local result_id = window_id ~= side_id and side_id or nil
+
+    result[#result + 1] = {
+      origin = window_id,
+      position = side,
+      target = result_id,
+    }
+  end
+
+  vim.api.nvim_set_current_win(original_window)
+
+  return result
 end
 
 return util

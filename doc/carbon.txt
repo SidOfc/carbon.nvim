@@ -1,7 +1,7 @@
 *carbon.nvim.txt*      The simple directory tree viewer for Neovim written in Lua.
 *carbon.txt*
 
-  `Version: 0.18.2`
+  `Version: 0.18.3`
   `Licence: MIT`
   `Source:  https://github.com/SidOfc/carbon.nvim`
   `Author:  Sidney Liebrand <sidneyliebrand@gmail.com>`
@@ -409,6 +409,20 @@ CARBON                                                             *carbon-carbo
 
   This method should be called only once per Neovim instance and must be called
   before any buffer is created otherwise such buffer will not function properly.
+
+  `------------------------------------------------------------------------------`
+  session_load_post                              *carbon-carbon-session-load-post*
+
+  Signature: `require('carbon').session_load_post()`
+
+  Executed on |SessionLoadPost| events. Attempts to identify Carbon buffers.
+  When a buffer whose `file` property ends in `carbon` is found, it is assumed
+  to be a Carbon buffer. Carbon will initialize itself in such buffer.
+
+  Additionally, if the `width` of the window the buffer is contained in
+  matches that of |carbon-setting-sidebar-width| then Carbon will also restore
+  sidebar flags which it attaches on windows. This will allow
+  |ToggleSidebarCarbon| to work properly after sourcing a vim session.
 
   `------------------------------------------------------------------------------`
   edit                                                        *carbon-carbon-edit*

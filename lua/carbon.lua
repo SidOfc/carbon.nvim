@@ -39,6 +39,8 @@ function carbon.setup(user_settings)
     util.command('Fcarbon', carbon.explore_float, command_opts)
     util.command('ToggleSidebarCarbon', carbon.toggle_sidebar, command_opts)
 
+    util.autocmd('SessionLoadPost', carbon.session_load_post, { pattern = '*' })
+
     if settings.open_on_dir then
       util.autocmd('BufWinEnter', carbon.explore_buf_dir, { pattern = '*' })
     end
@@ -75,10 +77,34 @@ function carbon.setup(user_settings)
       and settings.auto_open
       and util.is_directory(open)
     then
-      view.activate({ path = open, delete_current_buf = true })
+      view.activate({ path = open })
     end
 
     vim.g.carbon_initialized = true
+  end
+end
+
+function carbon.session_load_post(event)
+  if util.is_directory(event.file) then
+    local window_id = util.bufwinid(event.buf)
+    local window_width = vim.api.nvim_win_get_width(window_id)
+    local is_sidebar = window_width == settings.sidebar_width
+
+    view.activate({ path = event.file })
+    vim.cmd.doautocmd({ 'BufWinEnter', event.file })
+
+    if is_sidebar then
+      local neighbor = util.tbl_find(
+        util.window_neighbors(window_id, { 'left', 'right' }),
+        function(neighbor)
+          return neighbor.target
+        end
+      )
+
+      if neighbor then
+        view.sidebar = neighbor
+      end
+    end
   end
 end
 
