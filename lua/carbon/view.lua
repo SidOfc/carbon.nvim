@@ -98,7 +98,6 @@ end
 function view.activate(options_param)
   local options = options_param or {}
   local original_window = vim.api.nvim_get_current_win()
-  local original_buffer = vim.api.nvim_get_current_buf()
   local current_view = (options.path and view.get(options.path))
     or view.current()
     or view.get(vim.loop.cwd())
@@ -249,6 +248,8 @@ function view:expand_to_path(path)
 
     if current and current.path == resolved then
       self.flash = current
+
+      self:update()
 
       return true
     end
