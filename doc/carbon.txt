@@ -18,9 +18,9 @@ TABLE OF CONTENTS                                     *carbon-contents* *carbon-
   SETUP `................` |carbon-setup|
 
   UTIL `.................` |carbon-util|
-  ENTRY `................` |carbon-entry|
   PLUGS `................` |carbon-plugs|
-  BUFFER `...............` |carbon-buffer|
+  ENTRY `................` |carbon-entry|
+  VIEW `.................` |carbon-view|
   CARBON `...............` |carbon-carbon|
   WATCHER `..............` |carbon-watcher|
   COMMANDS `.............` |carbon-commands|
@@ -97,17 +97,25 @@ CONSTANTS                                                       *carbon-constant
   Usage: `require('carbon.constants').hl_tmp`
   Value: `carbon:tmp`
 
-  Used for temporary highlighting. Used only by |carbon-buffer-focus-flash|
+  Used for temporary highlighting. Used only by |carbon-view-focus-flash|
   at the moment.
 
   `------------------------------------------------------------------------------`
-  augroup                                                *carbon-constants-augroup*
+  augroup                                               *carbon-constants-augroup*
 
   Usage: `require('carbon.constants').augroup`
   Value  `carbon:tmp`
 
-  Used for temporary highlighting. Used only by |carbon-buffer-focus-flash|
+  Used for temporary highlighting. Used only by |carbon-view-focus-flash|
   at the moment.
+
+  `------------------------------------------------------------------------------`
+  directions                                         *carbon-constants-directions*
+
+  Usage: `require('carbon.constants').directions`
+  Value  `{ left = 'h', right = 'l', up = 'k', down = 'j' }`
+
+  Helper to map "human" direction names to "vim" directions.
 
 ================================================================================
 COMMANDS                                                         *carbon-commands*
@@ -124,7 +132,7 @@ COMMANDS                                                         *carbon-command
   Replaces the current buffer with the Carbon buffer.
   When called with a <bang> (`Carbon!`) or |carbon-setting-auto-reveal| enabled,
   the tree will expand to show the current buffer path and
-  |carbon-buffer-flash-bang| it if possible. This also works for its alias.
+  |carbon-view-flash-bang| it if possible. This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Lcarbon                                                 *carbon-command-Lcarbon*
@@ -141,7 +149,7 @@ COMMANDS                                                         *carbon-command
 
   When called with a <bang> (`Carbon!`) or |carbon-setting-auto-reveal| enabled,
   the tree will expand to show the current buffer path and
-  |carbon-buffer-flash-bang| it if possible. This also works for its alias.
+  |carbon-view-flash-bang| it if possible. This also works for its alias.
 
   `------------------------------------------------------------------------------`
   Rcarbon                                                 *carbon-command-Rcarbon*
@@ -185,7 +193,7 @@ COMMANDS                                                         *carbon-command
 
   When called with a <bang> (`Carbon!`) or |carbon-setting-auto-reveal| enabled,
   the tree will expand to show the current buffer path and
-  |carbon-buffer-flash-bang| it if possible.
+  |carbon-view-flash-bang| it if possible.
 
   See |carbon-setting-float-settings| for more information on how to configure
   the floating window spawned by `:Fcarbon`.
@@ -196,15 +204,15 @@ AUTOCMDS                                                         *carbon-autocmd
   This section documents the default |autocmd| commands that Carbon uses.
 
   `------------------------------------------------------------------------------`
-  BufEnter                                               *carbon-autocmd-bufenter*
+  BufWinEnter                                         *carbon-autocmd-bufwinenter*
 
   Group:          |carbon-constants-augroup|
-  Event:          `BufEnter`
+  Event:          `BufWinEnter`
   Pattern:
-  Implementation: `require('carbon.buffer').process_enter()`
+  Implementation: `view:show()`
 
   Local to Carbon buffers.
-  Calls |carbon-buffer-process-enter| when entering a Carbon buffer.
+  Calls |carbon-view-show| when entering a Carbon buffer.
 
   `------------------------------------------------------------------------------`
   BufHidden                                             *carbon-autocmd-bufhidden*
@@ -212,10 +220,10 @@ AUTOCMDS                                                         *carbon-autocmd
   Group:          |carbon-constants-augroup|
   Event:          `BufHidden`
   Pattern:
-  Implementation: `require('carbon.buffer').process_hidden()`
+  Implementation: `view:hide()`
 
   Local to Carbon buffers.
-  Calls |carbon-buffer-process-hidden| when the Carbon buffer is hidden.
+  Calls |carbon-view-hide| when the Carbon buffer is hidden.
 
   `------------------------------------------------------------------------------`
   CursorMovedI                                       *carbon-autocmd-cursormovedi*
@@ -226,7 +234,7 @@ AUTOCMDS                                                         *carbon-autocmd
   Implementation:
 
   Local to Carbon buffers. Called when moving the cursor in insert mode.
-  Used during |carbon-buffer-create| to control the line and minimul column
+  Used during |carbon-view-create| to control the line and minimul column
   offset of the cursor.
 
   `------------------------------------------------------------------------------`
@@ -237,7 +245,7 @@ AUTOCMDS                                                         *carbon-autocmd
   Pattern:        `global`
   Implementation: `require('carbon').cd()`
 
-  Calls |carbon-buffer-cd| when changing |pwd| using |cd|.
+  Calls |carbon-view-cd| when changing |pwd| using |cd|.
 
 ================================================================================
 PLUGS                                                               *carbon-plugs*
@@ -251,7 +259,7 @@ PLUGS                                                               *carbon-plug
   Implementation: `require('carbon').up()`
   Mapping:        |carbon-setting-actions-up|
 
-  Sets |carbon-buffer-data-root| to the parent directory of the current
+  Sets the root of the current `view` to the parent directory of the current
   working directory. Accepts a [count], when given, jumps to [count]nth parent
   directory of the current working directory.
 
@@ -261,10 +269,10 @@ PLUGS                                                               *carbon-plug
   Implementation: `require('carbon').down()`
   Mapping:        |carbon-setting-actions-down|
 
-  Sets |carbon-buffer-data-root| to the directory under the cursor. If the entry
-  under the cursor is a file then the parent directory of the file's path will
-  be used. Accepts a [count] to allow navigating deeper into compressed paths.
-  See |carbon-setting-compress| and |carbon-buffer-down| for more information
+  Sets the root of the current `view` to the directory under the cursor. If the
+  entry under the cursor is a file then the parent directory of the file's path
+  will be used. Accepts a [count] to allow navigating deeper into compressed
+  paths. See |carbon-setting-compress| and |carbon-view-down| for more information
   about how compressed paths work and how they are handled.
 
   `------------------------------------------------------------------------------`
@@ -301,7 +309,7 @@ PLUGS                                                               *carbon-plug
   Accepts a [count] to allow left to right selection of the entry to move when
   on a compressed path (|carbon-setting-compress|).
 
-  For more information see |carbon-buffer-move|.
+  For more information see |carbon-view-move|.
 
   `------------------------------------------------------------------------------`
   <Plug>(carbon-reset)                                         *carbon-plug-reset*
@@ -309,8 +317,7 @@ PLUGS                                                               *carbon-plug
   Implementation: `require('carbon').reset()`
   Mapping:        |carbon-setting-actions-reset|
 
-  Sets |carbon-buffer-data-root| to the initial directory that Neovim
-  was opened with.
+  Sets root of the current `view` to its initial directory.
 
   `------------------------------------------------------------------------------`
   <Plug>(carbon-split)                                         *carbon-plug-split*
@@ -343,7 +350,7 @@ PLUGS                                                               *carbon-plug
   parent directories will be created using |mkdir|. Pressing <enter> without
   typing anything will not create anything. Press <esc> to cancel.
 
-  For more information see |carbon-buffer-create|.
+  For more information see |carbon-view-create|.
 
   `------------------------------------------------------------------------------`
   <Plug>(carbon-delete)                                       *carbon-plug-delete*
@@ -355,7 +362,7 @@ PLUGS                                                               *carbon-plug
   under the cursor. Accepts a [count] to allow deleting directories "from left
   to right" when the cursor is on a compressed path (|carbon-setting-compress|).
 
-  For more information see |carbon-buffer-delete|.
+  For more information see |carbon-view-delete|.
 
   `------------------------------------------------------------------------------`
   <Plug>(carbon-close-parent)                           *carbon-plug-close-parent*
@@ -389,19 +396,16 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').setup(`{preferences}`)`
 
+  Initializes Carbon.
+
   This method updates Carbon's |carbon-settings| with user {preferences}.
   The {preferences} argument can be a table which will be deep-merged with
   |carbon-settings-table| or a callback function which accepts
   |carbon-settings-table| as argument. The callback can modify the settings
   freely. See |carbon-setup| for init.vim / init.lua setup call examples.
 
-  `------------------------------------------------------------------------------`
-  initialize                                            *carbon-carbon-initialize*
-
-  Signature: `require('carbon').initialize()`
-
-  Initializes Carbon. This method creates |carbon-commands|, |carbon-plugs|,
-  |carbon-autocmds|, and highlights. It hijacks NetRW depending on the value of
+  This method creates |carbon-commands|, |carbon-plugs|, |carbon-autocmds|, and
+  highlights. It hijacks NetRW depending on the value of
   |carbon-setting-keep-netrw| and automatically opens the Carbon buffer if
   Neovim was opened with a directory path depending on |carbon-setting-auto-open|.
   It also attaches a callback to the watcher to enable auto-refreshing the
@@ -409,6 +413,19 @@ CARBON                                                             *carbon-carbo
 
   This method should be called only once per Neovim instance and must be called
   before any buffer is created otherwise such buffer will not function properly.
+
+  `------------------------------------------------------------------------------`
+  explore_buf_dir                                  *carbon-carbon-explore-buf-dir*
+
+  Signature: `require('carbon').explore_buf_dir(`[{params}]`)`
+
+  Called on |BufWinEnter| if |carbon-setting-open-on-dir| is enabled.
+  When the buffer being entered is a directory Carbon will show instead.
+
+  The {params} attribute, when given, must be a Lua table with a `file` key
+  pointing to the absolute path of the buffer.
+
+  If {params} is not passed or does not contain a `file` key, nothing is executed.
 
   `------------------------------------------------------------------------------`
   session_load_post                              *carbon-carbon-session-load-post*
@@ -458,12 +475,12 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').explore(`[{options}]`)`
 
-  Show Carbon in the current window. Calls |carbon-buffer-show| internally.
+  Show Carbon in the current window. Calls |carbon-view-show| internally.
   Used by the |carbon-command-Carbon| command.
 
   When {options} is given and `options.bang` is `true` or when
   |carbon-setting-auto-reveal| is `true` then this calls
-  |carbon-buffer-expand-to-path| to expand the tree to reveal
+  |carbon-view-expand-to-path| to expand the tree to reveal
   the current buffer.
 
   `------------------------------------------------------------------------------`
@@ -484,7 +501,7 @@ CARBON                                                             *carbon-carbo
 
   When {options} is given and `options.bang` is `true` or when
   |carbon-setting-auto-reveal| is `true` then this calls
-  |carbon-buffer-expand-to-path| to expand the tree to reveal
+  |carbon-view-expand-to-path| to expand the tree to reveal
   the current buffer.
 
   Subsequent calls to `:Lcarbon` will attempt to navigate to an existing
@@ -528,7 +545,7 @@ CARBON                                                             *carbon-carbo
 
   When {options} is given and `options.bang` is `true` or when
   |carbon-setting-auto-reveal| is `true` then this calls
-  |carbon-buffer-expand-to-path| to expand the tree to reveal
+  |carbon-view-expand-to-path| to expand the tree to reveal
   the current buffer.
 
   `------------------------------------------------------------------------------`
@@ -536,7 +553,7 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').up()`
 
-  Calls |carbon-buffer-up|. When the |buffer-data-root| is updated
+  Calls |carbon-view-up|. When the root of the current `view` is updated
   successfully, this method will move the cursor to the top of the buffer and
   rerender.
 
@@ -545,7 +562,7 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').reset()`
 
-  Calls |carbon-buffer-reset|. When the |carbon-buffer-data-root| is updated
+  Calls |carbon-view-reset|. When the root of the current `view` is updated
   successfully, this method will move the cursor to the top of the buffer and
   rerender.
 
@@ -554,7 +571,7 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').down()`
 
-  Calls |carbon-buffer-down|. When the |carbon-buffer-data-root| is updated
+  Calls |carbon-view-down|. When the root of the current `view` is updated
   successfully, this method will move the cursor to the top of the buffer and
   rerender.
 
@@ -563,28 +580,28 @@ CARBON                                                             *carbon-carbo
 
   Signature: `require('carbon').create()`
 
-  Calls |carbon-buffer-create|.
+  Calls |carbon-view-create|.
 
   `------------------------------------------------------------------------------`
   move                                                        *carbon-carbon-move*
 
   Signature: `require('carbon').move()`
 
-  Calls |carbon-buffer-move|.
+  Calls |carbon-view-move|.
 
   `------------------------------------------------------------------------------`
   delete                                                    *carbon-carbon-delete*
 
   Signature: `require('carbon').delete()`
 
-  Calls |carbon-buffer-delete|.
+  Calls |carbon-view-delete|.
 
   `------------------------------------------------------------------------------`
   cd                                                            *carbon-carbon-cd*
 
   Signature: `require('carbon').cd(`[{path}]`)`
 
-  Calls |carbon-buffer-cd| to set |carbon-buffer-data-root| to {path}. If {path}
+  Calls |carbon-view-cd| to set the root of the current `view` to {path}. If {path}
   is not supplied then |vim.v| variable `vim.v.event.cwd` will be used. When updated
   successfully, this method will move the cursor to the top of the buffer
   and rerender.
@@ -737,6 +754,54 @@ UTIL                                                                 *carbon-uti
   {properties} must be a table.
 
   `------------------------------------------------------------------------------`
+  add_highlight                                        *carbon-util-add-highlight*
+
+  Signature: `require('carbon.util').add_highlight(`{buf}, {...}`)`
+
+  Calls |nvim_buf_add_highlight| like this:
+
+  `vim.api.nvim_buf_add_highlight(`{buf}, <ns_id>, {...}`)`
+
+  <ns_id> will be set to |carbon-constants-hl|.
+
+  `------------------------------------------------------------------------------`
+  window_neighbors                                  *carbon-util-window-neighbors*
+
+  Signature: `require('carbon.util').window_neighbors(`{win}, {sides}`)`
+
+  Get windows on {sides} of {win} if present. The {sides} argument is a
+  table of directions. Available directions are keys defined in
+  |carbon-constants-directions|.
+
+  Returns a table of results:
+
+  `{`
+    `{`
+      `origin = `{win}`,`
+      `position = string,`
+      `target = number,`
+    `}`,
+    `... other sides defined in `{sides}
+  `}`
+
+  `------------------------------------------------------------------------------`
+  find_buf_by_name                                  *carbon-util-find-buf-by-name*
+
+  Signature: `require('carbon.util').find_buf_by_name(`{name}`)`
+
+  Returns |bufnr| of buffer with name {name} or `nil` when no buffer with
+  {name} exists.
+
+  `------------------------------------------------------------------------------`
+  resolve                                                    *carbon-util-resolve*
+
+  Signature: `require('carbon.util').resolve(`{path}`)`
+
+  Returns normalized absolute path of given {path}. Uses |vim.fs.normalize|
+  followed by |fnamemodify| with `:p` as modifier to get the full path.
+  Trailing slashes are stripped.
+
+  `------------------------------------------------------------------------------`
   autocmd                                                    *carbon-util-autocmd*
 
   Signature: `require('carbon.util').autocmd(`{event}, {cmd_or_cb}[, {opts}]`)`
@@ -774,7 +839,7 @@ UTIL                                                                 *carbon-uti
 
   For example:
 
-  `util.set_winhl(`..., {Normal = 'CarbonIndicator', FloatBorder = 'Normal'}`)`
+  `util.set_winhl(`0, {Normal = 'CarbonIndicator', FloatBorder = 'Normal'}`)`
 
   Will result in the following command being executed:
 
@@ -1082,7 +1147,7 @@ ENTRY                                                               *carbon-entr
   Any truthy value will be treated as if the `entry` is compressible, any
   falsy value will be treated as if the `entry` is not compressible.
 
-  This method is used by |carbon-buffer-create| to control the rendered
+  This method is used by |carbon-view-create| to control the rendered
   structure while a new path is being created.
 
   `------------------------------------------------------------------------------`
@@ -1151,196 +1216,157 @@ ENTRY                                                               *carbon-entr
   be excluded from the returned table.
 
 ================================================================================
-BUFFER                                                             *carbon-buffer*
+VIEW                                                                 *carbon-view*
 
-  Usage: `require('carbon.buffer')`
+  Usage: `require('carbon.view')`
 
   This module is one of Carbon's core modules. It provides methods and
-  utilities to show the directory tree, interact with it, and keep it
+  utilities to show directory trees, interact with them, and keep them
   synchronized with changes from the file system.
 
-                                                         *carbon-buffer-data-root*
+  `------------------------------------------------------------------------------`
+  get                                                            *carbon-view-get*
 
-  The following sections may refer to a `data.root` entry object.
-  This `data.root` variable is local and private to this module. It is set to
-  a |carbon-entry-new| created with the value of |getcwd()| as only argument.
+  Signature: `view.get(`{path}`)`
 
-  This variable is the internal representation of the file tree which methods
-  such as |carbon-buffer-lines| can use as a data source or methods like
-  |carbon-buffer-up|, |carbon-buffer-down|, |carbon-buffer-reset|, or
-  |carbon-buffer-cd| can manipulate to enable navigating up from the current
-  working directory, down into a child, reset back to the original
-  directory Neovim was opened with, or set to an arbitrary path.
+  Returns an existing `view` for given {path}. Otherwise a new `view` is
+  created and returned.
 
   `------------------------------------------------------------------------------`
-  sidebar_window_id                              *carbon-buffer-sidebar-window-id*
+  activate                                                  *carbon-view-activate*
 
-  Signature: `require('carbon.buffer').sidebar_window_id()`
+  Signature: `view.activate(`[{options}]`)`
 
-  Returns the |winid| of the window opened by |carbon-command-Lcarbon|,
-  |carbon-command-Rcarbon|, or |carbon-command-ToggleSidebarCarbon|.
-
-  Returns `nil` when no such window exists.
-
-  `------------------------------------------------------------------------------`
-  focus_flash                                          *carbon-buffer-focus-flash*
-
-  Signature: `require('carbon.buffer').focus_flash(`{duration}, {group},
-                                                  {start}, {finish}`)`
-
-  Highlights a region from {start} to {finish} with {group} for {duration}
-  milliseconds. {start} and {finish} must be values accepted by
-  |vim.highlight.range|.
-
-  See |carbon-buffer-flash-bang| for more information about customizing the
-  highlighting properties when entries are revealed.
+  Shows a `view` for `path` given in {options} in the current window. If `sidebar`
+  in {options} is set to `'right'` or `'left'` then a new sidebar explorer is opened
+  on that side. Otherwise if `float` is truthy then a floating explorer is
+  opened. If neither is set then an explorer is shown in the current window.
 
   `------------------------------------------------------------------------------`
-  expand_to_path                                    *carbon-buffer-expand-to-path*
+  current                                                    *carbon-view-current*
 
-  Signature: `require('carbon.buffer').expand_to_path(`{path}`)`
+  Signature: `view.current()`
+
+  Returns the `view` for the current buffer if it is a Carbon explorer.
+  When the current buffer is not a Carbon explorer `false` is returned.
+
+  `------------------------------------------------------------------------------`
+  execute                                                    *carbon-view-execute*
+
+  Signature: `view.execute(`{callback}`)`
+
+  Calls {callback} when the current active buffer is a Carbon buffer. Does
+  nothing otherwise.
+
+  Executes {callback} with a table containing the following keys:
+
+  `{`
+    `cursor =` |carbon-view-cursor|`,`
+    `view = `|carbon-view-current|`,`
+  `}`
+
+  `------------------------------------------------------------------------------`
+  resync                                                      *carbon-view-resync*
+
+  Signature: `view.resync(`{path}`)`
+
+  Stores {path} in `view.resync_paths` and defers synchronization by
+  |carbon-setting-sync-delay| milliseconds. This is done to batch multiple
+  modifications to directories which were made in quick succession.
+
+  Calls |carbon-entry-synchronize|  on the root directory of every `view` after
+  |carbon-setting-sync-delay| amount of time has passed without any modifications.
+
+  `------------------------------------------------------------------------------`
+  expand_to_path                                      *carbon-view-expand-to-path*
+
+  Signature: `view:expand_to_path(`{path}`)`
 
   Expands the Carbon buffer to reveal {path} in the tree. If {path} is not
-  present within |carbon-buffer-data-root| this will result in a no-op.
+  present within the root of the current `view` this will result in a no-op.
 
   When successful this sets `data.flash` to the entry identified by {path}.
-  This causes the next call to |carbon-buffer-render| to move to and highlight
-  the entry |carbon-buffer-flash-bang|.
+  This causes the next call to |carbon-view-render| to move to and highlight
+  the entry |carbon-view-flash-bang|.
 
-  Given {path} will be converted to an absolute path automatically by means of
-  calling |fnamemodify| with the `:p` flag. You do not need to pass an
-  absolute path yourself.
+  Given {path} will be converted to an absolute path via |carbon-util-resolve|.
 
   This method also works when Carbon is not currently visible. It will fail
   only if {path} is not a string.
 
   The buffer is NOT rerendered automatically, this must be done manually by
-  calling |carbon-buffer-render| afterwards.
+  calling |carbon-view-render| afterwards.
 
   `------------------------------------------------------------------------------`
-  set_root                                                *carbon-buffer-set-root*
+  get_path_attr                                        *carbon-view-get-path-attr*
 
-  Signature: `require('carbon.buffer').set_root(`{new_root}`)`
+  Signature: `view:get_path_attr(`{path}, {attr}`)`
 
-  The {new_root} argument can be an absolute path to a directory or a
-  |carbon-entry-new| entry. When passed as an absolute path it is converted to
-  an entry. |carbon-buffer-data-root| is then set to this entry.
-
-  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
-
-  Returns the updated |carbon-buffer-data-root|.
+  Get {attr} for {path} in the current `view`. When {attr} is `'compressible'`
+  and its value is `nil` then `true` is returned.
 
   `------------------------------------------------------------------------------`
-  launch                                                    *carbon-buffer-launch*
+  set_path_attr                                        *carbon-view-set-path-attr*
 
-  Signature: `require('carbon.buffer').launch(`{new_root}`)`
+  Signature: `view:set_path_attr(`{path}, {attr}`)`
 
-  Called during |carbon-carbon-initialize| when |carbon-setting-auto-open| is set
-  and Neovim is opened with a directory or no argument. Not called when
-  Neovim is opened with a regular file.
-
-  Calls |carbon-buffer-set-root| with {new_root} and then calls |carbon-buffer-show|.
-  Also set the reset directory used by |carbon-plug-reset| to navigate back to.
-
-  Returns the updated |carbon-buffer-data-root|.
+  Set {attr} for {path} in the current `view`.
 
   `------------------------------------------------------------------------------`
-  process_event                                      *carbon-buffer-process-event*
+  buffers                                                    *carbon-view-buffers*
 
-  Signature: `require('carbon.buffer').defer_resync()`
+  Signature: `view:buffers()`
 
-  During |carbon-carbon-initialize| this method is attached using
-  |carbon-watcher-on| to process file change events.
-
-  When this method is called, it will start a timer for
-  |carbon-setting-sync-delay| milliseconds after which |carbon-buffer-synchronize|
-  is called. When called twice within a single |carbon-setting-sync-delay|
-  the previous timer will be cancelled and a new one will be started.
+  Returns a list of buffers which belong to the current `view`. This is done using
+  an internal `view.index` property which is stored in each buffer's `carbon`
+  local variable which is attached to new Carbon buffers via |carbon-view-buffer|.
 
   `------------------------------------------------------------------------------`
-  process_enter                                      *carbon-buffer-process-enter*
+  buffer                                                      *carbon-view-buffer*
 
-  Signature: `require('carbon.buffer').process_enter()`
-  Autocmd:   |carbon-autocmd-bufenter|
+  Signature: `view:buffer()`
 
-  This method sets |fillchars| `eob` to a space to hide the tilde characters after
-  the end of the buffer and disables |wrap|.
+  Checks if a buffer for the current `view` already exists in
+  |carbon-view-buffers| and returns it. Otherwise creates and configures a new
+  buffer, updates the current buffer handle and returns the new buffer handle.
 
-  `------------------------------------------------------------------------------`
-  process_hidden                                    *carbon-buffer-process-hidden*
-
-  Signature: `require('carbon.buffer').process_hidden()`
-  Autocmd:   |carbon-autocmd-bufhidden|
-
-  This method restores |fillchars| and |wrap| back to their original values
-  before |carbon-buffer-process-enter| was called.
-
-  It also `nils` out any `vim.w.carbon_*` window-local variables which are used
-  internally by some of Carbon's commands.
-
-  `------------------------------------------------------------------------------`
-  is_loaded                                              *carbon-buffer-is-loaded*
-
-  Signature: `require('carbon.buffer').is_loaded()`
-
-  Returns `true` or `false` depending on whether the current Carbon buffer handle is
-  valid and loaded. Uses |nvim_buf_is_loaded| internally.
-
-  `------------------------------------------------------------------------------`
-  is_hidden                                              *carbon-buffer-is-hidden*
-
-  Signature: `require('carbon.buffer').is_hidden()`
-
-  Returns `nil` if there is no Carbon buffer handle, `true` if the current buffer
-  handle is hidden, and `false` if the current buffer handle is not hidden.
-  A buffer is deemed to be hidden when |carbon-util-bufwinid| returns `nil`.
-
-  `------------------------------------------------------------------------------`
-  handle                                                    *carbon-buffer-handle*
-
-  Signature: `require('carbon.buffer').handle()`
-
-  Checks the current buffer handle and if valid, returns it. Otherwise creates
-  and configures a new buffer, updates the current buffer handle and returns
-  the new buffer handle.
-
-  The buffer name will always be `'carbon'` and the following buffer-local
-  options are always set:
+  The buffer name is set to the root directory of the current `view` and the
+  following buffer-local options are always set:
 
   |swapfile|    =>  `false`
-  |filetype|    =>  `'carbon'`
-  |bufhidden|   =>  `'hide'`
+  |filetype|    =>  `'carbon.explorer'`
+  |bufhidden|   =>  `'wipe'`
   |buftype|     =>  `'nofile'`
   |modifiable|  =>  `false`
   |modified|    =>  `false`
 
-  Finally, if there are actions to map in |carbon-setting-actions| then they
-  will be mapped locally to this buffer to a |<Plug>| mapping with the
-  same suffix from |carbon-plugs|.
+  Actions in |carbon-setting-actions| will be mapped locally to this buffer to a
+  |<Plug>| mapping with the same suffix from |carbon-plugs|.
+
+  Additionally, a buffer-local `carbon` variable is set so that Carbon can
+  figure out which buffers belong to Carbon.
 
   `------------------------------------------------------------------------------`
-  show                                                        *carbon-buffer-show*
+  update                                                      *carbon-view-update*
 
-  Signature: `require('carbon.buffer').show()`
+  Signature: `view:update()`
 
-  Show the Carbon buffer in the current window. Triggers a |carbon-buffer-render|.
+  Clears lines cached via |carbon-view-current-lines|. Does not automatically
+  rerender the buffer!
 
   `------------------------------------------------------------------------------`
-  render                                                    *carbon-buffer-render*
+  render                                                      *carbon-view-render*
 
-  Signature: `require('carbon.buffer').render()`
+  Signature: `view:render()`
 
   Renders the Carbon buffer. The contents are determined by calling the
-  |carbon-buffer-lines| method with the `data.root` entry object as only
-  argument. See |carbon-buffer-data-root| for more information about `data.root`.
+  |carbon-view-lines| method with the root entry object of the current `view` as
+  only argument.
 
-  The Carbon buffer is NOT rendered if |carbon-buffer-is-loaded| returns
-  `false` or if |carbon-buffer-is-hidden| returns `true`.
-
-                                                        *carbon-buffer-flash-bang*
+                                                          *carbon-view-flash-bang*
 
   After rendering, if `data.flash` is set to an entry which is currently visible,
-  (it is set by |carbon-buffer-expand-to-path|) then the cursor will move to
+  (it is set by |carbon-view-expand-to-path|) then the cursor will move to
   that entry and reset `data.flash` to `nil`.
 
   Additionally, when this happens, that entry is also highlighted using
@@ -1348,46 +1374,9 @@ BUFFER                                                             *carbon-buffe
   highlight are controlled by |carbon-setting-flash|.
 
   `------------------------------------------------------------------------------`
-  cursor                                                    *carbon-buffer-cursor*
+  lines                                                        *carbon-view-lines*
 
-  Signature: `require('carbon.buffer').cursor(`[{opts}]`)`
-
-  Returns a table with the following shape:
->
-  {
-    line = <line>,
-    target = <entry>,
-    target_line = <line>,
-  }
-<
-  Property: `line`
-
-  An item at index `line('.')` from |carbon-buffer-lines|.
-
-  Property: `target`
-
-  Equal to `line.entry` by default but when called during a mapping, will respect
-  |v:count| where possible. This is used for example to start deleting from
-  "left to right" on compressed paths by prefixing a mapping with a [count].
-
-  When {opts}`.target_directory_only` is truthy and `target.is_directory` is `false`
-  then `target` will be set to `line.path[#line.path] or target.parent` BEFORE
-  any [count] logic is applied.
-
-  One way to describe the difference between `line.entry` and `target` is that
-  `line.entry` will always point to the last path component entry on the current
-  line whereas `target` points to the entry targetted by the user.
-
-  Property: `target_line`
-
-  Like `line` but `target_line` refers to the line which `target` is located on.
-
-  For more information about compressed paths, see: |carbon-setting-compress|.
-
-  `------------------------------------------------------------------------------`
-  lines                                                      *carbon-buffer-lines*
-
-  Signature: `require('carbon.buffer').lines(`{entry}[, {lines}[, {depth}]]`)`
+  Signature: `view:lines(`{target}[, {lines}[, {depth}]]`)`
 
   The {entry} argument must be an entry object as returned by |carbon-entry-new|.
   The {lines} argument is optional. Defaults to an empty table `{}`. When {lines}
@@ -1418,17 +1407,17 @@ BUFFER                                                             *carbon-buffe
 
   Property: `lnum`
 
-  The line number of the entry. Used by |carbon-buffer-create| to determine
+  The line number of the entry. Used by |carbon-view-create| to determine
   the line number to move to for editing.
 
   Property: `depth`
 
-  The indent depth of the entry. Used by |carbon-buffer-create| to determine
+  The indent depth of the entry. Used by |carbon-view-create| to determine
   the start column to move to for editing.
 
   Property: `icon_width`
 
-  Width of file icons shown before a path. Used by |carbon-buffer-create| to
+  Width of file icons shown before a path. Used by |carbon-view-create| to
   determine the start column to move to for editing.
 
   Property: `highlights`
@@ -1442,176 +1431,98 @@ BUFFER                                                             *carbon-buffe
     <number end_column>,
   }
 <
-  |carbon-buffer-render| uses |nvim_buf_add_highlight| to set the highlights.
+  |carbon-view-render| uses |nvim_buf_add_highlight| to set the highlights.
   It is called the following way:
->
-  vim.api.nvim_buf_add_highlight(
-    buffer.handle(),
-    require('util.constants').hl,
-    highlight[1],
-    lnum - 1,
-    highlight[2],
-    highlight[3],
-  )
-<
+
+  `vim.api.nvim_buf_add_highlight(`
+    |carbon-view-buffer|,
+    |carbon-constants-hl|,
+    `highlight[1],`
+    `lnum - 1,`
+    `highlight[2],`
+    `highlight[3],`
+  `)`
+
   Property: `path`
 
   When |carbon-setting-compress| is enabled, this table is filled with the
   compressed parent entry objects of `entry`.
 
   `------------------------------------------------------------------------------`
-  synchronize                                          *carbon-buffer-synchronize*
+  current_lines                                        *carbon-view-current-lines*
 
-  Signature: `require('carbon.buffer').synchronize()`
+  Signature: `view:current_lines()`
 
-  Calls |carbon-entry-synchronize| on |carbon-buffer-data-root| and calls
-  |carbon-buffer-render| afterwards.
-
-  `------------------------------------------------------------------------------`
-  up                                                            *carbon-buffer-up*
-
-  Signature: `require('carbon.buffer').up(`[{count}]`)`
-
-  Set |carbon-buffer-data-root| to its {count}th parent directory. When {count}
-  is not supplied, it will use `vim.v.count1` which defaults to `1` or [count] if
-  specified while executing this method in a mapping.
-
-  This method moves the root up one level at a time. It queries the children
-  of the parent and replaces the child with the same path as the current
-  `data.root` with `data.root`. It also sets `data.root` to an open state so
-  when "zooming out" you still see what you had open.
-
-  After doing all this, the `data.root` is finally set to the actual parent.
-  This routine then is repeated {count} `- 1` more times.
-
-  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
-
-  Returns `true` if the root is replaced at least once. `nil` otherwise. This
-  can happen when you are at your OS root directory and try to go up more.
+  Returns cached lines generated from |carbon-view-lines| if present.
+  Otherwise |carbon-view-lines| is called and its results are cached.
 
   `------------------------------------------------------------------------------`
-  down                                                        *carbon-buffer-down*
+  cursor                                                      *carbon-view-cursor*
 
-  Signature: `require('carbon.buffer').down(`[{count}]`)`
+  Signature: `view:cursor(`[{opts}]`)`
 
-  Set |carbon-buffer-data-root| to its {count}th child directory below the
-  cursor. When {count} is not supplied, it will use `vim.v.count1` which defaults
-  to `1` or [count] if specified while executing this method in a mapping.
+  Returns a table with the following shape:
+>
+  {
+    line = <line>,
+    target = <entry>,
+    target_line = <line>,
+  }
+<
+  Property: `line`
 
-  Specifying a {count} is only useful when the cursor is on a compressed path.
-  The |carbon-setting-compress| section explains how compressed paths work.
+  An item at index `line('.')` from |carbon-view-lines|.
 
-  With the cursor on this path `a/b/c/d/e.txt`, calling this method without
-  specifying a {count} will move the root to `/a`, you will now see the path
-  `b/c/d/e.txt`. If you call the method again, but this time you supply `2` as
-  {count} you will navigate "past" `c/` directly into `d/`. You will now only
-  see `e.txt`.
+  Property: `target`
 
-  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+  Equal to `line.entry` by default but when called during a mapping, will respect
+  |v:count| where possible. This is used for example to start deleting from
+  "left to right" on compressed paths by prefixing a mapping with a [count].
 
-  Returns `true` when the root is replaced, `nil` when the `new_root` path is the
-  same as the current `data.root` path in which case the root is not replaced.
+  When {opts}`.target_directory_only` is truthy and `target.is_directory` is `false`
+  then `target` will be set to `line.path[#line.path] or target.parent` BEFORE
+  any [count] logic is applied.
 
-  `------------------------------------------------------------------------------`
-  cd                                                            *carbon-buffer-cd*
+  One way to describe the difference between `line.entry` and `target` is that
+  `line.entry` will always point to the last path component entry on the current
+  line whereas `target` points to the entry targetted by the user.
 
-  Signature: `require('carbon.buffer').cd(`{path}`)`
+  Property: `target_line`
 
-  Set |carbon-buffer-data-root| to a |carbon-entry-new| created using {path}.
-  This method remembers the state of all child directories when navigating up
-  directories. When navigating to a child of the current working directory
-  Carbon tries look for any children in its own state to jump to without
-  having to perform additional file system reads. In any other case, Carbon
-  navigates to the {path} entry object.
+  Like `line` but `target_line` refers to the line which `target` is located on.
 
-  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
-
-  `------------------------------------------------------------------------------`
-  reset                                                      *carbon-buffer-reset*
-
-  Signature: `require('carbon.buffer').reset()`
-
-  Set |carbon-buffer-data-root| to the original |pwd| using |carbon-buffer-cd|.
-  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+  For more information about compressed paths, see: |carbon-setting-compress|.
 
   `------------------------------------------------------------------------------`
-  set_lines                                              *carbon-buffer-set-lines*
+  show                                                          *carbon-view-show*
 
-  Signature: `require('carbon.buffer').set_lines(`{from}, {to}, {lines}`)`
+  Signature: `view:show()`
 
-  Makes the Carbon buffer |modifiable| and calls |nvim_buf_set_lines| like this:
+  Sets the following local options:
 
-  `vim.api.nvim_buf_set_lines(`<bufnr>, {from}, {to}, 1, {lines}`)`
+  - |wrap| to `false`
+  - |spell| to `false`
+  - |fillchars| to `{ eob = ' ' }`
 
-  After lines have been inserted Carbon sets |modified| to `false`.
-  Will also set |nomodifiable| to `true` except when called in |insert-mode|.
-
-  <bufnr> will be set to the |bufnr| of the Carbon buffer.
-
-  `------------------------------------------------------------------------------`
-  add_highlight                                      *carbon-buffer-add-highlight*
-
-  Signature: `require('carbon.buffer').add_highlight(`{hl}, {lnum}, {from}, {to}`)`
-
-  Calls |nvim_buf_add_highlight| like this:
-
-  `vim.api.nvim_buf_add_highlight(`<bufnr>, <ns_id>, {hl}, {lnum}, {from}, {to}`)`
-
-  <bufnr> will be set to the |bufnr| of the Carbon buffer.
-  <ns_id> will be set to the namespace stored internally by Carbon.
+  Show the Carbon buffer in the current window. Triggers a |carbon-view-render|.
 
   `------------------------------------------------------------------------------`
-  clear_namespace                                  *carbon-buffer-clear-namespace*
+  hide                                                          *carbon-view-hide*
 
-  Signature: `require('carbon.buffer').clear_namespace(`{from}, {to}`)`
+  Signature: `view:hide()`
 
-  Calls |nvim_buf_clear_namespace| like this:
+  Resets the following local options to their global defaults:
 
-  `vim.api.nvim_buf_clear_namespace(`<bufnr>, <ns_id>, {from}, {to}`)`
+  - |wrap|
+  - |spell|
+  - |fillchars|
 
-  <bufnr> will be set to the |bufnr| of the Carbon buffer.
-  <ns_id> will be set to the namespace stored internally by Carbon.
-
-  `------------------------------------------------------------------------------`
-  clear_extmarks                                    *carbon-buffer-clear-extmarks*
-
-  Signature: `require('carbon.buffer').clear_extmarks(`{from}, {to}, {opts}`)`
-
-  Wraps |nvim_buf_get_extmarks| and |nvim_buf_del_extmark|. This function
-  first calls |nvim_buf_get_extmarks| like this:
-
-  `vim.api.nvim_buf_get_extmarks(`<bufnr>, <ns_id>, {from}, {to}, {opts}`)`
-
-  The resulting list of |extmarks| will all be cleared by calling
-  |nvim_buf_del_extmark| like this:
-
-  `vim.api.nvim_buf_del_extmark(`<bufnr>, <ns_id>, <extmark_id>`)`
-
-  <bufnr> will be set to the |bufnr| of the Carbon buffer.
-  <ns_id> will be set to the namespace stored internally by Carbon.
+  Clears sidebar and float flags.
 
   `------------------------------------------------------------------------------`
-  entry_line                                            *carbon-buffer-entry-line*
+  create                                                      *carbon-view-create*
 
-  Signature: `require('carbon.buffer').entry_line(`{entry}`)`
-
-  Returns line information for given {entry}. The format is the same as a
-  single line result from |carbon-buffer-lines|. When {entry} is not visible
-  in the buffer this function returns `nil`.
-
-  An entry is visible when it is shown in the buffer. This is also true for
-  compressed path entries. While they are not displayed on their "own" line
-  they are visible "somewhere" in the buffer.
-
-  In those cases, Carbon returns the line info of the rendered entry which
-  will then have {entry} in its `line.path`.
-
-  See |carbon-setting-compress| for more information about compressed paths.
-
-  `------------------------------------------------------------------------------`
-  create                                                    *carbon-buffer-create*
-
-  Signature: `require('carbon.buffer').create()`
+  Signature: `view:create()`
 
   When called, puts the Carbon buffer in a context-aware insert mode which
   allows a path to be typed. Pressing <cr> will confirm creation and pressing
@@ -1722,9 +1633,9 @@ BUFFER                                                             *carbon-buffe
   behavior as if no count was supplied will be executed.
 
   `------------------------------------------------------------------------------`
-  delete                                                    *carbon-buffer-delete*
+  delete                                                      *carbon-view-delete*
 
-  Signature: `require('carbon.buffer').delete()`
+  Signature: `view:delete()`
 
   Prompts confirmation to delete the current entry under the cursor.
   When the current entry is a regular file or executable the file itself will be
@@ -1783,9 +1694,9 @@ BUFFER                                                             *carbon-buffe
   then it will select the last component (the actual entry of that line).
 
   `------------------------------------------------------------------------------`
-  move                                                        *carbon-buffer-move*
+  move                                                          *carbon-view-move*
 
-  Signature: `require('carbon.buffer').move()`
+  Signature: `view:move()`
 
   Prompts the user for a new destination for the entry below the cursor.
   A [count] can be supplied to move starting from left to right on compressed
@@ -1793,6 +1704,114 @@ BUFFER                                                             *carbon-buffe
   path then it will select the last component (the actual entry of that line).
 
   Intermediate directories will be created if they do not exist.
+
+  `------------------------------------------------------------------------------`
+  focus_flash                                            *carbon-view-focus-flash*
+
+  Signature: `view:focus_flash(`{duration}, {group}, {start}, {finish}`)`
+
+  Highlights a region from {start} to {finish} with {group} for {duration}
+  milliseconds. {start} and {finish} must be values accepted by
+  |vim.highlight.range|.
+
+  See |carbon-view-flash-bang| for more information about customizing the
+  highlighting properties when entries are revealed.
+
+  `------------------------------------------------------------------------------`
+  close_sidebar                                        *carbon-view-close-sidebar*
+
+  Signature: `view.close_sidebar()`
+
+  Closes a sidebar Carbon explorer window.
+
+  `------------------------------------------------------------------------------`
+  close_float                                            *carbon-view-close-float*
+
+  Signature: `view.close_float()`
+
+  Closes a floating Carbon explorer window.
+
+  `------------------------------------------------------------------------------`
+  handle_sidebar_or_float                    *carbon-view-handle-sidebar-or-float*
+
+  Signature: `view.handle_sidebar_or_float()`
+
+  Executed before opening new files to handle sidebar/float mechanics i.e.
+  when |carbon-command-ToggleSidebarCarbon| is used to open a sidebar explorer and
+  a file is edited from there this function ensures that the buffer to the side
+  of the explorer is used to show the file. If such buffer does not exist it
+  creates it.
+
+  `------------------------------------------------------------------------------`
+  set_root                                                  *carbon-view-set-root*
+
+  Signature: `view:set_root(`{target}`)`
+
+  The {new_root} argument can be an absolute path to a directory or a
+  |carbon-entry-new| entry. When passed as an absolute path it is converted to
+  an entry. The root of the current `view` is then set to this entry.
+
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+  This is only done when the original root directory matches the current
+  working directory.
+
+  `------------------------------------------------------------------------------`
+  cd                                                              *carbon-view-cd*
+
+  Signature: `view:cd(`{path}`)`
+
+  Set the root of the current `view` to specified {path}.
+  When {path} is a parent of the current root directory of `view` then
+  |carbon-view-up| is used. Otherwise the root directory is set directly via
+  |carbon-view-set-root|.
+
+  `------------------------------------------------------------------------------`
+  reset                                                        *carbon-view-reset*
+
+  Signature: `view:reset()`
+
+  Reset the root of the current `view` to the directory it originally showed.
+
+  `------------------------------------------------------------------------------`
+  up                                                              *carbon-view-up*
+
+  Signature: `view:up(`[{count}]`)`
+
+  Set the root of the current `view` to its {count}th parent directory. When
+  {count} is not supplied, it will use `vim.v.count1` which defaults to `1` or
+  [count] if specified while executing this method in a mapping.
+
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+  This is only done when the original root directory matches the current
+  working directory.
+
+  Returns `true` if the root is replaced at least once. `nil` otherwise. This
+  can happen when you are at your OS root directory and try to go up more.
+
+  `------------------------------------------------------------------------------`
+  down                                                          *carbon-view-down*
+
+  Signature: `view:down(`{count}`)`
+
+  Set the root of the current `view` to its {count}th child directory below the
+  cursor. When {count} is not supplied, it will use `vim.v.count1` which defaults
+  to `1` or [count] if specified while executing this method in a mapping.
+
+  Specifying a {count} is only useful when the cursor is on a compressed path.
+  The |carbon-setting-compress| section explains how compressed paths work.
+
+  With the cursor on this path `a/b/c/d/e.txt`, calling this method without
+  specifying a {count} will move the root to `/a`, you will now see the path
+  `b/c/d/e.txt`. If you call the method again, but this time you supply `2` as
+  {count} you will navigate "past" `c/` directly into `d/`. You will now only
+  see `e.txt`.
+
+  When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
+  This is only done when the original root directory matches the current
+  working directory.
+
+  Returns `true` when the root is replaced, `nil` when the `new_root` path is the
+  same as the current `data.root` path in which case the root is not replaced.
 
 ================================================================================
 WATCHER                                                           *carbon-watcher*
@@ -1957,6 +1976,7 @@ SETTINGS                                                         *carbon-setting
   `  sidebar_toggle_focus = `|carbon-setting-sidebar-toggle-focus|`,`
   `  sidebar_position     = `|carbon-setting-sidebar-position|`,`
   `  auto_reveal          = `|carbon-setting-auto-reveal|`,`
+  `  open_on_dir          = `|carbon-setting-open-on-dir|`,`
   `  exclude              = `|carbon-setting-exclude|`,`
 
   `  indicators = {`
@@ -2096,7 +2116,8 @@ SETTINGS                                                         *carbon-setting
   Disabled by default when |autochdir| is set to `1`, enabled by default when
   |autochdir| set to `0`. When enabled, Carbon listens for `:cd` commands.
   Once a `:cd` command is executed Carbon will automatically update
-  |carbon-buffer-data-root| to that path.
+  the root of a `view` pointing to the original current working directory
+  to the `:cd` path.
 
   `------------------------------------------------------------------------------`
   sync_delay                                           *carbon-setting-sync-delay*
@@ -2136,6 +2157,13 @@ SETTINGS                                                         *carbon-setting
   By default, only the <bang> versions of all |carbon-commands| will reveal
   the current buffer. Enabling this will cause all versions of these commands
   to reveal the current buffer.
+
+  `------------------------------------------------------------------------------`
+  open_on_dir                                         *carbon-setting-open-on-dir*
+
+  Default: `true`
+
+  Shows a Carbon buffer when opening directories.
 
   `------------------------------------------------------------------------------`
   exclude                                                 *carbon-setting-exclude*
@@ -2185,7 +2213,7 @@ SETTINGS                                                         *carbon-setting
     `}`
 
   Controls highlight {delay} and {duration} for entries revealed by
-  |carbon-buffer-expand-to-path|. Setting it to `nil` will disable
+  |carbon-view-expand-to-path|. Setting it to `nil` will disable
   highlighting of revealed entries.
 
   Uses |carbon-setting-highlights-CarbonFlash| to highlight the revealed entry.
@@ -2197,13 +2225,13 @@ SETTINGS                                                         *carbon-setting
     function()
       local columns = vim.opt.columns:get()
       local rows = vim.opt.lines:get()
-      local width = math.min(50, columns * 0.8)
-      local height = math.min(20, rows * 0.8)
+      local width = math.min(40, columns * 0.9)
+      local height = math.min(20, rows * 0.9)
 
       return {
         relative = 'editor',
         style = 'minimal',
-        border = 'single',
+        border = 'rounded',
         width = width,
         height = height,
         col = math.floor(columns / 2 - width / 2),
@@ -2293,6 +2321,10 @@ SETTINGS                                                         *carbon-setting
     `    fg = 'Gray',`
     `    ctermfg = 'DarkGray',`
     `    bold = true,`
+    `  },`
+    `  CarbonFloat = {`                       *carbon-setting-highlights-CarbonFloat*
+    `    bg = '#111111',`
+    `    ctermbg = 'Black',`
     `  },`
     `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
     `    link = 'Error',`

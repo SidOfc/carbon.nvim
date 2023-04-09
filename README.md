@@ -113,7 +113,7 @@ customization options.
 All commands also support bang (`!`) versions which will make Carbon expand the
 tree to reveal the current buffer path if possible. When successful, the cursor
 will be moved to the entry and it will be highlighted for a short time as well.
-See `:h carbon-buffer-flash-bang` for more information. This behavior can also
+See `:h carbon-view-flash-bang` for more information. This behavior can also
 be enabled by default by setting: `:h carbon-setting-auto-reveal`.
 
 ### `:Carbon` / `:Explore`
@@ -252,7 +252,7 @@ opened with [`Fcarbon`](#fcarbon) or [`Lcarbon` / `Rcarbon`](#lcarbon--lexplore-
 Enters an interactive mode in which a path can be entered. When
 done typing, press <kbd>enter</kbd> to confirm or <kbd>escape</kbd>
 to cancel. Prepending a `count` to <kbd>c</kbd> will select the `count`_nth_
-directory from the left as base. See `:h carbon-buffer-create` for more details.
+directory from the left as base. See `:h carbon-view-create` for more details.
 
 ### <kbd>m</kbd> Moving files and directories
 
@@ -261,7 +261,7 @@ directory from the left as base. See `:h carbon-buffer-create` for more details.
 Prompts to enter a new destination of the current entry under the cursor.
 Will throw an error when the new destination already exists. Prepending
 a `count` to <kbd>c</kbd> will select the `count`_nth_ directory from
-the left as base. See `:h carbon-buffer-move` for more details.
+the left as base. See `:h carbon-view-move` for more details.
 
 ### <kbd>d</kbd> Deleting files and directories
 
@@ -270,7 +270,7 @@ the left as base. See `:h carbon-buffer-move` for more details.
 Prompts confirmation to delete the current entry under the cursor. Press <kbd>enter</kbd>
 to confirm the currently highlighted option, <kbd>D</kbd> to confirm deletion directly,
 or <kbd>escape</kbd> to cancel. Prepending a `count` to <kbd>c</kbd> will select
-the `count`_nth_ directory from the left as base. See `:h carbon-buffer-delete`
+the `count`_nth_ directory from the left as base. See `:h carbon-view-delete`
 for more details.
 
 # File icons
