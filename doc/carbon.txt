@@ -84,7 +84,7 @@ CONSTANTS                                                       *carbon-constant
   Exposes a table containing all the constants which Carbon uses.
 
   `------------------------------------------------------------------------------`
-  hl                                                         *carbon-constants-hl*
+  hl                                                          *carbon-constant-hl*
 
   Usage: `require('carbon.constants').hl`
   Value: `carbon`
@@ -92,7 +92,7 @@ CONSTANTS                                                       *carbon-constant
   Used for all default highlighting.
 
   `------------------------------------------------------------------------------`
-  hl_tmp                                                 *carbon-constants-hl-tmp*
+  hl_tmp                                                  *carbon-constant-hl-tmp*
 
   Usage: `require('carbon.constants').hl_tmp`
   Value: `carbon:tmp`
@@ -101,7 +101,7 @@ CONSTANTS                                                       *carbon-constant
   at the moment.
 
   `------------------------------------------------------------------------------`
-  augroup                                               *carbon-constants-augroup*
+  augroup                                                *carbon-constant-augroup*
 
   Usage: `require('carbon.constants').augroup`
   Value  `carbon:tmp`
@@ -110,7 +110,7 @@ CONSTANTS                                                       *carbon-constant
   at the moment.
 
   `------------------------------------------------------------------------------`
-  directions                                         *carbon-constants-directions*
+  directions                                          *carbon-constant-directions*
 
   Usage: `require('carbon.constants').directions`
   Value  `{ left = 'h', right = 'l', up = 'k', down = 'j' }`
@@ -206,7 +206,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   BufWinEnter                                         *carbon-autocmd-bufwinenter*
 
-  Group:          |carbon-constants-augroup|
+  Group:          |carbon-constant-augroup|
   Event:          `BufWinEnter`
   Pattern:
   Implementation: `view:show()`
@@ -217,7 +217,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   BufHidden                                             *carbon-autocmd-bufhidden*
 
-  Group:          |carbon-constants-augroup|
+  Group:          |carbon-constant-augroup|
   Event:          `BufHidden`
   Pattern:
   Implementation: `view:hide()`
@@ -228,7 +228,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   CursorMovedI                                       *carbon-autocmd-cursormovedi*
 
-  Group:          |carbon-constants-augroup|
+  Group:          |carbon-constant-augroup|
   Event:          `CursorMovedI`
   Pattern:
   Implementation:
@@ -240,7 +240,7 @@ AUTOCMDS                                                         *carbon-autocmd
   `------------------------------------------------------------------------------`
   DirChanged                                           *carbon-autocmd-dirchanged*
 
-  Group:          |carbon-constants-augroup|
+  Group:          |carbon-constant-augroup|
   Event:          `DirChanged`
   Pattern:        `global`
   Implementation: `require('carbon').cd()`
@@ -762,7 +762,7 @@ UTIL                                                                 *carbon-uti
 
   `vim.api.nvim_buf_add_highlight(`{buf}, <ns_id>, {...}`)`
 
-  <ns_id> will be set to |carbon-constants-hl|.
+  <ns_id> will be set to |carbon-constant-hl|.
 
   `------------------------------------------------------------------------------`
   window_neighbors                                  *carbon-util-window-neighbors*
@@ -771,7 +771,7 @@ UTIL                                                                 *carbon-uti
 
   Get windows on {sides} of {win} if present. The {sides} argument is a
   table of directions. Available directions are keys defined in
-  |carbon-constants-directions|.
+  |carbon-constant-directions|.
 
   Returns a table of results:
 
@@ -1436,7 +1436,7 @@ VIEW                                                                 *carbon-vie
 
   `vim.api.nvim_buf_add_highlight(`
     |carbon-view-buffer|,
-    |carbon-constants-hl|,
+    |carbon-constant-hl|,
     `highlight[1],`
     `lnum - 1,`
     `highlight[2],`
