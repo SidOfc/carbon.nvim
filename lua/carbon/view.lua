@@ -181,10 +181,6 @@ function view.handle_sidebar_or_float()
   end
 end
 
-function view.exists(index)
-  return views[index] and true or false
-end
-
 function view.current()
   local bufnr = vim.api.nvim_get_current_buf()
   local ref = select(2, pcall(vim.api.nvim_buf_get_var, bufnr, 'carbon'))
@@ -198,10 +194,6 @@ function view.execute(callback)
   if current_view then
     return callback({ cursor = current_view:cursor(), view = current_view })
   end
-end
-
-function view.list()
-  return views
 end
 
 function view.resync(path)
