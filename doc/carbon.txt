@@ -778,8 +778,8 @@ UTIL                                                                 *carbon-uti
   `{`
     `{`
       `origin = `{win}`,`
-      `position = string,`
-      `target = number,`
+      `position = <string>,`
+      `target = <number>,`
     `}`,
     `... other sides defined in `{sides}
   `}`
@@ -1227,15 +1227,37 @@ VIEW                                                                 *carbon-vie
   `------------------------------------------------------------------------------`
   get                                                            *carbon-view-get*
 
-  Signature: `view.get(`{path}`)`
+  Signature: `require('carbon.view').get(`{path}`)`
 
-  Returns an existing `view` for given {path}. Otherwise a new `view` is
+  Returns an existing `view` for given {path}. Otherwise a new `view` instance is
   created and returned.
+
+                                                            *carbon-view-instance*
+
+  A view instance includes information about a specific root directory. It
+  holds various state attributes such as which directories have been expanded
+  and which entries are compressible.
+
+  Views instances exist to allow multiple Carbon buffers to exist which can
+  show different directories. They are stored in a list local to this module
+  to allow them being referenced by index.
+
+  This is done to prevent confusion when moving the root directory of one view
+  instance to one which is already present in another view.
+
+  A view instance includes the following data structure:
+
+  `{`
+    `index = <number>,`
+    `initial = <string>,`
+    `states = <table<string, table<string>>>,`
+    `root = <entry>`
+  `}`
 
   `------------------------------------------------------------------------------`
   activate                                                  *carbon-view-activate*
 
-  Signature: `view.activate(`[{options}]`)`
+  Signature: `require('carbon.view').activate(`[{options}]`)`
 
   Shows a `view` for `path` given in {options} in the current window. If `sidebar`
   in {options} is set to `'right'` or `'left'` then a new sidebar explorer is opened
@@ -1245,15 +1267,15 @@ VIEW                                                                 *carbon-vie
   `------------------------------------------------------------------------------`
   current                                                    *carbon-view-current*
 
-  Signature: `view.current()`
+  Signature: `require('carbon.view').current()`
 
-  Returns the `view` for the current buffer if it is a Carbon explorer.
-  When the current buffer is not a Carbon explorer `false` is returned.
+  Returns the |carbon-view-instance| for the current buffer if it is a Carbon
+  explorer. When the current buffer is not a Carbon explorer `false` is returned.
 
   `------------------------------------------------------------------------------`
   execute                                                    *carbon-view-execute*
 
-  Signature: `view.execute(`{callback}`)`
+  Signature: `require('carbon.view').execute(`{callback}`)`
 
   Calls {callback} when the current active buffer is a Carbon buffer. Does
   nothing otherwise.
@@ -1262,13 +1284,13 @@ VIEW                                                                 *carbon-vie
 
   `{`
     `cursor =` |carbon-view-cursor|`,`
-    `view = `|carbon-view-current|`,`
+    `view = `|carbon-view-instance|`,`
   `}`
 
   `------------------------------------------------------------------------------`
   resync                                                      *carbon-view-resync*
 
-  Signature: `view.resync(`{path}`)`
+  Signature: `require('carbon.view').resync(`{path}`)`
 
   Stores {path} in `view.resync_paths` and defers synchronization by
   |carbon-setting-sync-delay| milliseconds. This is done to batch multiple
@@ -1278,9 +1300,36 @@ VIEW                                                                 *carbon-vie
   |carbon-setting-sync-delay| amount of time has passed without any modifications.
 
   `------------------------------------------------------------------------------`
+  close_sidebar                                        *carbon-view-close-sidebar*
+
+  Signature: `require('carbon.view').close_sidebar()`
+
+  Closes a sidebar Carbon explorer window.
+
+  `------------------------------------------------------------------------------`
+  close_float                                            *carbon-view-close-float*
+
+  Signature: `require('carbon.view').close_float()`
+
+  Closes a floating Carbon explorer window.
+
+  `------------------------------------------------------------------------------`
+  handle_sidebar_or_float                    *carbon-view-handle-sidebar-or-float*
+
+  Signature: `require('carbon.view').handle_sidebar_or_float()`
+
+  Executed before opening new files to handle sidebar/float mechanics i.e.
+  when |carbon-command-ToggleSidebarCarbon| is used to open a sidebar explorer and
+  a file is edited from there this function ensures that the buffer to the side
+  of the explorer is used to show the file. If such buffer does not exist it
+  creates it.
+
+  `------------------------------------------------------------------------------`
   expand_to_path                                      *carbon-view-expand-to-path*
 
   Signature: `view:expand_to_path(`{path}`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   Expands the Carbon buffer to reveal {path} in the tree. If {path} is not
   present within the root of the current `view` this will result in a no-op.
@@ -1302,6 +1351,8 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:get_path_attr(`{path}, {attr}`)`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Get {attr} for {path} in the current `view`. When {attr} is `'compressible'`
   and its value is `nil` then `true` is returned.
 
@@ -1310,12 +1361,16 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:set_path_attr(`{path}, {attr}`)`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Set {attr} for {path} in the current `view`.
 
   `------------------------------------------------------------------------------`
   buffers                                                    *carbon-view-buffers*
 
   Signature: `view:buffers()`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   Returns a list of buffers which belong to the current `view`. This is done using
   an internal `view.index` property which is stored in each buffer's `carbon`
@@ -1325,6 +1380,8 @@ VIEW                                                                 *carbon-vie
   buffer                                                      *carbon-view-buffer*
 
   Signature: `view:buffer()`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   Checks if a buffer for the current `view` already exists in
   |carbon-view-buffers| and returns it. Otherwise creates and configures a new
@@ -1351,13 +1408,17 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:update()`
 
-  Clears lines cached via |carbon-view-current-lines|. Does not automatically
-  rerender the buffer!
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
+  Clears lines of the current `view` cached via |carbon-view-current-lines|.
+  Does not automatically rerender the buffer!
 
   `------------------------------------------------------------------------------`
   render                                                      *carbon-view-render*
 
   Signature: `view:render()`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   Renders the Carbon buffer. The contents are determined by calling the
   |carbon-view-lines| method with the root entry object of the current `view` as
@@ -1377,6 +1438,8 @@ VIEW                                                                 *carbon-vie
   lines                                                        *carbon-view-lines*
 
   Signature: `view:lines(`{target}[, {lines}[, {depth}]]`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   The {entry} argument must be an entry object as returned by |carbon-entry-new|.
   The {lines} argument is optional. Defaults to an empty table `{}`. When {lines}
@@ -1453,13 +1516,17 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:current_lines()`
 
-  Returns cached lines generated from |carbon-view-lines| if present.
-  Otherwise |carbon-view-lines| is called and its results are cached.
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
+  Returns cached lines of the current `view` generated from |carbon-view-lines| if
+  present. Otherwise |carbon-view-lines| is called and its results are cached.
 
   `------------------------------------------------------------------------------`
   cursor                                                      *carbon-view-cursor*
 
   Signature: `view:cursor(`[{opts}]`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   Returns a table with the following shape:
 >
@@ -1498,6 +1565,8 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:show()`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Sets the following local options:
 
   - |wrap| to `false`
@@ -1511,6 +1580,8 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:hide()`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Resets the following local options to their global defaults:
 
   - |wrap|
@@ -1523,6 +1594,8 @@ VIEW                                                                 *carbon-vie
   create                                                      *carbon-view-create*
 
   Signature: `view:create()`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   When called, puts the Carbon buffer in a context-aware insert mode which
   allows a path to be typed. Pressing <cr> will confirm creation and pressing
@@ -1637,6 +1710,8 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:delete()`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Prompts confirmation to delete the current entry under the cursor.
   When the current entry is a regular file or executable the file itself will be
   removed. When it is a directory, the directory and all its contents will be
@@ -1698,6 +1773,8 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:move()`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Prompts the user for a new destination for the entry below the cursor.
   A [count] can be supplied to move starting from left to right on compressed
   paths. The [count] is clamped. If it exceeds the amount of "components" in the
@@ -1710,6 +1787,8 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:focus_flash(`{duration}, {group}, {start}, {finish}`)`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Highlights a region from {start} to {finish} with {group} for {duration}
   milliseconds. {start} and {finish} must be values accepted by
   |vim.highlight.range|.
@@ -1718,34 +1797,11 @@ VIEW                                                                 *carbon-vie
   highlighting properties when entries are revealed.
 
   `------------------------------------------------------------------------------`
-  close_sidebar                                        *carbon-view-close-sidebar*
-
-  Signature: `view.close_sidebar()`
-
-  Closes a sidebar Carbon explorer window.
-
-  `------------------------------------------------------------------------------`
-  close_float                                            *carbon-view-close-float*
-
-  Signature: `view.close_float()`
-
-  Closes a floating Carbon explorer window.
-
-  `------------------------------------------------------------------------------`
-  handle_sidebar_or_float                    *carbon-view-handle-sidebar-or-float*
-
-  Signature: `view.handle_sidebar_or_float()`
-
-  Executed before opening new files to handle sidebar/float mechanics i.e.
-  when |carbon-command-ToggleSidebarCarbon| is used to open a sidebar explorer and
-  a file is edited from there this function ensures that the buffer to the side
-  of the explorer is used to show the file. If such buffer does not exist it
-  creates it.
-
-  `------------------------------------------------------------------------------`
   set_root                                                  *carbon-view-set-root*
 
   Signature: `view:set_root(`{target}`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   The {new_root} argument can be an absolute path to a directory or a
   |carbon-entry-new| entry. When passed as an absolute path it is converted to
@@ -1760,6 +1816,8 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:cd(`{path}`)`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Set the root of the current `view` to specified {path}.
   When {path} is a parent of the current root directory of `view` then
   |carbon-view-up| is used. Otherwise the root directory is set directly via
@@ -1770,12 +1828,16 @@ VIEW                                                                 *carbon-vie
 
   Signature: `view:reset()`
 
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
   Reset the root of the current `view` to the directory it originally showed.
 
   `------------------------------------------------------------------------------`
   up                                                              *carbon-view-up*
 
   Signature: `view:up(`[{count}]`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   Set the root of the current `view` to its {count}th parent directory. When
   {count} is not supplied, it will use `vim.v.count1` which defaults to `1` or
@@ -1792,6 +1854,8 @@ VIEW                                                                 *carbon-vie
   down                                                          *carbon-view-down*
 
   Signature: `view:down(`{count}`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
 
   Set the root of the current `view` to its {count}th child directory below the
   cursor. When {count} is not supplied, it will use `vim.v.count1` which defaults
