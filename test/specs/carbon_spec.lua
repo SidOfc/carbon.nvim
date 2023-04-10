@@ -12,7 +12,7 @@ describe('carbon', function()
   before_each(function()
     carbon.explore()
     util.cursor(1, 1)
-    vim.cmd.only()
+    vim.cmd.only({ mods = { silent = true } })
   end)
 
   describe('autocommands', function()
@@ -166,7 +166,7 @@ describe('carbon', function()
       carbon.toggle_recursive()
       assert.is_false(helpers.is_open(assets_entry.path))
       assert.same(
-        { '+ doc/', '+ lua/' },
+        { '+ doc/', '+ lua/carbon/' },
         vim.api.nvim_buf_get_lines(0, 3, 5, true)
       )
     end)
@@ -322,18 +322,8 @@ describe('carbon', function()
       assert.equal(vim.loop.cwd(), string.format('%s/.github', original_cwd))
 
       carbon.reset()
+      assert.equal(vim.loop.cwd(), original_cwd)
       settings.sync_pwd = settings.defaults.sync_pwd
-    end)
-
-    it('releases registered listeners not in new cwd', function()
-      local original_listeners = watcher.registered()
-
-      util.cursor(2, 1)
-      carbon.down()
-
-      assert.not_same(original_listeners, watcher.registered())
-
-      carbon.reset()
     end)
   end)
 

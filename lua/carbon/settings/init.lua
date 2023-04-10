@@ -67,9 +67,9 @@ local defaults = {
   highlights = {
     CarbonDir = { link = 'Directory' },
     CarbonFile = { link = 'Text' },
-    CarbonExe = { link = 'NetrwExe' },
-    CarbonSymlink = { link = 'NetrwSymLink' },
-    CarbonBrokenSymlink = { link = 'ErrorMsg' },
+    CarbonExe = { link = '@function.builtin' },
+    CarbonSymlink = { link = '@include' },
+    CarbonBrokenSymlink = { link = 'DiagnosticError' },
     CarbonIndicator = { fg = 'Gray', ctermfg = 'DarkGray', bold = true },
     CarbonFloat = { bg = '#111111', ctermbg = 'black' },
     CarbonDanger = { link = 'Error' },

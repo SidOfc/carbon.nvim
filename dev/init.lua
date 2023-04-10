@@ -6,4 +6,4 @@ vim.opt.runtimepath:append({
   vim.env.HOME .. '/.local/share/nvim/site/pack/packer/start/nvim-web-devicons',
 })
 
-require('carbon').setup({ file_icons = false })
+require('carbon').setup({ file_icons = false, sync_pwd = true })

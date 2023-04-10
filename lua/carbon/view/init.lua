@@ -4,11 +4,11 @@ local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local constants = require('carbon.constants')
 local view = {}
-local views = {}
 
 view.__index = view
 view.sidebar = { origin = -1, target = -1 }
 view.float = { origin = -1, target = -1 }
+view.items = {}
 view.resync_paths = {}
 
 local function create_leave(ctx)
@@ -74,7 +74,7 @@ end
 
 function view.get(path)
   local resolved = util.resolve(path)
-  local found_view = util.tbl_find(views, function(target_view)
+  local found_view = util.tbl_find(view.items, function(target_view)
     return target_view.root.path == resolved
   end)
 
@@ -82,7 +82,7 @@ function view.get(path)
     return found_view
   end
 
-  local index = #views + 1
+  local index = #view.items + 1
   local instance = setmetatable({
     index = index,
     initial = resolved,
@@ -90,7 +90,7 @@ function view.get(path)
     root = entry.new(resolved),
   }, view)
 
-  views[index] = instance
+  view.items[index] = instance
 
   return instance
 end
@@ -197,7 +197,7 @@ function view.current()
   local bufnr = vim.api.nvim_get_current_buf()
   local ref = select(2, pcall(vim.api.nvim_buf_get_var, bufnr, 'carbon'))
 
-  return ref and views[ref.index] or false
+  return ref and view.items[ref.index] or false
 end
 
 function view.execute(callback)
@@ -216,7 +216,7 @@ function view.resync(path)
   end
 
   view.resync_timer = vim.defer_fn(function()
-    for _, current_view in ipairs(views) do
+    for _, current_view in ipairs(view.items) do
       current_view.root:synchronize(view.resync_paths)
       current_view:update()
       current_view:render()
@@ -507,6 +507,7 @@ function view:set_root(target)
   end
 
   self.root = target
+  vim.api.nvim_buf_set_name(self:buffer(), self.root.raw_path)
   vim.api.nvim_buf_set_var(
     self:buffer(),
     'carbon',
@@ -514,7 +515,9 @@ function view:set_root(target)
   )
 
   watcher.keep(function(path)
-    return vim.startswith(path, self.root.path)
+    return util.tbl_some(view.items, function(current_view)
+      return vim.startswith(path, current_view.root.path)
+    end)
   end)
 
   if settings.sync_pwd and is_cwd then
@@ -592,6 +595,8 @@ function view:lines(input_target, lines, depth)
         indicator = collapse_indicator
       elseif not is_empty then
         indicator = expand_indicator
+      else
+        indent = indent .. '  '
       end
     else
       indent = indent .. '  '
@@ -613,7 +618,6 @@ function view:lines(input_target, lines, depth)
       icon_highlight = info[2]
     end
 
-    local link_group
     local full_path = tmp.name .. path_suffix
     local indent_end = #indent
     local icon_width = #icon ~= 0 and #icon + 1 or 0
@@ -630,14 +634,6 @@ function view:lines(input_target, lines, depth)
       full_path = dir_path .. '/' .. full_path
     end
 
-    if tmp.is_symlink == 1 then
-      link_group = 'CarbonSymlink'
-    elseif tmp.is_symlink == 2 then
-      link_group = 'CarbonBrokenSymlink'
-    elseif tmp.is_executable then
-      link_group = 'CarbonExe'
-    end
-
     if indicator_width ~= 0 and not is_empty then
       hls[#hls + 1] =
         { 'CarbonIndicator', indent_end, indent_end + indicator_width }
@@ -648,15 +644,26 @@ function view:lines(input_target, lines, depth)
         { icon_highlight, indent_end + indicator_width, path_start - 1 }
     end
 
-    if tmp.is_directory then
-      hls[#hls + 1] = { link_group or 'CarbonDir', path_start, -1 }
-    elseif path[1] then
-      local dir_end = path_start + #dir_path + 1
+    local entries = { unpack(path) }
+    entries[#entries + 1] = tmp
 
-      hls[#hls + 1] = { link_group or 'CarbonDir', path_start, dir_end }
-      hls[#hls + 1] = { link_group or 'CarbonFile', dir_end, -1 }
-    else
-      hls[#hls + 1] = { link_group or 'CarbonFile', path_start, -1 }
+    for _, current_entry in ipairs(entries) do
+      local part = current_entry.name .. '/'
+      local path_end = path_start + #part
+      local highlight_group = 'CarbonFile'
+
+      if current_entry.is_symlink == 1 then
+        highlight_group = 'CarbonSymlink'
+      elseif current_entry.is_symlink == 2 then
+        highlight_group = 'CarbonBrokenSymlink'
+      elseif current_entry.is_directory then
+        highlight_group = 'CarbonDir'
+      elseif current_entry.is_executable then
+        highlight_group = 'CarbonExe'
+      end
+
+      hls[#hls + 1] = { highlight_group, path_start, path_end }
+      path_start = path_end
     end
 
     local line_prefix = indent

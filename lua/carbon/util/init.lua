@@ -3,9 +3,11 @@ local settings = require('carbon.settings')
 local util = {}
 
 function util.resolve(path)
-  local normalized = vim.fs.normalize(path)
-
-  return string.gsub(vim.fn.fnamemodify(normalized, ':p'), '/+$', '')
+  return string.gsub(
+    vim.fn.fnamemodify(vim.fs.normalize(path), ':p'),
+    '/+$',
+    ''
+  )
 end
 
 function util.is_excluded(path)
@@ -38,6 +40,16 @@ function util.tbl_key(tbl, item)
       return key
     end
   end
+end
+
+function util.tbl_some(tbl, callback)
+  for key, value in pairs(tbl) do
+    if callback(value, key) then
+      return true
+    end
+  end
+
+  return false
 end
 
 function util.tbl_find(tbl, callback)
@@ -205,7 +217,7 @@ function util.create_scratch_buf(options)
   }, util.tbl_except(options, { 'name', 'lines', 'mappings', 'autocmds' }))
 
   if options.name then
-    vim.api.nvim_buf_set_name(buf, options.name)
+    vim.api.nvim_buf_set_name(buf, options.name == '' and '/' or options.name)
   end
 
   if options.lines then
