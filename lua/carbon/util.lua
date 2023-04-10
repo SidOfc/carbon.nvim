@@ -278,11 +278,13 @@ function util.window_neighbors(window_id, sides)
     local side_id = vim.api.nvim_get_current_win()
     local result_id = window_id ~= side_id and side_id or nil
 
-    result[#result + 1] = {
-      origin = window_id,
-      position = side,
-      target = result_id,
-    }
+    if result_id then
+      result[#result + 1] = {
+        origin = window_id,
+        position = side,
+        target = result_id,
+      }
+    end
   end
 
   vim.api.nvim_set_current_win(original_window)

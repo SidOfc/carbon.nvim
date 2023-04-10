@@ -110,14 +110,19 @@ function view.activate(options_param)
     if vim.api.nvim_win_is_valid(view.sidebar.origin) then
       vim.api.nvim_set_current_win(view.sidebar.origin)
     else
-      local split = options.sidebar == 'right' and 'rightbelow' or 'leftabove'
+      local split = options.sidebar == 'right' and 'botright' or 'topleft'
+      local target_side = options.sidebar == 'right' and 'left' or 'right'
 
       vim.cmd.split({ mods = { vertical = true, split = split } })
 
+      local origin_id = vim.api.nvim_get_current_win()
+      local neighbor = util.window_neighbors(origin_id, { target_side })[1]
+      local target = neighbor and neighbor.target or original_window
+
       view.sidebar = {
         position = options.sidebar,
-        origin = vim.api.nvim_get_current_win(),
-        target = original_window,
+        origin = origin_id,
+        target = target,
       }
     end
 
@@ -168,13 +173,20 @@ function view.handle_sidebar_or_float()
     if vim.api.nvim_win_is_valid(view.sidebar.target) then
       vim.api.nvim_set_current_win(view.sidebar.target)
     else
-      local split = view.sidebar.position == 'right' and 'aboveleft'
-        or 'belowright'
+      local split = view.sidebar.position == 'right' and 'topleft' or 'botright'
+      local target_side = view.sidebar.position == 'right' and 'left' or 'right'
+      local neighbor =
+        util.window_neighbors(view.sidebar.origin, { target_side })[1]
 
-      vim.cmd.split({ mods = { vertical = true, split = split } })
+      if neighbor then
+        view.sidebar.target = neighbor.target
+        vim.api.nvim_set_current_win(neighbor.target)
+      else
+        vim.cmd.split({ mods = { vertical = true, split = split } })
 
-      view.sidebar.target = vim.api.nvim_get_current_win()
-      vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
+        view.sidebar.target = vim.api.nvim_get_current_win()
+        vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
+      end
     end
   elseif current_window == view.float.origin then
     view.close_float()

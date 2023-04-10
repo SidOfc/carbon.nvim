@@ -40,6 +40,7 @@ function carbon.setup(user_settings)
     util.command('ToggleSidebarCarbon', carbon.toggle_sidebar, command_opts)
 
     util.autocmd('SessionLoadPost', carbon.session_load_post, { pattern = '*' })
+    util.autocmd('WinResized', carbon.win_resized, { pattern = '*' })
 
     if settings.open_on_dir then
       util.autocmd('BufWinEnter', carbon.explore_buf_dir, { pattern = '*' })
@@ -81,6 +82,16 @@ function carbon.setup(user_settings)
     end
 
     vim.g.carbon_initialized = true
+  end
+end
+
+function carbon.win_resized()
+  if vim.api.nvim_win_is_valid(view.sidebar.origin) then
+    local window_width = vim.api.nvim_win_get_width(view.sidebar.origin)
+
+    if window_width ~= settings.sidebar_width then
+      vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
+    end
   end
 end
 

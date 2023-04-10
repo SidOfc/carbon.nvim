@@ -428,6 +428,14 @@ CARBON                                                             *carbon-carbo
   If {params} is not passed or does not contain a `file` key, nothing is executed.
 
   `------------------------------------------------------------------------------`
+  win_resized                                          *carbon-carbon-win-resized*
+
+  Signature: `require('carbon').win_resized()`
+
+  Resizes the sidebar to |carbon-setting-sidebar-width| after a |WinResized|
+  event has occurred. When no sidebar is present this method does nothing.
+
+  `------------------------------------------------------------------------------`
   session_load_post                              *carbon-carbon-session-load-post*
 
   Signature: `require('carbon').session_load_post()`
