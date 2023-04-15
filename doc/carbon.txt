@@ -30,7 +30,17 @@ TABLE OF CONTENTS                                     *carbon-contents* *carbon-
 ================================================================================
 USAGE                                                               *carbon-usage*
 
-  Carbon automatically replaces |netrw| and remaps NetRW's |Explore| and |Lexplore|
+  In your |$MYVIMRC| file, run `require('carbon').setup()` to initialize Carbon.
+
+  Depending on your plugin manager you may need to call this `setup` function
+  in a specific place or in a specific way. If you use any package manager
+  please consult its documentation to find out where `setup` functions may be run.
+
+  When using regular Vim |packages| this `setup` function can simply be run
+  directly anywhere in your |$MYVIMRC| file since such packages are
+  automatically loaded.
+
+  Carbon replaces |netrw| by default and remaps NetRW's |Explore| and |Lexplore|
   commands to Carbon's |carbon-command-Carbon| and |carbon-command-Lcarbon| commands
   respectively. For more specific usage and configuration information, see:
 
@@ -42,7 +52,7 @@ USAGE                                                               *carbon-usag
 ================================================================================
 SETUP                                                               *carbon-setup*
 
-  The behavior of this plugin can be customized by calling
+  The behavior of this plugin can be customized by providing settings to
   `require('carbon').setup` in your |$MYVIMRC| like this:
 
   init.lua: >
@@ -411,8 +421,7 @@ CARBON                                                             *carbon-carbo
   It also attaches a callback to the watcher to enable auto-refreshing the
   buffer when file system events occur.
 
-  This method should be called only once per Neovim instance and must be called
-  before any buffer is created otherwise such buffer will not function properly.
+  This method must be called within your init.vim / init.lua configuration.
 
   `------------------------------------------------------------------------------`
   explore_buf_dir                                  *carbon-carbon-explore-buf-dir*

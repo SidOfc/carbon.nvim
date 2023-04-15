@@ -44,46 +44,29 @@ Install on Nightly Neovim (0.8.0+) using your favorite plugin manager:
 | **[dein.vim](https://github.com/Shougo/dein.vim)**           | `call dein#add('SidOfc/carbon.nvim')`   |
 | **[minpac](https://github.com/k-takata/minpac)**             | `call minpac#add('SidOfc/carbon.nvim')` |
 | **[packer.nvim](https://github.com/wbthomason/packer.nvim)** | `use 'SidOfc/carbon.nvim'`              |
-| **[paq-nvim](https://github.com/savq/paq-nvim)**             | `{ 'SidOfc/carbon.nvim', }`             |
+| **[paq-nvim](https://github.com/savq/paq-nvim)**             | `{ 'SidOfc/carbon.nvim' }`              |
 | **[lazy.nvim](https://github.com/folke/lazy.nvim)**          | `{ 'SidOfc/carbon.nvim' }`              |
 
-# Configuration
+# Usage and configuration
+
+Depending on whether you use native vim packages or a plugin manager
+the way Carbon is set up will be slightly different. The most important
+part is that Carbon's `setup` method **must** be called somewhere in your
+`init.lua` / `init.vim` to initialize and use Carbon. It can be called like this:
+
+```lua
+require('carbon').setup()
+```
 
 Configuration can be supplied like this:
 
-**init.vim**
-
-```viml
-lua << EOF
-  require('carbon').setup({
-    setting = 'value',
-  })
-EOF
-```
-
-**init.lua**
-
 ```lua
-require('carbon').setup({
-  setting = 'value',
-})
+require('carbon').setup({ setting = 'value' })
 ```
 
 These settings will be deep merged with the default settings. See
 `:h carbon-settings-table` for a list of available settings. An
 alternative option of calling this method also exists:
-
-**init.vim**
-
-```viml
-lua << EOF
-  require('carbon').setup(function(settings)
-    settings.setting = 'value'
-  end)
-EOF
-```
-
-**init.lua**
 
 ```lua
 require('carbon').setup(function(settings)
@@ -96,12 +79,6 @@ You are free to modify them as you wish, no merging will occur.
 
 See `:h carbon-setup` for a more detailed explanation on configuration.
 See `:h carbon-carbon-setup` for documentation about the `.setup` method.
-
-# Usage
-
-After installation, Carbon will launch automatically and disable NetRW.
-These behaviors and many others can be customized, see `:h carbon-settings` for
-more information about customization or `:h carbon-toc` for a table of contents.
 
 Carbon comes with a few commands and mappings out of the box, each is described below:
 
