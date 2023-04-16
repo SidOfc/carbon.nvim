@@ -442,29 +442,15 @@ function view:show()
 end
 
 function view:up(count)
-  local rerender = false
-  local remaining = count or vim.v.count1
+  local parents = self:parents(count)
 
-  while remaining > 0 do
-    remaining = remaining - 1
-    local new_root = entry.new(vim.fn.fnamemodify(self.root.path, ':h'))
 
-    if new_root.path ~= self.root.path then
-      rerender = true
-
-      new_root:set_children(vim.tbl_map(function(child)
-        if child.path == self.root.path then
-          self:set_path_attr(child.path, 'open', true)
-        end
-
-        return child
-      end, new_root:get_children()))
-
-      self:set_root(new_root)
-    end
+  for idx, parent_entry in ipairs(parents) do
+    self:set_path_attr(self.root.path, 'open', true)
+    self:set_root(parent_entry, { rename = idx == #parents })
   end
 
-  return rerender
+  return #parents ~= 0
 end
 
 function view:reset()
@@ -910,6 +896,24 @@ function view:move()
     vim.fn.rename(tmp_path, updated_path)
     view.resync(vim.fn.fnamemodify(ctx.target.path, ':h'))
   end
+end
+
+function view:parents(count)
+  local path = self.root.path
+  local parents = {}
+
+  if path ~= '' then
+    for _ = count or vim.v.count1, 1, -1 do
+      path = vim.fn.fnamemodify(path, ':h')
+      parents[#parents + 1] = entry.new(path)
+
+      if path == '/' then
+        break
+      end
+    end
+  end
+
+  return parents
 end
 
 return view

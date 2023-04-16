@@ -1941,6 +1941,29 @@ VIEW                                                                 *carbon-vie
   Returns `true` when the root is replaced, `nil` when the `new_root` path is the
   same as the current `data.root` path in which case the root is not replaced.
 
+  `------------------------------------------------------------------------------`
+  parents                                                    *carbon-view-parents*
+
+  Signature: `view:parents(`[{count}]`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
+  Returns a table of parent entries (|carbon-entry-new|) sorted from nearest to
+  farthest i.e. given a view whose root is `/a/b/c/d` and {count} set to `4` this
+  function returns:
+
+  `{`
+    `<entry root.path = '/a/b/c'>,`
+    `<entry root.path = '/a/b'>,`
+    `<entry root.path = '/a'>,`
+    `<entry root.path = ''>,`
+  `}`
+
+  An empty table is returned when there are no parents. If {count} is not
+  supplied it will default to `1` and result in either a table with a single
+  parent entry, or an empty table if there are no parents (i.e. the root
+  directory of the operating system).
+
 ================================================================================
 WATCHER                                                           *carbon-watcher*
 
