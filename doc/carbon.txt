@@ -1842,17 +1842,20 @@ VIEW                                                                 *carbon-vie
   `------------------------------------------------------------------------------`
   set_root                                                  *carbon-view-set-root*
 
-  Signature: `view:set_root(`{target}`)`
+  Signature: `view:set_root(`{target}[, {opts}]`)`
 
   The variable `view` in this section refers to a |carbon-view-instance|.
 
-  The {new_root} argument can be an absolute path to a directory or a
+  The {target} argument can be an absolute path to a directory or a
   |carbon-entry-new| entry. When passed as an absolute path it is converted to
   an entry. The root of the current `view` is then set to this entry.
 
   When |carbon-setting-sync-pwd| is enabled Neovim's |pwd| is updated automatically.
   This is only done when the original root directory matches the current
   working directory.
+
+  The |carbon-view-buffer| name will be set to the new root of the `view`
+  unless {opts} is given and `opts.rename` is set to `false`.
 
   `------------------------------------------------------------------------------`
   cd                                                              *carbon-view-cd*

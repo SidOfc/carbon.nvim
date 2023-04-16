@@ -501,7 +501,8 @@ function view:down(count)
   end
 end
 
-function view:set_root(target)
+function view:set_root(target, options_param)
+  local options = options_param or {}
   local is_cwd = self.root.path == vim.loop.cwd()
 
   if type(target) == 'string' then
@@ -513,7 +514,11 @@ function view:set_root(target)
   end
 
   self.root = target
-  vim.api.nvim_buf_set_name(self:buffer(), self.root.raw_path)
+
+  if options.rename ~= false then
+    vim.api.nvim_buf_set_name(self:buffer(), self.root.raw_path)
+  end
+
   vim.api.nvim_buf_set_var(
     self:buffer(),
     'carbon',
