@@ -443,7 +443,11 @@ end
 
 function view:up(count)
   local parents = self:parents(count)
+  local destination = parents[#parents]
 
+  if destination and self:switch_to_existing_view(destination.path) then
+    return true
+  end
 
   for idx, parent_entry in ipairs(parents) do
     self:set_path_attr(self.root.path, 'open', true)
@@ -467,6 +471,8 @@ function view:cd(path)
     if current_depth - new_depth > 0 then
       return self:up(current_depth - new_depth)
     end
+  elseif self:switch_to_existing_view(path) then
+    return true
   else
     return self:set_root(entry.find(path) or entry.new(path))
   end
@@ -480,7 +486,13 @@ function view:down(count)
     new_root = new_root.parent
   end
 
-  if new_root.path ~= self.root.path then
+  if not new_root or new_root.path == self.root.path then
+    return false
+  end
+
+  if self:switch_to_existing_view(new_root.path) then
+    return true
+  else
     self:set_path_attr(self.root.path, 'open', true)
 
     return self:set_root(new_root)
@@ -914,6 +926,20 @@ function view:parents(count)
   end
 
   return parents
+end
+
+function view:switch_to_existing_view(path)
+  local destination_view = view.find(path)
+
+  if destination_view then
+    vim.api.nvim_win_set_buf(0, destination_view:buffer())
+
+    if settings.sync_pwd and self.root.path == vim.loop.cwd() then
+      vim.api.nvim_set_current_dir(destination_view.root.path)
+    end
+
+    return true
+  end
 end
 
 return view

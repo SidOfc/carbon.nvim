@@ -1964,6 +1964,20 @@ VIEW                                                                 *carbon-vie
   parent entry, or an empty table if there are no parents (i.e. the root
   directory of the operating system).
 
+  `------------------------------------------------------------------------------`
+  switch_to_existing_view                    *carbon-view-switch-to-existing-view*
+
+  Signature: `view:switch_to_existing_view(`{path}`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
+  If an existing `view` instance exists which has its root set to {path} the
+  current window will have its current buffer replaced for the buffer
+  belonging to that existing view.
+
+  Additionally, if the current `view` (before switching) root equals |uv.cwd()| and
+  |carbon-setting-sync-pwd| is set then the cwd of Neovim is updated as well.
+
 ================================================================================
 WATCHER                                                           *carbon-watcher*
 
