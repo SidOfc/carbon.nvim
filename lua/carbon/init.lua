@@ -233,11 +233,8 @@ end
 
 function carbon.explore(options_param)
   local options = options_param or {}
-  local path = options.fargs and string.gsub(options.fargs[1] or '', '%s', '')
-
-  if path == '' then
-    path = vim.loop.cwd()
-  end
+  local path =
+    util.explore_path(options.fargs and options.fargs[1] or '', view.current())
 
   view.activate({ path = path, reveal = options.bang })
 end
@@ -264,12 +261,9 @@ end
 
 function carbon.explore_sidebar(options_param)
   local options = options_param or {}
-  local path = options.fargs and string.gsub(options.fargs[1] or '', '%s', '')
   local sidebar = options.sidebar or settings.sidebar_position
-
-  if path == '' then
-    path = vim.loop.cwd()
-  end
+  local path =
+    util.explore_path(options.fargs and options.fargs[1] or '', view.current())
 
   view.activate({ path = path, reveal = options.bang, sidebar = sidebar })
 end
@@ -296,11 +290,8 @@ end
 
 function carbon.explore_float(options_param)
   local options = options_param or {}
-  local path = options.fargs and string.gsub(options.fargs[1] or '', '%s', '')
-
-  if path == '' then
-    path = vim.loop.cwd()
-  end
+  local path =
+    util.explore_path(options.fargs and options.fargs[1] or '', view.current())
 
   view.activate({ path = path, reveal = options.bang, float = true })
 end

@@ -666,6 +666,24 @@ UTIL                                                                 *carbon-uti
   external to Carbon.
 
   `------------------------------------------------------------------------------`
+  explore_path                                          *carbon-util-explore-path*
+
+  Signature: `require('carbon.util').explore_path(`{path}[, {view}]`)`
+
+  Converts {path} to an absolute path. When {view} (|carbon-view-instance|) is
+  given its `root.path` will be used as a base instead of |uv.cwd()| when {path} is
+  relative.
+
+  If the current view or current working directory is `/example/directory`
+  and this function is called with `../` then the result will be `/example`.
+  For `../other/directory` the result will be `/example/other/directory`.
+
+  When {path} starts with a `/` an absolute path is assumed. In this case no
+  base path will be prepended.
+
+  When {path} is an empty string, it will default to |uv.cwd()|.
+
+  `------------------------------------------------------------------------------`
   is_excluded                                            *carbon-util-is-excluded*
 
   Signature: `require('carbon.util').is_excluded(`{path}`)`

@@ -2,6 +2,28 @@ local constants = require('carbon.constants')
 local settings = require('carbon.settings')
 local util = {}
 
+function util.explore_path(path, current_view)
+  path = string.gsub(path, '%s', '')
+
+  if path == '' then
+    path = vim.loop.cwd()
+  end
+
+  if not vim.startswith(path, '/') then
+    local base_path = current_view and current_view.root.path or vim.loop.cwd()
+
+    path = string.format('%s/%s', base_path, path)
+  end
+
+  path = string.gsub(
+    vim.fn.fnamemodify(string.gsub(path, '/+$', '') .. '/', ':p'),
+    '/+$',
+    ''
+  )
+
+  return path
+end
+
 function util.resolve(path)
   return string.gsub(
     vim.fn.fnamemodify(vim.fs.normalize(path), ':p'),
