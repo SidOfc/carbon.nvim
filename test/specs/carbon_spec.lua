@@ -353,7 +353,7 @@ describe('carbon', function()
   end)
 
   describe('create', function()
-    it('calls buffer.create', function()
+    it('calls view.create', function()
       local view_create = spy.on(view, 'create')
 
       carbon.create()
@@ -364,7 +364,7 @@ describe('carbon', function()
   end)
 
   describe('delete', function()
-    it('calls buffer.delete', function()
+    it('calls view.delete', function()
       local view_delete = spy.on(view, 'delete')
 
       carbon.delete()
@@ -375,7 +375,7 @@ describe('carbon', function()
   end)
 
   describe('move', function()
-    it('calls buffer.move', function()
+    it('calls view.move', function()
       local view_move = spy.on(view, 'move')
 
       carbon.move()
