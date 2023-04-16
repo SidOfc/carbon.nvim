@@ -281,21 +281,6 @@ describe('carbon', function()
 
       assert.not_same(original_listeners, watcher.registered())
     end)
-
-    it('automatically opens previous cwd', function()
-      util.cursor(1, 1)
-
-      assert.is_equal('carbon.explorer', vim.bo.filetype)
-
-      view.execute(function(ctx)
-        local root = ctx.view.root
-
-        carbon.up()
-        assert.is_true(ctx.view:get_path_attr(root.path, 'open'))
-      end)
-
-      carbon.reset()
-    end)
   end)
 
   describe('reset', function()

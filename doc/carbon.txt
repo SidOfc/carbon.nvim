@@ -1893,6 +1893,24 @@ VIEW                                                                 *carbon-vie
   Returns `true` if the root is replaced at least once. `nil` otherwise. This
   can happen when you are at your OS root directory and try to go up more.
 
+  This method also tries to open the intermediate parent directories while
+  navigating to the desired location.
+
+  This is not always possible to enfore because Carbon can have multiple views
+  representing different directories and the name of Carbon `view` buffers will
+  be the absolute path to these directories.
+
+  This causes issues when trying to navigate to a path for which a `view`
+  already exists, because Carbon will rename the buffer to match its current
+  root path which will yield |E95|.
+
+  To solve this Carbon checks if a `view` for the desired destination exists.
+  If this is the case, then Carbon skips traversing and opening parent
+  directories and will instead show the existing view directly.
+
+  In doing this, Carbon will no longer expand intermediate parents between the
+  original `view` root and the destination `view` root.
+
   `------------------------------------------------------------------------------`
   down                                                          *carbon-view-down*
 
