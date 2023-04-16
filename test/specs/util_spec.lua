@@ -1,10 +1,29 @@
 require('test.config.assertions')
 
 local spy = require('luassert.spy')
+local view = require('carbon.view')
 local util = require('carbon.util')
 local helpers = require('test.config.helpers')
 
 describe('carbon.util', function()
+  describe('explore_path', function()
+    it('{path} is expanded to an absolute path', function()
+      local cwd = vim.loop.cwd()
+      local parent = vim.fn.fnamemodify(cwd, ':h')
+
+      assert.equal(parent, util.explore_path('../'))
+      assert.equal(parent, util.explore_path('..'))
+    end)
+
+    it('{path} is expanded relative to {current_view}', function()
+      local current_view = view.get(vim.fn.tempname())
+      local parent = vim.fn.fnamemodify(current_view.root.path, ':h')
+
+      assert.equal(parent, util.explore_path('../', current_view))
+      assert.equal(parent, util.explore_path('..', current_view))
+    end)
+  end)
+
   describe('cursor', function()
     it('{lnum} and {col} are both 1-based', function()
       util.cursor(2, 2)

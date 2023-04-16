@@ -15,13 +15,7 @@ function util.explore_path(path, current_view)
     path = string.format('%s/%s', base_path, path)
   end
 
-  path = string.gsub(
-    vim.fn.fnamemodify(string.gsub(path, '/+$', '') .. '/', ':p'),
-    '/+$',
-    ''
-  )
-
-  return path
+  return string.gsub(vim.fn.simplify(path), '/+$', '')
 end
 
 function util.resolve(path)
