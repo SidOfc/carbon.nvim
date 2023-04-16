@@ -1917,7 +1917,7 @@ VIEW                                                                 *carbon-vie
   `------------------------------------------------------------------------------`
   down                                                          *carbon-view-down*
 
-  Signature: `view:down(`{count}`)`
+  Signature: `view:down(`[{count}]`)`
 
   The variable `view` in this section refers to a |carbon-view-instance|.
 
