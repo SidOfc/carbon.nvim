@@ -72,17 +72,23 @@ function view.file_icons()
   end
 end
 
-function view.get(path)
+function view.find(path)
   local resolved = util.resolve(path)
-  local found_view = util.tbl_find(view.items, function(target_view)
+
+  return util.tbl_find(view.items, function(target_view)
     return target_view.root.path == resolved
   end)
+end
+
+function view.get(path)
+  local found_view = view.find(path)
 
   if found_view then
     return found_view
   end
 
   local index = #view.items + 1
+  local resolved = util.resolve(path)
   local instance = setmetatable({
     index = index,
     initial = resolved,

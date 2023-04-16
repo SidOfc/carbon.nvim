@@ -1260,12 +1260,20 @@ VIEW                                                                 *carbon-vie
   synchronized with changes from the file system.
 
   `------------------------------------------------------------------------------`
+  find                                                          *carbon-view-find*
+
+  Signature: `require('carbon.view').find(`{path}`)`
+
+  Returns an existing `view` (|carbon-view-instance|) for given {path} or `nil` if no
+  instance for {path} exists.
+
+  `------------------------------------------------------------------------------`
   get                                                            *carbon-view-get*
 
   Signature: `require('carbon.view').get(`{path}`)`
 
-  Returns an existing `view` for given {path}. Otherwise a new `view` instance is
-  created and returned.
+  Returns an existing `view` (|carbon-view-instance|) for given {path}. Otherwise a
+  new `view` instance is created and returned.
 
                                                             *carbon-view-instance*
 
