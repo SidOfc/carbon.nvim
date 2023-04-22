@@ -1,8 +1,8 @@
 local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local entry = {}
-local data = { children = {}, open = {}, compressible = {} }
 
+entry.items = {}
 entry.__index = entry
 entry.__lt = function(a, b)
   if a.is_directory and b.is_directory then
@@ -17,14 +17,15 @@ entry.__lt = function(a, b)
 end
 
 function entry.new(path, parent)
-  local clean = string.gsub(path, '/+$', '')
-  local lstat = select(2, pcall(vim.loop.fs_lstat, clean)) or {}
+  local raw_path = path == '' and '/' or path
+  local clean = string.gsub(raw_path, '/+$', '')
+  local lstat = select(2, pcall(vim.loop.fs_lstat, raw_path)) or {}
   local is_executable = lstat.mode == 33261
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
   if is_symlink then
-    local stat = select(2, pcall(vim.loop.fs_stat, clean))
+    local stat = select(2, pcall(vim.loop.fs_stat, raw_path))
 
     if stat then
       is_executable = lstat.mode == 33261
@@ -36,6 +37,7 @@ function entry.new(path, parent)
   end
 
   return setmetatable({
+    raw_path = raw_path,
     path = clean,
     name = vim.fn.fnamemodify(clean, ':t'),
     parent = parent,
@@ -46,7 +48,7 @@ function entry.new(path, parent)
 end
 
 function entry.find(path)
-  for _, children in pairs(data.children) do
+  for _, children in pairs(entry.items) do
     for _, child in ipairs(children) do
       if child.path == path then
         return child
@@ -63,10 +65,12 @@ function entry:synchronize(paths)
   paths = paths or {}
 
   if paths[self.path] then
+    paths[self.path] = nil
+
     local all_paths = {}
     local current_paths = {}
     local previous_paths = {}
-    local previous_children = data.children[self.path] or {}
+    local previous_children = entry.items[self.path] or {}
 
     self:set_children(nil)
 
@@ -86,7 +90,6 @@ function entry:synchronize(paths)
 
       if previous and current then
         if current.is_directory then
-          current:set_open(previous:is_open())
           current:synchronize(paths)
         end
       elseif previous then
@@ -116,33 +119,8 @@ function entry:terminate()
   if self.parent and self.parent:has_children() then
     self.parent:set_children(vim.tbl_filter(function(sibling)
       return sibling.path ~= self.path
-    end, data.children[self.parent.path]))
+    end, entry.items[self.parent.path]))
   end
-end
-
-function entry:set_compressible(value)
-  data.compressible[self.path] = value
-end
-
-function entry:is_compressible()
-  return data.compressible[self.path] == nil and true
-    or data.compressible[self.path]
-end
-
-function entry:set_open(value, recursive)
-  if self.is_directory then
-    data.open[self.path] = value
-
-    if recursive and self:has_children() then
-      for _, child in ipairs(self:children()) do
-        child:set_open(value, recursive)
-      end
-    end
-  end
-end
-
-function entry:is_open()
-  return data.open[self.path] and true or false
 end
 
 function entry:children()
@@ -150,20 +128,20 @@ function entry:children()
     self:set_children(self:get_children())
   end
 
-  return data.children[self.path] or {}
+  return entry.items[self.path] or {}
 end
 
 function entry:has_children()
-  return data.children[self.path] and true or false
+  return entry.items[self.path] and true or false
 end
 
 function entry:set_children(children)
-  data.children[self.path] = children
+  entry.items[self.path] = children
 end
 
 function entry:get_children()
   local entries = {}
-  local handle = vim.loop.fs_scandir(self.path)
+  local handle = vim.loop.fs_scandir(self.raw_path)
 
   if type(handle) == 'userdata' then
     local function iterator()
@@ -183,6 +161,20 @@ function entry:get_children()
   end
 
   return entries
+end
+
+function entry:highlight_group()
+  if self.is_symlink == 1 then
+    return 'CarbonSymlink'
+  elseif self.is_symlink == 2 then
+    return 'CarbonBrokenSymlink'
+  elseif self.is_directory then
+    return 'CarbonDir'
+  elseif self.is_executable then
+    return 'CarbonExe'
+  else
+    return 'CarbonFile'
+  end
 end
 
 return entry

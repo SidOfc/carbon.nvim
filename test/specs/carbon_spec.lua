@@ -3,7 +3,7 @@ require('test.config.assertions')
 local spy = require('luassert.spy')
 local util = require('carbon.util')
 local carbon = require('carbon')
-local buffer = require('carbon.buffer')
+local view = require('carbon.view')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local helpers = require('test.config.helpers')
@@ -12,17 +12,11 @@ describe('carbon', function()
   before_each(function()
     carbon.explore()
     util.cursor(1, 1)
-    vim.cmd.only()
+    vim.cmd.only({ mods = { silent = true } })
   end)
 
   describe('autocommands', function()
     describe('DirChanged', function()
-      it('exists', function()
-        local autocmd = helpers.autocmd('DirChanged')
-
-        assert.is_number(autocmd.id)
-      end)
-
       it('is not buffer local', function()
         local autocmd = helpers.autocmd('DirChanged')
 
@@ -37,26 +31,23 @@ describe('carbon', function()
     end)
 
     describe('BufWinEnter', function()
-      it('exists', function()
-        local autocmd = helpers.autocmd('BufWinEnter')
-
-        assert.is_number(autocmd.id)
-      end)
-
-      it('is buffer local', function()
-        local autocmd = helpers.autocmd('BufWinEnter')
+      it('has buffer local event', function()
+        local autocmd = helpers.autocmd(
+          'BufWinEnter',
+          { buffer = vim.api.nvim_get_current_buf() }
+        )
 
         assert.is_true(autocmd.buflocal)
+      end)
+
+      it('has a global event', function()
+        local autocmd = helpers.autocmd('BufWinEnter')
+
+        assert.is_false(autocmd.buflocal)
       end)
     end)
 
     describe('BufHidden', function()
-      it('exists', function()
-        local autocmd = helpers.autocmd('BufHidden')
-
-        assert.is_number(autocmd.id)
-      end)
-
       it('is buffer local', function()
         local autocmd = helpers.autocmd('BufHidden')
 
@@ -100,49 +91,61 @@ describe('carbon', function()
       util.cursor(4, 1)
       carbon.edit()
 
-      assert.is_true(doc_entry:is_open())
+      view.execute(function(ctx)
+        assert.is_true(ctx.view:get_path_attr(doc_entry.path, 'open'))
+      end)
 
       carbon.edit()
-      assert.is_false(doc_entry:is_open())
+      view.execute(function(ctx)
+        assert.is_false(ctx.view:get_path_attr(doc_entry.path, 'open'))
+      end)
     end)
 
     it('edits file when on file', function()
-      assert.equal('carbon', vim.fn.bufname())
+      assert.equal('carbon.explorer', vim.bo.filetype)
 
       util.cursor(12, 1)
       carbon.edit()
 
-      assert.not_equal('carbon', vim.fn.bufname())
+      assert.not_equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
   describe('split', function()
     it('open file in horizontal split', function()
-      assert.equal('carbon', vim.fn.bufname())
+      assert.equal('carbon.explorer', vim.bo.filetype)
 
-      util.cursor(3, 1)
+      local file_line = helpers.line_with_file()
+
+      assert.not_nil(file_line)
+
+      util.cursor(file_line.lnum, 1)
       carbon.split()
 
-      assert.not_equal('carbon', vim.fn.bufname())
+      assert.not_equal('carbon.explorer', vim.bo.filetype)
 
       vim.cmd.wincmd('j')
 
-      assert.equal('carbon', vim.fn.bufname())
+      assert.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
   describe('vsplit', function()
     it('open file in vertical split', function()
-      assert.equal('carbon', vim.fn.bufname())
+      assert.equal('carbon.explorer', vim.bo.filetype)
 
-      util.cursor(3, 1)
+      local file_line = helpers.line_with_file()
+
+      assert.not_nil(file_line)
+
+      util.cursor(file_line.lnum, 1)
       carbon.vsplit()
 
-      assert.not_equal('carbon', vim.fn.bufname())
+      assert.not_equal('carbon.explorer', vim.bo.filetype)
 
       vim.cmd.wincmd('l')
 
-      assert.equal('carbon', vim.fn.bufname())
+      assert.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
@@ -154,16 +157,16 @@ describe('carbon', function()
       assert.not_nil(assets_entry)
 
       carbon.toggle_recursive()
-      assert.is_true(assets_entry:is_open())
+      assert.is_true(helpers.is_open(assets_entry.path))
       assert.same(
         { '- doc/', '  - assets/' },
         vim.api.nvim_buf_get_lines(0, 3, 5, true)
       )
 
       carbon.toggle_recursive()
-      assert.is_false(assets_entry:is_open())
+      assert.is_false(helpers.is_open(assets_entry.path))
       assert.same(
-        { '+ doc/', '+ lua/' },
+        { '+ doc/', '+ lua/carbon/' },
         vim.api.nvim_buf_get_lines(0, 3, 5, true)
       )
     end)
@@ -171,23 +174,27 @@ describe('carbon', function()
 
   describe('close_parent', function()
     it('closes parent of cursor entry and moves cursor', function()
-      util.cursor(7, 1)
+      util.cursor(6, 1)
       carbon.edit()
-      util.cursor(9, 1)
+      util.cursor(8, 1)
       carbon.close_parent()
 
-      assert.equal(7, vim.fn.line('.'))
+      assert.equal(6, vim.fn.line('.'))
       assert.equal(3, vim.fn.col('.'))
     end)
   end)
 
   describe('explore', function()
     it('shows the buffer', function()
-      util.cursor(12, 1)
+      local file_line = helpers.line_with_file()
+
+      assert.not_nil(file_line)
+
+      util.cursor(file_line.lnum, 1)
       carbon.edit()
       carbon.explore()
 
-      assert.equal('carbon', vim.fn.bufname())
+      assert.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
@@ -274,20 +281,6 @@ describe('carbon', function()
 
       assert.not_same(original_listeners, watcher.registered())
     end)
-
-    it('automatically opens previous cwd', function()
-      util.cursor(1, 1)
-
-      assert.is_equal('carbon', vim.fn.bufname())
-
-      local root_entry = buffer.cursor().line.entry
-
-      carbon.up()
-
-      assert.is_true(root_entry:is_open())
-
-      carbon.reset()
-    end)
   end)
 
   describe('reset', function()
@@ -314,18 +307,8 @@ describe('carbon', function()
       assert.equal(vim.loop.cwd(), string.format('%s/.github', original_cwd))
 
       carbon.reset()
+      assert.equal(vim.loop.cwd(), original_cwd)
       settings.sync_pwd = settings.defaults.sync_pwd
-    end)
-
-    it('releases registered listeners not in new cwd', function()
-      local original_listeners = watcher.registered()
-
-      util.cursor(2, 1)
-      carbon.down()
-
-      assert.not_same(original_listeners, watcher.registered())
-
-      carbon.reset()
     end)
   end)
 
@@ -350,40 +333,40 @@ describe('carbon', function()
       carbon.explore()
       helpers.type_keys(settings.actions.quit)
 
-      assert.not_equal('carbon', vim.fn.bufname())
+      assert.not_equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
   describe('create', function()
-    it('calls buffer.create', function()
-      local buffer_create = spy.on(buffer, 'create')
+    it('calls view.create', function()
+      local view_create = spy.on(view, 'create')
 
       carbon.create()
       helpers.type_keys('<esc>')
 
-      assert.spy(buffer_create).is_called()
+      assert.spy(view_create).is_called()
     end)
   end)
 
   describe('delete', function()
-    it('calls buffer.delete', function()
-      local buffer_delete = spy.on(buffer, 'delete')
+    it('calls view.delete', function()
+      local view_delete = spy.on(view, 'delete')
 
       carbon.delete()
       helpers.type_keys('<esc>')
 
-      assert.spy(buffer_delete).is_called()
+      assert.spy(view_delete).is_called()
     end)
   end)
 
   describe('move', function()
-    it('calls buffer.move', function()
-      local buffer_move = spy.on(buffer, 'move')
+    it('calls view.move', function()
+      local view_move = spy.on(view, 'move')
 
       carbon.move()
       helpers.type_keys('<esc>')
 
-      assert.spy(buffer_move).is_called()
+      assert.spy(view_move).is_called()
     end)
   end)
 end)

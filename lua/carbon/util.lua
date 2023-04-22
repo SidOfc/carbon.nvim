@@ -2,6 +2,30 @@ local constants = require('carbon.constants')
 local settings = require('carbon.settings')
 local util = {}
 
+function util.explore_path(path, current_view)
+  path = string.gsub(path, '%s', '')
+
+  if path == '' then
+    path = vim.loop.cwd()
+  end
+
+  if not vim.startswith(path, '/') then
+    local base_path = current_view and current_view.root.path or vim.loop.cwd()
+
+    path = string.format('%s/%s', base_path, path)
+  end
+
+  return string.gsub(vim.fn.simplify(path), '/+$', '')
+end
+
+function util.resolve(path)
+  return string.gsub(
+    vim.fn.fnamemodify(vim.fs.normalize(path), ':p'),
+    '/+$',
+    ''
+  )
+end
+
 function util.is_excluded(path)
   if settings.exclude then
     for _, pattern in ipairs(settings.exclude) do
@@ -32,6 +56,16 @@ function util.tbl_key(tbl, item)
       return key
     end
   end
+end
+
+function util.tbl_some(tbl, callback)
+  for key, value in pairs(tbl) do
+    if callback(value, key) then
+      return true
+    end
+  end
+
+  return false
 end
 
 function util.tbl_find(tbl, callback)
@@ -100,7 +134,7 @@ function util.confirm(options)
         callback()
       end
 
-      vim.cmd({ cmd = 'close' })
+      vim.cmd.close()
     end
 
     if not immediate then
@@ -153,7 +187,7 @@ function util.confirm(options)
   })
 
   local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'editor',
+    relative = 'win',
     anchor = 'NW',
     border = 'single',
     style = 'minimal',
@@ -182,9 +216,16 @@ function util.bufwinid(buf)
   end
 end
 
+function util.find_buf_by_name(name)
+  return util.tbl_find(vim.api.nvim_list_bufs(), function(bufnr)
+    return name == vim.api.nvim_buf_get_name(bufnr)
+  end)
+end
+
 function util.create_scratch_buf(options)
   options = options or {}
-  local buf = vim.api.nvim_create_buf(false, true)
+  local found = util.find_buf_by_name(options.name)
+  local buf = found or vim.api.nvim_create_buf(false, true)
   local buffer_options = vim.tbl_extend('force', {
     bufhidden = 'wipe',
     buftype = 'nofile',
@@ -192,7 +233,7 @@ function util.create_scratch_buf(options)
   }, util.tbl_except(options, { 'name', 'lines', 'mappings', 'autocmds' }))
 
   if options.name then
-    vim.api.nvim_buf_set_name(buf, options.name)
+    vim.api.nvim_buf_set_name(buf, options.name == '' and '/' or options.name)
   end
 
   if options.lines then
@@ -240,6 +281,43 @@ function util.set_winhl(win, highlights)
   end
 
   vim.api.nvim_win_set_option(win, 'winhl', table.concat(winhls, ','))
+end
+
+function util.clear_extmarks(buf, ...)
+  local extmarks = vim.api.nvim_buf_get_extmarks(buf, constants.hl, ...)
+
+  for _, extmark in ipairs(extmarks) do
+    vim.api.nvim_buf_del_extmark(buf, constants.hl, extmark[1])
+  end
+end
+
+function util.add_highlight(buf, ...)
+  vim.api.nvim_buf_add_highlight(buf, constants.hl, ...)
+end
+
+function util.window_neighbors(window_id, sides)
+  local original_window = vim.api.nvim_get_current_win()
+  local result = {}
+
+  for _, side in ipairs(sides or {}) do
+    vim.api.nvim_set_current_win(window_id)
+    vim.cmd.wincmd(constants.directions[side])
+
+    local side_id = vim.api.nvim_get_current_win()
+    local result_id = window_id ~= side_id and side_id or nil
+
+    if result_id then
+      result[#result + 1] = {
+        origin = window_id,
+        position = side,
+        target = result_id,
+      }
+    end
+  end
+
+  vim.api.nvim_set_current_win(original_window)
+
+  return result
 end
 
 return util

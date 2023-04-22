@@ -1,9 +1,11 @@
 local util = require('carbon.util')
 local watcher = {}
-local data = { listeners = {}, events = {} }
+
+watcher.listeners = {}
+watcher.events = {}
 
 function watcher.keep(callback)
-  for path in pairs(data.listeners) do
+  for path in pairs(watcher.listeners) do
     if not callback(path) then
       watcher.release(path)
     end
@@ -12,21 +14,21 @@ end
 
 function watcher.release(path)
   if not path then
-    for listener_path in pairs(data.listeners) do
+    for listener_path in pairs(watcher.listeners) do
       watcher.release(listener_path)
     end
-  elseif data.listeners[path] then
-    data.listeners[path]:stop()
+  elseif watcher.listeners[path] then
+    watcher.listeners[path]:stop()
 
-    data.listeners[path] = nil
+    watcher.listeners[path] = nil
   end
 end
 
 function watcher.register(path)
-  if not data.listeners[path] and not util.is_excluded(path) then
-    data.listeners[path] = vim.loop.new_fs_event()
+  if not watcher.listeners[path] and not util.is_excluded(path) then
+    watcher.listeners[path] = vim.loop.new_fs_event()
 
-    data.listeners[path]:start(
+    watcher.listeners[path]:start(
       path,
       {},
       vim.schedule_wrap(function(error, filename)
@@ -37,11 +39,11 @@ function watcher.register(path)
 end
 
 function watcher.emit(event, ...)
-  for callback in pairs(data.events[event] or {}) do
+  for callback in pairs(watcher.events[event] or {}) do
     callback(event, ...)
   end
 
-  for callback in pairs(data.events['*'] or {}) do
+  for callback in pairs(watcher.events['*'] or {}) do
     callback(event, ...)
   end
 end
@@ -52,33 +54,34 @@ function watcher.on(event, callback)
       watcher.on(key, callback)
     end
   elseif event then
-    data.events[event] = data.events[event] or {}
-    data.events[event][callback] = callback
+    watcher.events[event] = watcher.events[event] or {}
+    watcher.events[event][callback] = callback
   end
 end
 
 function watcher.off(event, callback)
   if not event then
-    data.events = {}
+    watcher.events = {}
   elseif type(event) == 'table' then
     for _, key in ipairs(event) do
       watcher.off(key, callback)
     end
-  elseif data.events[event] and callback then
-    data.events[event][callback] = nil
-  elseif event then
-    data.events[event] = {}
+  elseif watcher.events[event] and callback then
+    watcher.events[event][callback] = nil
+  elseif watcher.events[event] then
+    watcher.events[event] = {}
   else
-    data.events[event] = nil
+    watcher.events[event] = nil
   end
 end
 
 function watcher.has(event, callback)
-  return data.events[event] and data.events[event][callback] and true or false
+  return watcher.events[event] and watcher.events[event][callback] and true
+    or false
 end
 
 function watcher.registered()
-  return vim.tbl_keys(data.listeners)
+  return vim.tbl_keys(watcher.listeners)
 end
 
 return watcher
