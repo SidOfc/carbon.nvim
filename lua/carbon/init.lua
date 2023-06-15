@@ -172,6 +172,7 @@ function carbon.split()
         vim.api.nvim_win_close(0, 1)
       end
 
+      view.handle_sidebar_or_float()
       vim.cmd.split(ctx.cursor.line.entry.path)
     end
   end)
@@ -184,6 +185,7 @@ function carbon.vsplit()
         vim.api.nvim_win_close(0, 1)
       end
 
+      view.handle_sidebar_or_float()
       vim.cmd.vsplit(ctx.cursor.line.entry.path)
     end
   end)

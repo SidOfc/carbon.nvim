@@ -15,3 +15,7 @@ lint:
 .PHONY: format-check
 format-check:
 	stylua lua --check
+
+.PHONY: dev
+dev:
+	nvim -Nu dev/init.lua
