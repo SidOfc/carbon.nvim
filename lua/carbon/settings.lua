@@ -72,6 +72,7 @@ local defaults = {
     CarbonBrokenSymlink = { link = 'DiagnosticError' },
     CarbonIndicator = { fg = 'Gray', ctermfg = 'DarkGray', bold = true },
     CarbonFloat = { bg = '#111111', ctermbg = 'black' },
+    CarbonFloatBorder = { link = 'FloatBorder' },
     CarbonDanger = { link = 'Error' },
     CarbonPending = { link = 'Search' },
     CarbonFlash = { link = 'Visual' },
