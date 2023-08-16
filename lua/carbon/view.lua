@@ -149,7 +149,7 @@ function view.activate(options_param)
     vim.api.nvim_win_set_option(
       view.float.origin,
       'winhl',
-      'FloatBorder:CarbonFloat,Normal:CarbonFloat'
+      'FloatBorder:CarbonFloatBorder,Normal:CarbonFloat'
     )
   else
     vim.api.nvim_win_set_buf(0, current_view:buffer())
