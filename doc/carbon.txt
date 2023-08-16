@@ -2487,9 +2487,12 @@ SETTINGS                                                         *carbon-setting
     `    ctermfg = 'DarkGray',`
     `    bold = true,`
     `  },`
-    `  CarbonFloat = {`                       *carbon-setting-highlights-CarbonFloat*
+    `  CarbonFloat = {`                      *carbon-setting-highlights-CarbonFloat*
     `    bg = '#111111',`
     `    ctermbg = 'Black',`
+    `  },`
+    `  CarbonFloatBorder = {`          *carbon-setting-highlights-CarbonFloatBorder*
+    `    link = 'FloatBorder',`
     `  },`
     `  CarbonDanger = {`                    *carbon-setting-highlights-CarbonDanger*
     `    link = 'Error',`
