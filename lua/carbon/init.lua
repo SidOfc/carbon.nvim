@@ -121,6 +121,15 @@ function carbon.session_load_post(event)
   end
 end
 
+function carbon.toggle_hidden()
+  view.execute(function(ctx)
+    ctx.view.show_hidden = not ctx.view.show_hidden
+
+    ctx.view:update()
+    ctx.view:render()
+  end)
+end
+
 function carbon.toggle_recursive()
   view.execute(function(ctx)
     if ctx.cursor.line.entry.is_directory then

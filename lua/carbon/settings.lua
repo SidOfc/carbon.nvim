@@ -63,6 +63,7 @@ local defaults = {
     create = { 'c', '%' },
     delete = 'd',
     close_parent = '-',
+    toggle_hidden = '*',
     toggle_recursive = '!',
   },
   highlights = {
