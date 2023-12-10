@@ -1,4 +1,3 @@
-local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local entry = {}
 
