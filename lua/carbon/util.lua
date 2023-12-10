@@ -2,6 +2,10 @@ local constants = require('carbon.constants')
 local settings = require('carbon.settings')
 local util = {}
 
+function util.get_line(lnum, buffer)
+  return vim.api.nvim_buf_get_lines(buffer or 0, lnum - 1, lnum, true)[1]
+end
+
 function util.explore_path(path, current_view)
   path = string.gsub(path, '%s', '')
 
@@ -113,99 +117,6 @@ function util.highlight(group, opts)
   local merged = vim.tbl_extend('force', { default = true }, opts or {})
 
   vim.api.nvim_set_hl(0, group, merged)
-end
-
-function util.confirm(options)
-  local finished = false
-  local actions = {}
-  local mappings = {}
-  local lines = {}
-
-  local function finish(label, immediate)
-    local function handler()
-      if finished then
-        return nil
-      end
-
-      finished = true
-      local callback = actions[label] and actions[label].callback
-
-      if type(callback) == 'function' then
-        callback()
-      end
-
-      vim.cmd.close()
-    end
-
-    if not immediate then
-      return handler
-    end
-
-    handler()
-  end
-
-  for ascii = 32, 127 do
-    if
-      ascii < 48
-      and ascii > 57
-      and not vim.tbl_contains({ 38, 40, 74, 75, 106, 107 }, ascii)
-    then
-      mappings[#mappings + 1] = { 'n', string.char(ascii), '<nop>' }
-    end
-  end
-
-  for _, action in ipairs(options.actions) do
-    actions[action.label] = action
-
-    if action.shortcut then
-      mappings[#mappings + 1] = { 'n', action.shortcut, finish(action.label) }
-      lines[#lines + 1] = ' [' .. action.shortcut .. '] ' .. action.label
-    else
-      lines[#lines + 1] = '     ' .. action.label
-    end
-  end
-
-  mappings[#mappings + 1] = { 'n', '<esc>', finish('cancel') }
-  mappings[#mappings + 1] = {
-    'n',
-    '<cr>',
-    function()
-      finish(string.sub(vim.fn.getline('.'), 6), true)
-    end,
-  }
-
-  local buf = util.create_scratch_buf({
-    modifiable = false,
-    lines = lines,
-    mappings = mappings,
-    autocmds = {
-      BufLeave = finish('cancel'),
-      CursorMoved = function()
-        util.cursor(vim.fn.line('.'), 3)
-      end,
-    },
-  })
-
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = 'win',
-    anchor = 'NW',
-    border = 'single',
-    style = 'minimal',
-    row = options.row or vim.fn.line('.'),
-    col = options.col or vim.fn.col('.'),
-    height = #lines,
-    width = 1 + math.max(unpack(vim.tbl_map(function(line)
-      return #line
-    end, lines))),
-  })
-
-  util.cursor(1, 3)
-  vim.api.nvim_win_set_option(win, 'cursorline', true)
-  util.set_winhl(win, {
-    Normal = options.highlight or 'CarbonIndicator',
-    FloatBorder = options.highlight or 'Normal',
-    CursorLine = options.highlight or 'Normal',
-  })
 end
 
 function util.bufwinid(buf)

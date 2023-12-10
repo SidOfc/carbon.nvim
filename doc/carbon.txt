@@ -959,69 +959,12 @@ UTIL                                                                 *carbon-uti
   `options.autocmds` as second argument.
 
   `------------------------------------------------------------------------------`
-  confirm                                                    *carbon-util-confirm*
+  get_line                                                  *carbon-util-get-line*
 
-  Signature: `require('carbon.util').confirm(`{options}`)`
+  Signature: `require('carbon.util').get_line(`{lnum}[, {buffer}]`)`
 
-  Creates a confirmation popup using |nvim_open_win|. This popup is intended
-  to be used to confirm specified actions via provided shortcuts or up/down
-  navigation and pressing <enter> to confirm or using <esc> to cancel.
-
-  All default mappings in the popup are unmapped with exception of <k>, <j>,
-  <shift-k>, <shift-j>, <up>, <down>, and digits <0> through <9>.
-
-  The {options} argument supports the following keys:
->
-  {
-    row = <number>,
-    col = <number>,
-    highlight = <string>,
-    actions = <table<action>>,
-  }
-<
-  Property:    `row`
-  Default:     `vim.fn.line('.')`
-  Required:    `false`
-  Description:
-    The "top" offset in lines at which to anchor the popup.
-
-  Property:    `col`
-  Default:     `vim.fn.col('.')`
-  Required:    `false`
-  Description:
-    The "left" offset in columns at which to anchor the popup.
-
-  Property:    `highlight`
-  Default:     `'Normal'`
-  Required:    `false`
-  Description:
-    The highlight group used to highlight FloatBorder
-    (see |nvim_open_win|) and |CursorLine| in the popup.
-
-  Property:    `actions`
-  Default:     `nil`
-  Required:    `true`
-  Description:
-    Specify popup actions via a table containing `<action>` entries.
-    An `<action>` is a table with the following keys:
->
-    {
-      label = <string>,
-      shortcut = <char>,
-      callback = <function>,
-    }
-<
-    Each action specified in `actions` will be shown in the popup. The position
-    of each action will be based on its index in the `actions` table. The `label`
-    will be the visible text shown in the popup and the `shortcut` key will be
-    shown before the `label` between `[` and `]` characters. The `callback` function
-    will be called when the action is executed.
-
-    When an `<action>` does not include a `shortcut` it can only be triggered
-    using keyboard navigation + <enter>.
-
-    The `label` and `shortcut` properties must be unique within
-    the table of `actions`.
+  Returns the contents of line {lnum} in {buffer}.
+  When {buffer} is absent `0` (current buffer) is used.
 
 ================================================================================
 ENTRY                                                               *carbon-entry*
