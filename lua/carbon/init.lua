@@ -147,6 +147,16 @@ function carbon.toggle_recursive()
   end)
 end
 
+function carbon.tabe()
+  view.execute(function(ctx)
+    view.handle_sidebar_or_float()
+    vim.cmd.tabedit({
+      ctx.cursor.line.entry.path,
+      mods = { keepalt = #vim.fn.getreg('#') ~= 0 },
+    })
+  end)
+end
+
 function carbon.edit()
   view.execute(function(ctx)
     if ctx.cursor.line.entry.is_directory then
