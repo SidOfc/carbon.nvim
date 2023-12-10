@@ -24,7 +24,8 @@ end
 
 local function create_confirm(ctx)
   return function()
-    local text = vim.trim(string.sub(vim.fn.getline('.'), ctx.edit_col))
+    local text =
+      vim.trim(string.sub(util.get_line(vim.fn.line('.')), ctx.edit_col))
     local name = vim.fn.fnamemodify(text, ':t')
     local parent_directory = ctx.target.path
       .. '/'
@@ -51,7 +52,7 @@ end
 local function create_insert_move(ctx)
   return function()
     local text = ctx.edit_prefix
-      .. vim.trim(string.sub(vim.fn.getline('.'), ctx.edit_col))
+      .. vim.trim(string.sub(util.get_line(vim.fn.line('.')), ctx.edit_col))
     local last_slash_col = vim.fn.strridx(text, '/') + 1
 
     vim.api.nvim_buf_set_lines(0, ctx.edit_lnum, ctx.edit_lnum + 1, 1, { text })
@@ -801,43 +802,44 @@ function view:delete()
 
   util.clear_extmarks(0, { lnum_idx, highlight[2] }, { lnum_idx, -1 }, {})
   util.add_highlight(0, 'CarbonDanger', lnum_idx, highlight[2], -1)
-  util.confirm({
-    row = cursor.line.lnum,
-    col = highlight[2],
-    highlight = 'CarbonDanger',
-    actions = {
-      {
-        label = 'delete',
-        shortcut = 'D',
-        callback = function()
-          local result =
-            vim.fn.delete(target.path, target.is_directory and 'rf' or '')
 
-          if result == -1 then
-            vim.api.nvim_echo({
-              { 'Failed to delete: ', 'CarbonDanger' },
-              { vim.fn.fnamemodify(target.path, ':.'), 'CarbonIndicator' },
-            }, false, {})
-          else
-            view.resync(vim.fn.fnamemodify(target.path, ':h'))
-          end
-        end,
-      },
-      {
-        label = 'cancel',
-        shortcut = 'q',
-        callback = function()
-          util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
+  vim.cmd.redraw()
 
-          for _, lhl in ipairs(cursor.line.highlights) do
-            util.add_highlight(0, lhl[1], lnum_idx, lhl[2], lhl[3])
-          end
+  local paths = table.concat(
+    vim.tbl_map(function(path)
+      return string.format('=> %s', vim.fn.fnamemodify(path, ':.'))
+    end, { target.path }),
+    '\n'
+  )
 
-          self:render()
-        end,
-      },
-    },
-  })
+  local answer = vim.fn.confirm(
+    string.format('Confirm deletion of specified paths:\n%s\n', paths),
+    '&Delete\n&Cancel',
+    2,
+    'Error'
+  )
+
+  if answer == 1 then
+    local result =
+      vim.fn.delete(target.path, target.is_directory and 'rf' or '')
+
+    if result == -1 then
+      vim.api.nvim_echo({
+        { 'Failed to delete: ', 'CarbonDanger' },
+        { vim.fn.fnamemodify(target.path, ':.'), 'CarbonIndicator' },
+      }, false, {})
+    else
+      view.resync(vim.fn.fnamemodify(target.path, ':h'))
+    end
+  else
+    util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
+
+    for _, lhl in ipairs(cursor.line.highlights) do
+      util.add_highlight(0, lhl[1], lnum_idx, lhl[2], lhl[3])
+    end
+
+    self:render()
+  end
 end
 
 function view:move()

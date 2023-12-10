@@ -6,6 +6,15 @@ local util = require('carbon.util')
 local helpers = require('test.config.helpers')
 
 describe('carbon.util', function()
+  describe('get_line', function()
+    it('returns the contents of given {lnum}', function()
+      local expected = vim.fn.getline(1)
+      local received = util.get_line(1)
+
+      assert.equal(expected, received)
+    end)
+  end)
+
   describe('explore_path', function()
     it('{path} is expanded to an absolute path', function()
       local cwd = vim.loop.cwd()
@@ -254,181 +263,6 @@ describe('carbon.util', function()
       assert.is_number(autocmd.id)
 
       vim.api.nvim_buf_delete(scratch, { force = true })
-    end)
-  end)
-
-  describe('confirm', function()
-    it('opens and focuses popup', function()
-      local buf_before = vim.api.nvim_get_current_buf()
-
-      util.confirm({ actions = { { label = 'cancel', shortcut = 'q' } } })
-
-      local buf_after = vim.api.nvim_get_current_buf()
-
-      assert.not_same(buf_before, buf_after)
-
-      vim.cmd.close()
-    end)
-
-    it('shows shortcuts and actions', function()
-      util.confirm({
-        actions = {
-          { label = 'action 1', shortcut = '1' },
-          { label = 'action 2', shortcut = '2' },
-          { label = 'action 3', shortcut = '3' },
-        },
-      })
-
-      assert.same({
-        ' [1] action 1',
-        ' [2] action 2',
-        ' [3] action 3',
-      }, vim.api.nvim_buf_get_lines(0, 0, -1, true))
-
-      vim.cmd.close()
-    end)
-
-    it('<esc> closes popup', function()
-      local buf_before = vim.api.nvim_get_current_buf()
-
-      util.confirm({ actions = { { label = 'cancel', shortcut = 'q' } } })
-      helpers.type_keys('<esc>')
-
-      local buf_after = vim.api.nvim_get_current_buf()
-
-      assert.same(buf_before, buf_after)
-    end)
-
-    it('<esc> calls callback of action labelled "cancel"', function()
-      local callback = spy()
-
-      util.confirm({
-        actions = {
-          {
-            label = 'cancel',
-            shortcut = 'q',
-            callback = function()
-              callback()
-            end,
-          },
-        },
-      })
-
-      helpers.type_keys('<esc>')
-
-      assert.spy(callback).is_called()
-    end)
-
-    it(':close calls callback of action labelled "cancel"', function()
-      local callback = spy()
-
-      util.confirm({
-        actions = {
-          {
-            label = 'cancel',
-            shortcut = 'q',
-            callback = function()
-              callback()
-            end,
-          },
-        },
-      })
-
-      helpers.type_keys(':close<cr>')
-
-      assert.spy(callback).is_called()
-    end)
-
-    it(':bd calls callback of action labelled "cancel"', function()
-      local callback = spy()
-
-      util.confirm({
-        actions = {
-          {
-            label = 'cancel',
-            shortcut = 'q',
-            callback = function()
-              callback()
-            end,
-          },
-        },
-      })
-
-      helpers.type_keys(':bd<cr>')
-
-      assert.spy(callback).is_called()
-    end)
-
-    it('pressing action shortcut calls callback', function()
-      local callback = spy()
-
-      util.confirm({
-        actions = {
-          {
-            label = 'cancel',
-            shortcut = 'q',
-            callback = function()
-              callback()
-            end,
-          },
-        },
-      })
-
-      helpers.type_keys('q')
-
-      assert.spy(callback).is_called()
-    end)
-
-    it('<enter> selects first action', function()
-      local callback = spy()
-
-      util.confirm({
-        actions = {
-          {
-            label = 'cancel',
-            shortcut = 'q',
-            callback = function()
-              callback()
-            end,
-          },
-        },
-      })
-
-      helpers.type_keys('<cr>')
-
-      assert.spy(callback).is_called()
-    end)
-
-    it('action shortcuts are case-sensitive', function()
-      local callback = spy()
-
-      util.confirm({
-        actions = {
-          {
-            label = 'cancel',
-            shortcut = 'Q',
-            callback = function()
-              callback()
-            end,
-          },
-        },
-      })
-
-      helpers.type_keys('q')
-
-      assert.spy(callback).is_not_called()
-
-      helpers.type_keys('Q')
-
-      assert.spy(callback).is_called()
-    end)
-
-    it('cursor is placed on column 3', function()
-      util.confirm({ actions = { { label = 'action 1', shortcut = '1' } } })
-
-      assert.same(3, vim.fn.col('.'))
-
-      vim.cmd.close()
     end)
   end)
 end)
