@@ -54,6 +54,7 @@ local defaults = {
     up = '[',
     down = ']',
     quit = 'q',
+    tabe = '<c-t>',
     edit = '<cr>',
     move = 'm',
     reset = 'u',

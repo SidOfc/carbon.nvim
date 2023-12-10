@@ -84,6 +84,36 @@ describe('carbon', function()
     end)
   end)
 
+  describe('tabe', function()
+    it('opens directories in new tab', function()
+      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+
+      util.cursor(4, 1)
+      carbon.tabe()
+
+      assert.equal('carbon.explorer', vim.bo.filetype)
+      assert.equal(#vim.api.nvim_list_tabpages(), 2)
+
+      vim.cmd.tabclose()
+
+      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+    end)
+
+    it('opens files in a new tab', function()
+      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+
+      util.cursor(12, 1)
+      carbon.tabe()
+
+      assert.equal('toml', vim.bo.filetype)
+      assert.equal(#vim.api.nvim_list_tabpages(), 2)
+
+      vim.cmd.tabclose()
+
+      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+    end)
+  end)
+
   describe('edit', function()
     it('toggles directory when on directory', function()
       local doc_entry = helpers.entry('doc')

@@ -300,6 +300,15 @@ PLUGS                                                               *carbon-plug
   more technical details.
 
   `------------------------------------------------------------------------------`
+  <Plug>(carbon-tabe)                                           *carbon-plug-tabe*
+
+  Implementation: `require('carbon').tabe()`
+  Mapping:        |carbon-setting-actions-tabe|
+
+  If the entry below the cursor is a directory, show that directory in a
+  Carbon buffer in a new tab. Otherwise the file is opened in a new tab.
+
+  `------------------------------------------------------------------------------`
   <Plug>(carbon-edit)                                           *carbon-plug-edit*
 
   Implementation: `require('carbon').edit()`
@@ -2100,6 +2109,7 @@ SETTINGS                                                         *carbon-setting
   `  actions = {`
   `    up               = `|carbon-setting-actions-up|`,`
   `    down             = `|carbon-setting-actions-down|`,`
+  `    tabe             = `|carbon-setting-actions-tabe|`,`
   `    edit             = `|carbon-setting-actions-edit|`,`
   `    reset            = `|carbon-setting-actions-reset|`,`
   `    split            = `|carbon-setting-actions-split|`,`
@@ -2369,6 +2379,7 @@ SETTINGS                                                         *carbon-setting
     `  up = '[',`                                        *carbon-setting-actions-up*
     `  down = ']',`                                    *carbon-setting-actions-down*
     `  quit = 'q',`                                    *carbon-setting-actions-quit*
+    `  tabe = '<c-t>',`                                *carbon-setting-actions-tabe*
     `  edit = '<cr>',`                                 *carbon-setting-actions-edit*
     `  move = 'm',`                                    *carbon-setting-actions-move*
     `  reset = 'u',`                                  *carbon-setting-actions-reset*
