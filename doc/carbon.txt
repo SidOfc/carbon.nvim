@@ -393,6 +393,14 @@ PLUGS                                                               *carbon-plug
   to allow closing multiple parents at once.
 
   `------------------------------------------------------------------------------`
+  <Plug>(carbon-toggle-hidden)                         *carbon-plug-toggle-hidden*
+
+  Implementation: `require('carbon').toggle_hidden()`
+  Mapping:        |carbon-setting-actions-toggle-hidden|
+
+  Toggles visibility of hidden files and directories in the current view.
+
+  `------------------------------------------------------------------------------`
   <Plug>(carbon-toggle-recursive)                   *carbon-plug-toggle-recursive*
 
   Implementation: `require('carbon').toggle_recursive()`
@@ -646,6 +654,13 @@ CARBON                                                             *carbon-carbo
 
   Finally, if the Carbon buffer is the only active buffer in the only active
   window, nothing happens.
+
+  `------------------------------------------------------------------------------`
+  toggle_hidden                                      *carbon-carbon-toggle-hidden*
+
+  Signature: `require('carbon').toggle_hidden()`
+
+  Toggles hidden files and directories in the current Carbon view.
 
   `------------------------------------------------------------------------------`
   toggle_recursive                                *carbon-carbon-toggle-recursive*
@@ -1199,8 +1214,11 @@ ENTRY                                                               *carbon-entr
   sorted in case-insensitive alphabetical order and all directories will come
   before any files.
 
-  Paths matching any of the patterns defined in |carbon-setting-exclude| will
-  be excluded from the returned table.
+  Paths matching |carbon-setting-exclude| are not filtered here. This is done at
+  render time to allow hidden files to be toggled. See:
+
+  - |carbon-view-entry-children|
+  - |carbon-plug-toggle-hidden|
 
 ================================================================================
 VIEW                                                                 *carbon-view*
@@ -1246,7 +1264,8 @@ VIEW                                                                 *carbon-vie
     `index = <number>,`
     `initial = <string>,`
     `states = <table<string, table<string>>>,`
-    `root = <entry>`
+    `show_hidden = <boolean>,`
+    `root = <entry>,`
   `}`
 
   `------------------------------------------------------------------------------`
@@ -1430,9 +1449,21 @@ VIEW                                                                 *carbon-vie
   highlight are controlled by |carbon-setting-flash|.
 
   `------------------------------------------------------------------------------`
+  entry_children                                      *carbon-view-entry-children*
+
+  Signature: `view:entry_children(`{entry}`)`
+
+  The variable `view` in this section refers to a |carbon-view-instance|.
+
+  The {entry} argument must be an entry object as returned by |carbon-entry-new|.
+  Returns filtered child entries of given {entry} based on `settings.exclude`
+  when `view.show_hidden` is `false`. Otherwise returns all child entries
+  without filtering.
+
+  `------------------------------------------------------------------------------`
   lines                                                        *carbon-view-lines*
 
-  Signature: `view:lines(`{target}[, {lines}[, {depth}]]`)`
+  Signature: `view:lines(`{entry}[, {lines}[, {depth}]]`)`
 
   The variable `view` in this section refers to a |carbon-view-instance|.
 
@@ -2119,6 +2150,7 @@ SETTINGS                                                         *carbon-setting
   `    move             = `|carbon-setting-actions-move|`,`
   `    delete           = `|carbon-setting-actions-delete|`,`
   `    close_parent     = `|carbon-setting-actions-close-parent|`,`
+      `toggle_hidden    =` |carbon-setting-actions-toggle-hidden|`,`
   `    toggle_recursive = `|carbon-setting-actions-toggle-recursive|`,`
   `  },`
 
@@ -2388,6 +2420,7 @@ SETTINGS                                                         *carbon-setting
     `  create = { 'c', '%' },`                       *carbon-setting-actions-create*
     `  delete = 'd',`                                *carbon-setting-actions-delete*
     `  close_parent = '-',`                    *carbon-setting-actions-close-parent*
+    `  toggle_hidden = '*',`                  *carbon-setting-actions-toggle-hidden*
     `  toggle_recursive = '!',`            *carbon-setting-actions-toggle-recursive*
     `}`
 
@@ -2414,6 +2447,7 @@ SETTINGS                                                         *carbon-setting
   `create`           => |carbon-plug-create|
   `delete`           => |carbon-plug-delete|
   `close_parent`     => |carbon-plug-close-parent|
+  `toggle_hidden`    => |carbon-plug-toggle-hidden|
   `toggle_recursive` => |carbon-plug-toggle-recursive|
 
   `------------------------------------------------------------------------------`

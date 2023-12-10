@@ -1,4 +1,3 @@
-local util = require('carbon.util')
 local watcher = {}
 
 watcher.listeners = {}
@@ -25,7 +24,7 @@ function watcher.release(path)
 end
 
 function watcher.register(path)
-  if not watcher.listeners[path] and not util.is_excluded(path) then
+  if not watcher.listeners[path] then
     watcher.listeners[path] = vim.loop.new_fs_event()
 
     watcher.listeners[path]:start(

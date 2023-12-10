@@ -1,4 +1,3 @@
-local util = require('carbon.util')
 local watcher = require('carbon.watcher')
 local entry = {}
 
@@ -149,12 +148,7 @@ function entry:get_children()
     end
 
     for name in iterator do
-      local absolute_path = self.path .. '/' .. name
-      local relative_path = vim.fn.fnamemodify(absolute_path, ':.')
-
-      if not util.is_excluded(relative_path) then
-        entries[#entries + 1] = entry.new(absolute_path, self)
-      end
+      entries[#entries + 1] = entry.new(self.path .. '/' .. name, self)
     end
 
     table.sort(entries)

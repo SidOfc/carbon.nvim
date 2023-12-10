@@ -94,6 +94,7 @@ function view.get(path)
     index = index,
     initial = resolved,
     states = {},
+    show_hidden = false,
     root = entry.new(resolved),
   }, view)
 
@@ -545,6 +546,16 @@ function view:current_lines()
   return self.cached_lines
 end
 
+function view:entry_children(target)
+  if self.show_hidden then
+    return target:children()
+  else
+    return vim.tbl_filter(function(child)
+      return not util.is_excluded(vim.fn.fnamemodify(child.path, ':.'))
+    end, target:children())
+  end
+end
+
 function view:lines(input_target, lines, depth)
   lines = lines or {}
   depth = depth or 0
@@ -572,7 +583,7 @@ function view:lines(input_target, lines, depth)
     watcher.register(self.root.path)
   end
 
-  for _, child in ipairs(target:children()) do
+  for _, child in ipairs(self:entry_children(target)) do
     local tmp = child
     local hls = {}
     local path = {}
@@ -585,20 +596,20 @@ function view:lines(input_target, lines, depth)
     if settings.compress then
       while
         tmp.is_directory
-        and #tmp:children() == 1
+        and #self:entry_children(tmp) == 1
         and self:get_path_attr(tmp.path, 'compressible')
       do
         watcher.register(tmp.path)
 
         path[#path + 1] = tmp
-        tmp = tmp:children()[1]
+        tmp = self:entry_children(tmp)[1]
       end
     end
 
     if tmp.is_directory then
       watcher.register(tmp.path)
 
-      is_empty = #tmp:children() == 0
+      is_empty = #self:entry_children(tmp) == 0
       path_suffix = '/'
 
       if not is_empty and self:get_path_attr(tmp.path, 'open') then

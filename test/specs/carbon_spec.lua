@@ -179,6 +179,25 @@ describe('carbon', function()
     end)
   end)
 
+  describe('toggle_hidden', function()
+    it('toggles hidden files and directories', function()
+      local visible_before = #vim.api.nvim_buf_get_lines(0, 0, -1, true)
+
+      carbon.toggle_hidden()
+
+      local visible_after = #vim.api.nvim_buf_get_lines(0, 0, -1, true)
+
+      assert.not_equal(visible_before, visible_after)
+      assert.is_true(visible_before < visible_after)
+
+      carbon.toggle_hidden()
+
+      local visible_after_revert = #vim.api.nvim_buf_get_lines(0, 0, -1, true)
+
+      assert.equal(visible_before, visible_after_revert)
+    end)
+  end)
+
   describe('toggle_recursive', function()
     it('toggles recursively opened directory', function()
       local assets_entry = helpers.entry('doc/assets')
