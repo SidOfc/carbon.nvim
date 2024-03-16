@@ -228,5 +228,15 @@ describe('carbon.entry', function()
 
       helpers.delete_path('a/')
     end)
+
+    it('does not set children on a non-existing directory', function()
+      helpers.ensure_path('a/b/c.txt')
+
+      local dir = entry.new(helpers.resolve('a/doesnotexit/'))
+      
+      assert.is_nil(dir:get_children())
+
+      helpers.delete_path('a/')
+    end)
   end)
 end)

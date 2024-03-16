@@ -152,6 +152,8 @@ function entry:get_children()
     end
 
     table.sort(entries)
+  else
+    return nil
   end
 
   return entries
