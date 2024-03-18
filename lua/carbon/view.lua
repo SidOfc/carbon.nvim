@@ -328,6 +328,10 @@ function view:terminate()
     vim.api.nvim_buf_delete(bufnr, { force = true })
   end
 
+  if not util.is_directory(self.root.path) then
+    self.root:terminate()
+  end
+
   if reopen then
     vim.cmd.Carbon()
   end
