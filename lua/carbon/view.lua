@@ -10,6 +10,7 @@ view.sidebar = { origin = -1, target = -1 }
 view.float = { origin = -1, target = -1 }
 view.items = {}
 view.resync_paths = {}
+view.last_index = 0
 
 local function create_leave(ctx)
   vim.cmd.stopinsert()
@@ -63,6 +64,22 @@ local function create_insert_move(ctx)
   end
 end
 
+function view.get_sorted_items()
+  local active_views = {}
+
+  for _, current_view in pairs(view.items) do
+    if current_view then
+      active_views[#active_views + 1] = current_view
+    end
+  end
+
+  table.sort(active_views, function(v1, v2)
+    return v1.index < v2.index
+  end)
+
+  return active_views
+end
+
 function view.file_icons()
   if settings.file_icons then
     local ok, module = pcall(require, 'nvim-web-devicons')
@@ -88,17 +105,18 @@ function view.get(path)
     return found_view
   end
 
-  local index = #view.items + 1
+  view.last_index = view.last_index + 1
+
   local resolved = util.resolve(path)
   local instance = setmetatable({
-    index = index,
+    index = view.last_index,
     initial = resolved,
     states = {},
     show_hidden = false,
     root = entry.new(resolved),
   }, view)
 
-  view.items[index] = instance
+  view.items[instance.index] = instance
 
   return instance
 end
@@ -224,10 +242,14 @@ function view.resync(path)
   end
 
   view.resync_timer = vim.defer_fn(function()
-    for _, current_view in ipairs(view.items) do
-      current_view.root:synchronize(view.resync_paths)
-      current_view:update()
-      current_view:render()
+    for _, current_view in pairs(view.items) do
+      if util.is_directory(current_view.root.path) then
+        current_view.root:synchronize(view.resync_paths)
+        current_view:update()
+        current_view:render()
+      else
+        current_view:terminate()
+      end
     end
 
     if not view.resync_timer:is_closing() then
@@ -297,6 +319,20 @@ function view:buffers()
 
     return ref and ref.index == self.index
   end, vim.api.nvim_list_bufs())
+end
+
+function view:terminate()
+  local reopen = #vim.api.nvim_list_wins() == 1
+
+  for _, bufnr in ipairs(self:buffers()) do
+    vim.api.nvim_buf_delete(bufnr, { force = true })
+  end
+
+  if reopen then
+    vim.cmd.Carbon()
+  end
+
+  view.items[self.index] = nil
 end
 
 function view:update()
