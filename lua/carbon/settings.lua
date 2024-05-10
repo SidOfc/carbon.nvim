@@ -37,8 +37,8 @@ local defaults = {
   float_settings = function()
     local columns = vim.opt.columns:get()
     local rows = vim.opt.lines:get()
-    local width = math.min(40, math.floor(columns * 0.9))
-    local height = math.min(20, math.floor(rows * 0.9))
+    local width = math.min(80, math.floor(columns * 0.9))
+    local height = math.min(40, math.floor(rows * 0.9))
 
     return {
       relative = 'editor',
