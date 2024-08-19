@@ -174,6 +174,11 @@ function view.activate(options_param)
   else
     vim.api.nvim_win_set_buf(0, current_view:buffer())
   end
+  vim.api.nvim_buf_set_option(
+    current_view:buffer(),
+    'filetype',
+    'carbon.explorer'
+  )
 end
 
 function view.close_sidebar()
