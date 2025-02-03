@@ -160,7 +160,7 @@ function carbon.tabe()
   view.execute(function(ctx)
     view.handle_sidebar_or_float()
     vim.cmd.tabedit({
-      ctx.cursor.line.entry.path,
+      vim.fn.fnameescape(ctx.cursor.line.entry.path),
       mods = { keepalt = #vim.fn.getreg('#') ~= 0 },
     })
   end)
@@ -177,7 +177,7 @@ function carbon.edit()
     else
       view.handle_sidebar_or_float()
       vim.cmd.edit({
-        ctx.cursor.line.entry.path,
+        vim.fn.fnameescape(ctx.cursor.line.entry.path),
         mods = { keepalt = #vim.fn.getreg('#') ~= 0 },
       })
     end
@@ -192,7 +192,7 @@ function carbon.split()
       end
 
       view.handle_sidebar_or_float()
-      vim.cmd.split(ctx.cursor.line.entry.path)
+      vim.cmd.split(vim.fn.fnameescape(ctx.cursor.line.entry.path))
     end
   end)
 end
@@ -205,7 +205,7 @@ function carbon.vsplit()
       end
 
       view.handle_sidebar_or_float()
-      vim.cmd.vsplit(ctx.cursor.line.entry.path)
+      vim.cmd.vsplit(vim.fn.fnameescape(ctx.cursor.line.entry.path))
     end
   end)
 end
