@@ -203,7 +203,7 @@ function util.clear_extmarks(buf, ...)
 end
 
 function util.add_highlight(buf, ...)
-  vim.hl.range(buf, constants.hl, ...)
+  vim.api.nvim_buf_add_highlight(buf, constants.hl, ...)
 end
 
 function util.window_neighbors(window_id, sides)

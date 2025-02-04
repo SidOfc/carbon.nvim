@@ -40,7 +40,7 @@ USAGE                                                               *carbon-usag
   directly anywhere in your |$MYVIMRC| file since such packages are
   automatically loaded.
 
-  Carbon replaces |netrw| by default and remaps NetRW's |Explore| and Lexplore
+  Carbon replaces |netrw| by default and remaps NetRW's |Explore| and |Lexplore|
   commands to Carbon's |carbon-command-Carbon| and |carbon-command-Lcarbon| commands
   respectively. For more specific usage and configuration information, see:
 
@@ -817,9 +817,9 @@ UTIL                                                                 *carbon-uti
 
   Signature: `require('carbon.util').add_highlight(`{buf}, {...}`)`
 
-  Calls |vim.hl.range| like this:
+  Calls |nvim_buf_add_highlight| like this:
 
-  `vim.hl.range(`{buf}, <ns_id>, {...}`)`
+  `vim.api.nvim_buf_add_highlight(`{buf}, <ns_id>, {...}`)`
 
   <ns_id> will be set to |carbon-constant-hl|.
 
@@ -1520,15 +1520,16 @@ VIEW                                                                 *carbon-vie
     <number end_column>,
   }
 <
-  |carbon-view-render| uses |vim.hl.range| to set the highlights.
+  |carbon-view-render| uses |nvim_buf_add_highlight| to set the highlights.
   It is called the following way:
 
-  `vim.hl.range(`
+  `vim.api.nvim_buf_add_highlight(`
     |carbon-view-buffer|,
     |carbon-constant-hl|,
     `highlight[1],`
-    `{lnum - 1, highlight[2]},`
-    `{lnum - 1, highlight[3]},`
+    `lnum - 1,`
+    `highlight[2],`
+    `highlight[3],`
   `)`
 
   Property: `path`
@@ -1816,7 +1817,7 @@ VIEW                                                                 *carbon-vie
 
   Highlights a region from {start} to {finish} with {group} for {duration}
   milliseconds. {start} and {finish} must be values accepted by
-  |vim.hl.range|.
+  |vim.highlight.range|.
 
   See |carbon-view-flash-bang| for more information about customizing the
   highlighting properties when entries are revealed.

@@ -58,18 +58,8 @@ local function create_insert_move(ctx)
 
     vim.api.nvim_buf_set_lines(0, ctx.edit_lnum, ctx.edit_lnum + 1, 1, { text })
     util.clear_extmarks(0, { ctx.edit_lnum, 0 }, { ctx.edit_lnum, -1 }, {})
-    util.add_highlight(
-      0,
-      'CarbonDir',
-      { ctx.edit_lnum, 0 },
-      { ctx.edit_lnum, last_slash_col }
-    )
-    util.add_highlight(
-      0,
-      'CarbonFile',
-      { ctx.edit_lnum, last_slash_col },
-      { ctx.edit_lnum, -1 }
-    )
+    util.add_highlight(0, 'CarbonDir', ctx.edit_lnum, 0, last_slash_col)
+    util.add_highlight(0, 'CarbonFile', ctx.edit_lnum, last_slash_col, -1)
     util.cursor(ctx.edit_lnum + 1, math.max(ctx.edit_col, vim.fn.col('.')))
   end
 end
@@ -388,7 +378,14 @@ function view:render()
   end
 
   for _, hl in ipairs(hls) do
-    vim.hl.range(buf, constants.hl, hl[1], { hl[2], hl[3] }, { hl[2], hl[4] })
+    vim.api.nvim_buf_add_highlight(
+      buf,
+      constants.hl,
+      hl[1],
+      hl[2],
+      hl[3],
+      hl[4]
+    )
   end
 
   if cursor then
@@ -412,7 +409,7 @@ end
 function view:focus_flash(duration, group, start, finish)
   local buf = self:buffer()
 
-  vim.hl.range(buf, constants.hl_tmp, group, start, finish, {})
+  vim.highlight.range(buf, constants.hl_tmp, group, start, finish, {})
 
   vim.defer_fn(function()
     if vim.api.nvim_buf_is_valid(buf) then
@@ -860,12 +857,7 @@ function view:delete()
   end
 
   util.clear_extmarks(0, { lnum_idx, highlight[2] }, { lnum_idx, -1 }, {})
-  util.add_highlight(
-    0,
-    'CarbonDanger',
-    { lnum_idx, highlight[2] },
-    { lnum_idx, -1 }
-  )
+  util.add_highlight(0, 'CarbonDanger', lnum_idx, highlight[2], -1)
 
   vim.cmd.redraw()
 
@@ -899,7 +891,7 @@ function view:delete()
     util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
 
     for _, lhl in ipairs(cursor.line.highlights) do
-      util.add_highlight(0, lhl[1], { lnum_idx, lhl[2] }, { lnum_idx, lhl[3] })
+      util.add_highlight(0, lhl[1], lnum_idx, lhl[2], lhl[3])
     end
 
     self:render()
@@ -932,12 +924,7 @@ function view:move()
   end
 
   util.clear_extmarks(0, { lnum_idx, start_hl }, { lnum_idx, -1 }, {})
-  util.add_highlight(
-    0,
-    'CarbonPending',
-    { lnum_idx, start_hl },
-    { lnum_idx, -1 }
-  )
+  util.add_highlight(0, 'CarbonPending', lnum_idx, start_hl, -1)
   vim.cmd.redraw({ bang = true })
   vim.cmd.echohl('CarbonPending')
 
