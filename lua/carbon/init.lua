@@ -38,6 +38,7 @@ function carbon.setup(user_settings)
     util.command('Lcarbon', carbon.explore_left, command_opts)
     util.command('Fcarbon', carbon.explore_float, command_opts)
     util.command('ToggleSidebarCarbon', carbon.toggle_sidebar, command_opts)
+    util.command('ToggleSidebarCarbonReveal', carbon.reveal_current_file, command_opts)
 
     util.autocmd('SessionLoadPost', carbon.session_load_post, { pattern = '*' })
     util.autocmd('WinResized', carbon.win_resized, { pattern = '*' })
@@ -390,6 +391,40 @@ function carbon.close_parent()
     ctx.view:update()
     ctx.view:render()
   end)
+end
+
+function carbon.reveal_current_file()
+  local current_file = vim.fn.expand('%:p')
+
+  if current_file == '' then
+    return
+  end
+
+  local current_win = vim.api.nvim_get_current_win()
+  local current_view = view.current()
+
+  if not current_view then
+    carbon.explore_sidebar({ fargs = { vim.fn.getcwd() } })
+    current_view = view.current()
+  end
+
+  if current_view then
+    current_view:expand_to_path(current_file)
+    current_view:update()
+    current_view:render()
+
+    local lines = current_view:current_lines()
+    for _, line in ipairs(lines) do
+      if line.entry.path == current_file then
+        vim.fn.cursor(line.lnum, (line.depth + 1) * 2 + 1)
+        break
+      end
+    end
+
+    if current_win ~= vim.api.nvim_get_current_win() and not settings.sidebar_toggle_focus then
+      vim.api.nvim_set_current_win(current_win)
+    end
+  end
 end
 
 return carbon
