@@ -12,6 +12,16 @@ view.items = {}
 view.resync_paths = {}
 view.last_index = 0
 
+local function profile(label, fn, ...)
+  local start_ns = vim.uv.hrtime()
+  local fn_result = { fn(...) }
+  local elapsed_ms = (vim.uv.hrtime() - start_ns) / 1e6
+
+  print('[' .. label .. ']' .. ' took: ' .. elapsed_ms .. 'ms')
+
+  return unpack(fn_result)
+end
+
 local function create_leave(ctx)
   vim.cmd.stopinsert()
   ctx.view:set_path_attr(ctx.target.path, 'compressible', ctx.prev_compressible)
@@ -357,11 +367,15 @@ function view:render()
     lines[#lines + 1] = line_data.line
 
     if self.flash and self.flash.path == line_data.entry.path then
-      cursor = { lnum = lnum, col = 1 + (line_data.depth + 1) * 2 }
+      cursor = {
+        lnum = lnum,
+        col = 1 + (line_data.depth + 1) * 2,
+        line = line_data.line,
+      }
     end
 
     for _, hl in ipairs(line_data.highlights) do
-      hls[#hls + 1] = { hl[1], lnum - 1, hl[2], hl[3] }
+      hls[#hls + 1] = { hl[1], { lnum - 1, hl[2] }, { lnum - 1, hl[3] } }
     end
   end
 
@@ -378,14 +392,7 @@ function view:render()
   end
 
   for _, hl in ipairs(hls) do
-    vim.api.nvim_buf_add_highlight(
-      buf,
-      constants.hl,
-      hl[1],
-      hl[2],
-      hl[3],
-      hl[4]
-    )
+    vim.hl.range(buf, constants.hl, hl[1], hl[2], hl[3])
   end
 
   if cursor then
@@ -397,7 +404,7 @@ function view:render()
           settings.flash.duration,
           'CarbonFlash',
           { cursor.lnum - 1, cursor.col - 1 },
-          { cursor.lnum - 1, -1 }
+          { cursor.lnum - 1, #cursor.line + 1 }
         )
       end, settings.flash.delay)
     end
@@ -409,7 +416,7 @@ end
 function view:focus_flash(duration, group, start, finish)
   local buf = self:buffer()
 
-  vim.highlight.range(buf, constants.hl_tmp, group, start, finish, {})
+  vim.hl.range(buf, constants.hl_tmp, group, start, finish)
 
   vim.defer_fn(function()
     if vim.api.nvim_buf_is_valid(buf) then
