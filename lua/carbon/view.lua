@@ -12,16 +12,6 @@ view.items = {}
 view.resync_paths = {}
 view.last_index = 0
 
-local function profile(label, fn, ...)
-  local start_ns = vim.uv.hrtime()
-  local fn_result = { fn(...) }
-  local elapsed_ms = (vim.uv.hrtime() - start_ns) / 1e6
-
-  print('[' .. label .. ']' .. ' took: ' .. elapsed_ms .. 'ms')
-
-  return unpack(fn_result)
-end
-
 local function create_leave(ctx)
   vim.cmd.stopinsert()
   ctx.view:set_path_attr(ctx.target.path, 'compressible', ctx.prev_compressible)
@@ -66,7 +56,13 @@ local function create_insert_move(ctx)
       .. vim.trim(string.sub(util.get_line(vim.fn.line('.')), ctx.edit_col))
     local last_slash_col = vim.fn.strridx(text, '/') + 1
 
-    vim.api.nvim_buf_set_lines(0, ctx.edit_lnum, ctx.edit_lnum + 1, 1, { text })
+    vim.api.nvim_buf_set_lines(
+      0,
+      ctx.edit_lnum,
+      ctx.edit_lnum + 1,
+      true,
+      { text }
+    )
     util.clear_extmarks(0, { ctx.edit_lnum, 0 }, { ctx.edit_lnum, -1 }, {})
     util.add_highlight(0, 'CarbonDir', ctx.edit_lnum, 0, last_slash_col)
     util.add_highlight(0, 'CarbonFile', ctx.edit_lnum, last_slash_col, -1)
@@ -172,22 +168,26 @@ function view.activate(options_param)
       or vim.deepcopy(float_settings)
 
     view.float = {
-      origin = vim.api.nvim_open_win(current_view:buffer(), 1, float_settings),
       target = original_window,
+      origin = vim.api.nvim_open_win(
+        current_view:buffer(),
+        true,
+        float_settings
+      ),
     }
 
-    vim.api.nvim_win_set_option(
-      view.float.origin,
+    vim.api.nvim_set_option_value(
       'winhl',
-      'FloatBorder:CarbonFloatBorder,Normal:CarbonFloat'
+      'FloatBorder:CarbonFloatBorder,Normal:CarbonFloat',
+      { win = view.float.origin }
     )
   else
     vim.api.nvim_win_set_buf(0, current_view:buffer())
   end
-  vim.api.nvim_buf_set_option(
-    current_view:buffer(),
+  vim.api.nvim_set_option_value(
     'filetype',
-    'carbon.explorer'
+    'carbon.explorer',
+    { buf = current_view:buffer() }
   )
 end
 
@@ -380,15 +380,16 @@ function view:render()
   end
 
   local buf = self:buffer()
+  local set_opts = { buf = buf }
   local current_mode = string.lower(vim.api.nvim_get_mode().mode)
 
   vim.api.nvim_buf_clear_namespace(buf, constants.hl, 0, -1)
-  vim.api.nvim_buf_set_option(buf, 'modifiable', true)
-  vim.api.nvim_buf_set_lines(buf, 0, -1, 1, lines)
-  vim.api.nvim_buf_set_option(buf, 'modified', false)
+  vim.api.nvim_set_option_value('modifiable', true, set_opts)
+  vim.api.nvim_buf_set_lines(buf, 0, -1, true, lines)
+  vim.api.nvim_set_option_value('modified', false, set_opts)
 
   if not string.find(current_mode, 'i') then
-    vim.api.nvim_buf_set_option(buf, 'modifiable', false)
+    vim.api.nvim_set_option_value('modifiable', false, set_opts)
   end
 
   for _, hl in ipairs(hls) do
@@ -820,15 +821,15 @@ function view:create()
   self:update()
   self:render()
   util.autocmd('CursorMovedI', create_insert_move(ctx), { buffer = 0 })
-  vim.keymap.set('i', '<cr>', create_confirm(ctx), { buffer = 0 })
-  vim.keymap.set('i', '<esc>', create_cancel(ctx), { buffer = 0 })
+  vim.keymap.set('i', '<cr>', create_confirm(ctx), { buf = 0 })
+  vim.keymap.set('i', '<esc>', create_cancel(ctx), { buf = 0 })
   vim.cmd.startinsert({ bang = true })
-  vim.api.nvim_buf_set_option(0, 'modifiable', true)
+  vim.api.nvim_set_option_value('modifiable', true, { buf = 0 })
   vim.api.nvim_buf_set_lines(
     0,
     ctx.edit_lnum,
     ctx.init_end_lnum,
-    1,
+    true,
     { ctx.edit_prefix }
   )
   util.cursor(ctx.edit_lnum + 1, ctx.edit_col)

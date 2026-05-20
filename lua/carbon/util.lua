@@ -10,7 +10,7 @@ function util.explore_path(path, current_view)
   path = string.gsub(path, '%s', '')
 
   if path == '' then
-    path = vim.loop.cwd()
+    path = vim.loop.cwd() or ''
   end
 
   if not vim.startswith(path, '/') then
@@ -148,8 +148,8 @@ function util.create_scratch_buf(options)
   end
 
   if options.lines then
-    vim.api.nvim_buf_set_lines(buf, 0, -1, 1, options.lines)
-    vim.api.nvim_buf_set_option(buf, 'modified', false)
+    vim.api.nvim_buf_set_lines(buf, 0, -1, true, options.lines)
+    vim.api.nvim_set_option_value('modified', false, { buf = buf })
   end
 
   if options.mappings then
@@ -161,7 +161,7 @@ function util.create_scratch_buf(options)
   end
 
   for option, value in pairs(buffer_options) do
-    vim.api.nvim_buf_set_option(buf, option, value)
+    vim.api.nvim_set_option_value(option, value, { buf = buf })
   end
 
   return buf
@@ -191,7 +191,9 @@ function util.set_winhl(win, highlights)
     winhls[#winhls + 1] = source .. ':' .. target
   end
 
-  vim.api.nvim_win_set_option(win, 'winhl', table.concat(winhls, ','))
+  local combined_winhls = table.concat(winhls, ',')
+
+  vim.api.nvim_set_option_value('winhl', combined_winhls, { win = win })
 end
 
 function util.clear_extmarks(buf, ...)

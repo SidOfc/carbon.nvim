@@ -188,7 +188,7 @@ function carbon.split()
   view.execute(function(ctx)
     if not ctx.cursor.line.entry.is_directory then
       if vim.w.carbon_fexplore_window then
-        vim.api.nvim_win_close(0, 1)
+        vim.api.nvim_win_close(0, true)
       end
 
       view.handle_sidebar_or_float()
@@ -201,7 +201,7 @@ function carbon.vsplit()
   view.execute(function(ctx)
     if not ctx.cursor.line.entry.is_directory then
       if vim.w.carbon_fexplore_window then
-        vim.api.nvim_win_close(0, 1)
+        vim.api.nvim_win_close(0, true)
       end
 
       view.handle_sidebar_or_float()
@@ -264,7 +264,7 @@ function carbon.toggle_sidebar(options)
   local current_win = vim.api.nvim_get_current_win()
 
   if vim.api.nvim_win_is_valid(view.sidebar.origin) then
-    vim.api.nvim_win_close(view.sidebar.origin, 1)
+    vim.api.nvim_win_close(view.sidebar.origin, true)
   else
     local explore_options = vim.tbl_extend(
       'force',
@@ -332,7 +332,7 @@ end
 
 function carbon.quit()
   if #vim.api.nvim_list_wins() > 1 then
-    vim.api.nvim_win_close(0, 1)
+    vim.api.nvim_win_close(0, true)
   elseif #vim.api.nvim_list_bufs() > 1 then
     pcall(vim.cmd.bprevious)
   end
