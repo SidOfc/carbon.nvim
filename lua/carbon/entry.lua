@@ -19,20 +19,25 @@ function entry.new(path, parent)
   local raw_path = path == '' and '/' or path
   local clean = string.gsub(raw_path, '/+$', '')
   local lstat = select(2, pcall(vim.loop.fs_lstat, raw_path)) or {}
-  local is_executable = lstat.mode == 33261
+  local is_executable = false
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
   if is_symlink then
-    local stat = select(2, pcall(vim.loop.fs_stat, raw_path))
+    local ok, stat = pcall(vim.loop.fs_stat, raw_path)
 
-    if stat then
-      is_executable = lstat.mode == 33261
+    if ok and stat then
       is_directory = stat.type == 'directory'
       is_symlink = 1
+      lstat = stat
     else
+      is_directory = false
       is_symlink = 2
     end
+  end
+
+  if lstat and lstat.mode and is_symlink ~= 2 and not is_directory then
+    is_executable = bit.band(lstat.mode, 73) ~= 0
   end
 
   return setmetatable({
