@@ -10,7 +10,16 @@ test:
 
 .PHONY: lint
 lint:
+	make lint-luacheck
+	make lint-luals
+
+.PHONY: lint-luacheck
+lint-luacheck:
 	luacheck lua
+
+.PHONY: lint-luals
+lint-luals:
+	lua-language-server --check .
 
 .PHONY: format-check
 format-check:

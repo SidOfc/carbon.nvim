@@ -1,5 +1,3 @@
-require('test.config.assertions')
-
 local spy = require('luassert.spy')
 local view = require('carbon.view')
 local util = require('carbon.util')
@@ -11,25 +9,25 @@ describe('carbon.util', function()
       local expected = vim.fn.getline(1)
       local received = util.get_line(1)
 
-      assert.equal(expected, received)
+      assert.is.equal(expected, received)
     end)
   end)
 
   describe('explore_path', function()
     it('{path} is expanded to an absolute path', function()
       local cwd = vim.loop.cwd()
-      local parent = vim.fn.fnamemodify(cwd, ':h')
+      local parent = cwd and vim.fn.fnamemodify(cwd, ':h')
 
-      assert.equal(parent, util.explore_path('../'))
-      assert.equal(parent, util.explore_path('..'))
+      assert.is.equal(parent, util.explore_path('../'))
+      assert.is.equal(parent, util.explore_path('..'))
     end)
 
     it('{path} is expanded relative to {current_view}', function()
       local current_view = view.get(vim.fn.tempname())
       local parent = vim.fn.fnamemodify(current_view.root.path, ':h')
 
-      assert.equal(parent, util.explore_path('../', current_view))
-      assert.equal(parent, util.explore_path('..', current_view))
+      assert.is.equal(parent, util.explore_path('../', current_view))
+      assert.is.equal(parent, util.explore_path('..', current_view))
     end)
   end)
 
@@ -37,8 +35,8 @@ describe('carbon.util', function()
     it('{lnum} and {col} are both 1-based', function()
       util.cursor(2, 2)
 
-      assert.equal(2, vim.fn.line('.'))
-      assert.equal(2, vim.fn.col('.'))
+      assert.is.equal(2, vim.fn.line('.'))
+      assert.is.equal(2, vim.fn.col('.'))
     end)
   end)
 
@@ -64,7 +62,7 @@ describe('carbon.util', function()
 
   describe('bufwinid', function()
     it('returns window id of {buf}', function()
-      assert.same(
+      assert.is.same(
         vim.fn.win_getid(),
         util.bufwinid(vim.api.nvim_get_current_buf())
       )
@@ -73,34 +71,37 @@ describe('carbon.util', function()
 
   describe('plug', function()
     it('returns <plug>(carbon-{name})', function()
-      assert.equal('<plug>(carbon-test)', util.plug('test'))
+      assert.is.equal('<plug>(carbon-test)', util.plug('test'))
     end)
 
     it('converts snake_case to kebab-case', function()
-      assert.equal('<plug>(carbon-snake-to-kebab)', util.plug('snake_to_kebab'))
+      assert.is.equal(
+        '<plug>(carbon-snake-to-kebab)',
+        util.plug('snake_to_kebab')
+      )
     end)
   end)
 
   describe('tbl_key', function()
     it('returns key of {tbl} whose value equals {item}', function()
-      assert.equal('b', util.tbl_key({ a = 1, b = 2, c = 3 }, 2))
+      assert.is.equal('b', util.tbl_key({ a = 1, b = 2, c = 3 }, 2))
     end)
 
     it('returns index of {tbl} whose value equals {item}', function()
-      assert.equal(2, util.tbl_key({ 2, 4, 6 }, 4))
+      assert.is.equal(2, util.tbl_key({ 2, 4, 6 }, 4))
     end)
   end)
 
   describe('tbl_find', function()
     it('calls callback({value}, {key})', function()
-      local callback = spy()
+      local callback = spy.new(function() end)
 
       util.tbl_find({ 2, 4, 6 }, callback)
 
-      assert.spy(callback).is_called(3)
-      assert.spy(callback).is_called_with(2, 1)
-      assert.spy(callback).is_called_with(4, 2)
-      assert.spy(callback).is_called_with(6, 3)
+      assert.spy(callback).was.called(3)
+      assert.spy(callback).was.called_with(2, 1)
+      assert.spy(callback).was.called_with(4, 2)
+      assert.spy(callback).was.called_with(6, 3)
     end)
 
     it('returns {value}, {key} when found', function()
@@ -108,8 +109,8 @@ describe('carbon.util', function()
         return value == 4
       end)
 
-      assert.equal(4, value)
-      assert.equal(2, key)
+      assert.is.equal(4, value)
+      assert.is.equal(2, key)
     end)
 
     it('returns nil when not found', function()
@@ -121,19 +122,19 @@ describe('carbon.util', function()
     it('returns shallow copy of {tbl} with only {keys}', function()
       local tbl = { 1, 2, 3, a = 'a', b = 'b', c = '3' }
 
-      assert.same({ 1, 2, 3 }, util.tbl_except(tbl, { 'a', 'b', 'c' }))
+      assert.is.same({ 1, 2, 3 }, util.tbl_except(tbl, { 'a', 'b', 'c' }))
     end)
   end)
 
   describe('set_buf_mappings', function()
     it('sets {mappings} local to {buf}', function()
-      assert.error(function()
+      assert.is.error(function()
         vim.keymap.del('n', '<c-z>', { buffer = 0 })
       end)
 
       util.set_buf_mappings(0, { { 'n', '<c-z>', function() end } })
 
-      assert.not_error(function()
+      assert.is_not.error(function()
         vim.keymap.del('n', '<c-z>', { buffer = 0 })
       end)
     end)
@@ -143,7 +144,7 @@ describe('carbon.util', function()
     it('creates user command', function()
       util.command('CreateCommandTest', function() end)
 
-      assert.not_nil(vim.api.nvim_get_commands({}).CreateCommandTest)
+      assert.is_not_nil(vim.api.nvim_get_commands({}).CreateCommandTest)
     end)
   end)
 
@@ -151,7 +152,7 @@ describe('carbon.util', function()
     it('creates highlight group', function()
       util.highlight('CreateHighlightTest', { link = 'Normal' })
 
-      assert.not_same(0, vim.fn.hlID('CreateHighlightTest'))
+      assert.is_not.same(0, vim.fn.hlID('CreateHighlightTest'))
     end)
   end)
 
@@ -163,7 +164,7 @@ describe('carbon.util', function()
 
       local autocmd = helpers.autocmd('FileAppendCmd', { buffer = scratch })
 
-      assert.same(scratch, autocmd.buffer)
+      assert.is.same(scratch, autocmd.buffer)
       assert.is_true(autocmd.buflocal)
 
       vim.api.nvim_buf_delete(scratch, { force = true })
@@ -194,7 +195,7 @@ describe('carbon.util', function()
 
       local autocmd = helpers.autocmd('FileAppendCmd', { buffer = scratch })
 
-      assert.same(scratch, autocmd.buffer)
+      assert.is.same(scratch, autocmd.buffer)
       assert.is_true(autocmd.buflocal)
 
       vim.api.nvim_buf_delete(scratch, { force = true })
@@ -207,8 +208,8 @@ describe('carbon.util', function()
 
       util.set_winhl(0, { FloatBorder = 'Normal' })
 
-      assert.not_equal(initial, vim.wo.winhl)
-      assert.same('FloatBorder:Normal', vim.wo.winhl)
+      assert.is_not.equal(initial, vim.wo.winhl)
+      assert.is.same('FloatBorder:Normal', vim.wo.winhl)
     end)
   end)
 
@@ -218,7 +219,7 @@ describe('carbon.util', function()
         name = 'scratch-test',
       })
 
-      assert.is_same(
+      assert.is.same(
         'scratch-test',
         vim.fn.fnamemodify(vim.api.nvim_buf_get_name(scratch), ':t')
       )
@@ -231,7 +232,7 @@ describe('carbon.util', function()
         lines = { 'hello', 'world' },
       })
 
-      assert.same(
+      assert.is.same(
         { 'hello', 'world' },
         vim.api.nvim_buf_get_lines(scratch, 0, -1, true)
       )
@@ -244,7 +245,7 @@ describe('carbon.util', function()
         mappings = { { 'n', '<c-z>', function() end } },
       })
 
-      assert.not_error(function()
+      assert.is_not.error(function()
         vim.keymap.del('n', '<c-z>', { buffer = scratch })
       end)
 

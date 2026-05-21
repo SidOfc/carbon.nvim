@@ -57,7 +57,7 @@ function helpers.type_keys(keys_to_type)
   return vim.api.nvim_feedkeys(
     vim.api.nvim_replace_termcodes(keys_to_type, true, false, true),
     'x',
-    true
+    false
   )
 end
 

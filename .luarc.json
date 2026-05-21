@@ -1,0 +1,12 @@
+{
+    "runtime.version": "LuaJIT",
+    "runtime.path": ["?.lua", "lua/?.lua", "lua/?/init.lua"],
+
+    "workspace.checkThirdParty": false,
+    "workspace.library": [
+        "/opt/homebrew/Cellar/neovim/HEAD-b346b87/share/nvim/runtime",
+        "${3rd}/luv/library",
+        "${3rd}/busted/library",
+        "${3rd}/luassert/library"
+    ]
+}

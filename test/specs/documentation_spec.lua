@@ -1,5 +1,3 @@
-require('test.config.assertions')
-
 local util = require('carbon.util')
 local helpers = require('test.config.helpers')
 
@@ -27,7 +25,7 @@ for ref in pairs(carbon_txt.refs) do
 end
 
 for _, rtp_path in ipairs(vim.opt.runtimepath:get()) do
-  local docs = vim.fn.glob(string.format('%s/doc/**.txt', rtp_path), 1, 1)
+  local docs = vim.fn.glob(string.format('%s/doc/**.txt', rtp_path), true, true)
 
   for _, doc_path in ipairs(docs) do
     for tag, count in pairs(helpers.help_info(doc_path).tags) do

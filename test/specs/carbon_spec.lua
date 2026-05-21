@@ -1,5 +1,3 @@
-require('test.config.assertions')
-
 local spy = require('luassert.spy')
 local util = require('carbon.util')
 local carbon = require('carbon')
@@ -26,7 +24,7 @@ describe('carbon', function()
       it('pattern is global', function()
         local autocmd = helpers.autocmd('DirChanged')
 
-        assert.same('global', autocmd.pattern)
+        assert.is.same('global', autocmd.pattern)
       end)
     end)
 
@@ -72,12 +70,12 @@ describe('carbon', function()
     it('does not merge settings after initialization', function()
       assert.is_nil(carbon.setup({ actions = false, highlights = false }))
 
-      assert.equal(
+      assert.is.equal(
         vim.inspect(settings.defaults.actions),
         vim.inspect(settings.actions)
       )
 
-      assert.equal(
+      assert.is.equal(
         vim.inspect(settings.defaults.highlights),
         vim.inspect(settings.highlights)
       )
@@ -86,31 +84,31 @@ describe('carbon', function()
 
   describe('tabe', function()
     it('opens directories in new tab', function()
-      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+      assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
 
       util.cursor(4, 1)
       carbon.tabe()
 
-      assert.equal('carbon.explorer', vim.bo.filetype)
-      assert.equal(#vim.api.nvim_list_tabpages(), 2)
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
+      assert.is.equal(#vim.api.nvim_list_tabpages(), 2)
 
       vim.cmd.tabclose()
 
-      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+      assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
     end)
 
     it('opens files in a new tab', function()
-      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+      assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
 
       util.cursor(12, 1)
       carbon.tabe()
 
-      assert.equal('toml', vim.bo.filetype)
-      assert.equal(#vim.api.nvim_list_tabpages(), 2)
+      assert.is.equal('toml', vim.bo.filetype)
+      assert.is.equal(#vim.api.nvim_list_tabpages(), 2)
 
       vim.cmd.tabclose()
 
-      assert.equal(#vim.api.nvim_list_tabpages(), 1)
+      assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
     end)
   end)
 
@@ -132,50 +130,50 @@ describe('carbon', function()
     end)
 
     it('edits file when on file', function()
-      assert.equal('carbon.explorer', vim.bo.filetype)
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
 
       util.cursor(12, 1)
       carbon.edit()
 
-      assert.not_equal('carbon.explorer', vim.bo.filetype)
+      assert.is_not.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
   describe('split', function()
     it('open file in horizontal split', function()
-      assert.equal('carbon.explorer', vim.bo.filetype)
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
 
       local file_line = helpers.line_with_file()
 
-      assert.not_nil(file_line)
+      assert.is_not_nil(file_line)
 
       util.cursor(file_line.lnum, 1)
       carbon.split()
 
-      assert.not_equal('carbon.explorer', vim.bo.filetype)
+      assert.is_not.equal('carbon.explorer', vim.bo.filetype)
 
       vim.cmd.wincmd('j')
 
-      assert.equal('carbon.explorer', vim.bo.filetype)
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
   describe('vsplit', function()
     it('open file in vertical split', function()
-      assert.equal('carbon.explorer', vim.bo.filetype)
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
 
       local file_line = helpers.line_with_file()
 
-      assert.not_nil(file_line)
+      assert.is_not_nil(file_line)
 
       util.cursor(file_line.lnum, 1)
       carbon.vsplit()
 
-      assert.not_equal('carbon.explorer', vim.bo.filetype)
+      assert.is_not.equal('carbon.explorer', vim.bo.filetype)
 
       vim.cmd.wincmd('l')
 
-      assert.equal('carbon.explorer', vim.bo.filetype)
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
@@ -187,14 +185,14 @@ describe('carbon', function()
 
       local visible_after = #vim.api.nvim_buf_get_lines(0, 0, -1, true)
 
-      assert.not_equal(visible_before, visible_after)
+      assert.is_not.equal(visible_before, visible_after)
       assert.is_true(visible_before < visible_after)
 
       carbon.toggle_hidden()
 
       local visible_after_revert = #vim.api.nvim_buf_get_lines(0, 0, -1, true)
 
-      assert.equal(visible_before, visible_after_revert)
+      assert.is.equal(visible_before, visible_after_revert)
     end)
   end)
 
@@ -203,18 +201,18 @@ describe('carbon', function()
       local assets_entry = helpers.entry('doc/assets')
 
       util.cursor(4, 1)
-      assert.not_nil(assets_entry)
+      assert.is_not_nil(assets_entry)
 
       carbon.toggle_recursive()
       assert.is_true(helpers.is_open(assets_entry.path))
-      assert.same(
+      assert.is.same(
         { '- doc/', '  - assets/' },
         vim.api.nvim_buf_get_lines(0, 3, 5, true)
       )
 
       carbon.toggle_recursive()
       assert.is_false(helpers.is_open(assets_entry.path))
-      assert.same(
+      assert.is.same(
         { '+ doc/', '+ lua/carbon/' },
         vim.api.nvim_buf_get_lines(0, 3, 5, true)
       )
@@ -228,8 +226,8 @@ describe('carbon', function()
       util.cursor(8, 1)
       carbon.close_parent()
 
-      assert.equal(6, vim.fn.line('.'))
-      assert.equal(3, vim.fn.col('.'))
+      assert.is.equal(6, vim.fn.line('.'))
+      assert.is.equal(3, vim.fn.col('.'))
     end)
   end)
 
@@ -237,13 +235,13 @@ describe('carbon', function()
     it('shows the buffer', function()
       local file_line = helpers.line_with_file()
 
-      assert.not_nil(file_line)
+      assert.is_not_nil(file_line)
 
       util.cursor(file_line.lnum, 1)
       carbon.edit()
       carbon.explore()
 
-      assert.equal('carbon.explorer', vim.bo.filetype)
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
@@ -259,7 +257,7 @@ describe('carbon', function()
         carbon.explore_sidebar()
         vim.cmd.wincmd('l')
 
-        assert.equal(before_bufname, vim.fn.bufname())
+        assert.is.equal(before_bufname, vim.fn.bufname())
 
         vim.cmd.bdelete()
       end
@@ -276,7 +274,7 @@ describe('carbon', function()
       carbon.explore_right()
       vim.cmd.wincmd('h')
 
-      assert.equal(before_bufname, vim.fn.bufname())
+      assert.is.equal(before_bufname, vim.fn.bufname())
 
       vim.cmd.bdelete()
     end)
@@ -292,7 +290,7 @@ describe('carbon', function()
       carbon.explore_left()
       vim.cmd.wincmd('l')
 
-      assert.equal(before_bufname, vim.fn.bufname())
+      assert.is.equal(before_bufname, vim.fn.bufname())
 
       vim.cmd.bdelete()
     end)
@@ -317,7 +315,10 @@ describe('carbon', function()
       settings.sync_pwd = true
       carbon.up()
 
-      assert.equal(vim.loop.cwd(), vim.fn.fnamemodify(original_cwd, ':h'))
+      assert.is.equal(
+        vim.loop.cwd(),
+        original_cwd and vim.fn.fnamemodify(original_cwd, ':h')
+      )
 
       carbon.reset()
       settings.sync_pwd = settings.defaults.sync_pwd
@@ -328,7 +329,7 @@ describe('carbon', function()
 
       carbon.up()
 
-      assert.not_same(original_listeners, watcher.registered())
+      assert.is_not.same(original_listeners, watcher.registered())
     end)
   end)
 
@@ -341,7 +342,7 @@ describe('carbon', function()
       carbon.reset()
       settings.sync_pwd = settings.defaults.sync_pwd
 
-      assert.equal(original_cwd, vim.loop.cwd())
+      assert.is.equal(original_cwd, vim.loop.cwd())
     end)
   end)
 
@@ -353,10 +354,10 @@ describe('carbon', function()
       util.cursor(2, 1)
       carbon.down()
 
-      assert.equal(vim.loop.cwd(), string.format('%s/.github', original_cwd))
+      assert.is.equal(vim.loop.cwd(), string.format('%s/.github', original_cwd))
 
       carbon.reset()
-      assert.equal(vim.loop.cwd(), original_cwd)
+      assert.is.equal(vim.loop.cwd(), original_cwd)
       settings.sync_pwd = settings.defaults.sync_pwd
     end)
   end)
@@ -369,7 +370,7 @@ describe('carbon', function()
       util.cursor(2, 1)
       carbon.cd(jump_cwd)
 
-      assert.equal(jump_cwd, vim.loop.cwd())
+      assert.is.equal(jump_cwd, vim.loop.cwd())
 
       carbon.reset()
       settings.sync_pwd = settings.defaults.sync_pwd
@@ -379,10 +380,16 @@ describe('carbon', function()
   describe('quit', function()
     it('closes the buffer', function()
       vim.cmd.edit('README.md')
+
+      assert.is.equal('markdown', vim.bo.filetype)
+
       carbon.explore()
+
+      assert.is.equal('carbon.explorer', vim.bo.filetype)
+
       helpers.type_keys(settings.actions.quit)
 
-      assert.not_equal('carbon.explorer', vim.bo.filetype)
+      assert.is_not.equal('carbon.explorer', vim.bo.filetype)
     end)
   end)
 
@@ -393,7 +400,7 @@ describe('carbon', function()
       carbon.create()
       helpers.type_keys('<esc>')
 
-      assert.spy(view_create).is_called()
+      assert.spy(view_create).was.called(1)
     end)
   end)
 
@@ -404,7 +411,7 @@ describe('carbon', function()
       carbon.delete()
       helpers.type_keys('<esc>')
 
-      assert.spy(view_delete).is_called()
+      assert.spy(view_delete).was.called(1)
     end)
   end)
 
@@ -415,7 +422,7 @@ describe('carbon', function()
       carbon.move()
       helpers.type_keys('<esc>')
 
-      assert.spy(view_move).is_called()
+      assert.spy(view_move).was.called(1)
     end)
   end)
 end)

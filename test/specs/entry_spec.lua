@@ -1,5 +1,3 @@
-require('test.config.assertions')
-
 local spy = require('luassert.spy')
 local util = require('carbon.util')
 local entry = require('carbon.entry')
@@ -9,20 +7,20 @@ local helpers = require('test.config.helpers')
 describe('carbon.entry', function()
   describe('new', function()
     it('returns table with metatable of carbon.entry', function()
-      assert.is_entry(entry.new(helpers.resolve('lua')))
+      assert.is.same(entry, getmetatable(entry.new(helpers.resolve('lua'))))
     end)
 
     it('path property is absolute path', function()
       local absolute_path = helpers.resolve('lua')
 
-      assert.equal(absolute_path, entry.new(absolute_path).path)
+      assert.is.equal(absolute_path, entry.new(absolute_path).path)
     end)
 
     it('name property is filename of path', function()
       local absolute_path = helpers.resolve('lua')
       local filename = vim.fn.fnamemodify(absolute_path, ':t')
 
-      assert.equal(filename, entry.new(absolute_path).name)
+      assert.is.equal(filename, entry.new(absolute_path).name)
     end)
 
     it('is_directory is boolean', function()
@@ -43,7 +41,7 @@ describe('carbon.entry', function()
 
       vim.loop.fs_symlink(original, symlink)
 
-      assert.equal(1, entry.new(symlink).is_symlink)
+      assert.is.equal(1, entry.new(symlink).is_symlink)
 
       vim.fn.delete(symlink)
     end)
@@ -55,7 +53,7 @@ describe('carbon.entry', function()
 
       vim.loop.fs_symlink(broken, symlink)
 
-      assert.equal(2, entry.new(symlink).is_symlink)
+      assert.is.equal(2, entry.new(symlink).is_symlink)
 
       vim.fn.delete(symlink)
     end)
@@ -63,7 +61,10 @@ describe('carbon.entry', function()
 
   describe('find', function()
     it('returns loaded children', function()
-      assert.is_entry(entry.find(helpers.resolve('lua')))
+      assert.is.same(
+        entry,
+        getmetatable(entry.find(helpers.resolve('lua')) or {})
+      )
     end)
 
     it('returns nil for not loaded children', function()
@@ -77,7 +78,7 @@ describe('carbon.entry', function()
       local file_synchronize = spy.on(file, 'synchronize')
 
       file:synchronize()
-      assert.spy(file_synchronize).is_called(1)
+      assert.spy(file_synchronize).was.called(1)
     end)
 
     it('calls synchronize recursively on directory', function()
@@ -87,8 +88,8 @@ describe('carbon.entry', function()
       local lua_carbon_synchronize = spy.on(lua_carbon, 'synchronize')
 
       lua:synchronize()
-      assert.spy(lua_synchronize).is_called()
-      assert.spy(lua_carbon_synchronize).is_called()
+      assert.spy(lua_synchronize).was.called(1)
+      assert.spy(lua_carbon_synchronize).was.called(1)
     end)
   end)
 
@@ -99,7 +100,7 @@ describe('carbon.entry', function()
 
       entry.find(target_path):terminate()
 
-      assert.spy(watcher_release).is_called_with(target_path)
+      assert.spy(watcher_release).was.called_with(target_path)
     end)
 
     it('sets children to nil on directory', function()
@@ -120,7 +121,7 @@ describe('carbon.entry', function()
       local parent = entry.new(helpers.resolve('a/'))
       local target = parent:children()[1]
 
-      assert.is_entry(target)
+      assert.is.same(entry, getmetatable(target))
 
       target:terminate()
 
@@ -136,7 +137,7 @@ describe('carbon.entry', function()
     it('returns empty table on regular file', function()
       local file = entry.new(helpers.resolve('README.md'))
 
-      assert.same({}, file:children())
+      assert.is.same({}, file:children())
     end)
 
     it('returns children of directory', function()
@@ -160,7 +161,7 @@ describe('carbon.entry', function()
       dir:set_children(nil)
       dir:children()
 
-      assert.spy(dir_has_children).is_called(1)
+      assert.spy(dir_has_children).was.called(1)
 
       helpers.delete_path('a/')
     end)
@@ -199,7 +200,7 @@ describe('carbon.entry', function()
 
       dir:set_children(children)
 
-      assert.equal(children, dir:children())
+      assert.is.equal(children, dir:children())
 
       helpers.delete_path('a/')
     end)
@@ -211,7 +212,7 @@ describe('carbon.entry', function()
 
       local dir = entry.new(helpers.resolve('a/'))
 
-      assert.is_equal(1, #dir:get_children())
+      assert.is.equal(1, #dir:get_children())
 
       helpers.delete_path('a/')
     end)

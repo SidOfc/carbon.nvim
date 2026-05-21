@@ -1,5 +1,3 @@
-require('test.config.assertions')
-
 local util = require('carbon.util')
 local settings = require('carbon.settings')
 
@@ -28,11 +26,11 @@ describe('carbon.settings', function()
     end)
 
     it('sets vim.g.loaded_netrw', function()
-      assert.is_same(1, vim.g.loaded_netrw)
+      assert.is.same(1, vim.g.loaded_netrw)
     end)
 
     it('sets vim.g.loaded_netrwPlugin', function()
-      assert.is_same(1, vim.g.loaded_netrwPlugin)
+      assert.is.same(1, vim.g.loaded_netrwPlugin)
     end)
 
     it('deletes augroup FileExplorer', function()
@@ -58,7 +56,7 @@ describe('carbon.settings', function()
     end)
 
     it('is a opposite of vim.o.autochdir', function()
-      assert.not_same(settings.sync_on_cd, vim.o.autochdir)
+      assert.is_not.same(settings.sync_on_cd, vim.o.autochdir)
     end)
   end)
 
@@ -166,13 +164,16 @@ describe('carbon.settings', function()
 
   describe('defaults', function()
     it('is same as settings', function()
-      assert.same(util.tbl_except(settings, { 'defaults' }), settings.defaults)
+      assert.is.same(
+        util.tbl_except(settings, { 'defaults' }),
+        settings.defaults
+      )
     end)
 
     it('does not change when settings change', function()
       settings.keep_netrw = not settings.keep_netrw
 
-      assert.not_same(settings.keep_netrw, settings.defaults.keep_netrw)
+      assert.is_not.same(settings.keep_netrw, settings.defaults.keep_netrw)
 
       settings.keep_netrw = settings.defaults.keep_netrw
     end)

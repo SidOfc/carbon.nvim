@@ -1,5 +1,3 @@
-require('test.config.assertions')
-
 local spy = require('luassert.spy')
 local watcher = require('carbon.watcher')
 local helpers = require('test.config.helpers')
@@ -12,7 +10,7 @@ describe('carbon.watcher', function()
 
   describe('on', function()
     it('registers {callback} for {event}', function()
-      local callback = spy()
+      local callback = spy.new(function() end)
 
       watcher.on('test-event', callback)
 
@@ -22,17 +20,17 @@ describe('carbon.watcher', function()
 
   describe('emit', function()
     it('calls registered callbacks for {event}', function()
-      local callback = spy()
+      local callback = spy.new(function() end)
 
       watcher.on('test-event', callback)
       watcher.emit('test-event')
 
-      assert.spy(callback).is_called()
+      assert.spy(callback).was.called(1)
     end)
 
     it('always calls registered callbacks for "*"', function()
-      local callback = spy()
-      local callback2 = spy()
+      local callback = spy.new(function() end)
+      local callback2 = spy.new(function() end)
 
       watcher.on('*', callback)
       watcher.on('*', callback2)
@@ -40,8 +38,8 @@ describe('carbon.watcher', function()
       watcher.emit(os.clock() * math.random(1000))
       watcher.emit(os.clock() * math.random(1000))
 
-      assert.spy(callback).is_called(2)
-      assert.spy(callback2).is_called(2)
+      assert.spy(callback).was.called(2)
+      assert.spy(callback2).was.called(2)
     end)
 
     -- FIXME: remove pending status after figuring out how to wait for fs events
@@ -49,7 +47,7 @@ describe('carbon.watcher', function()
       local it_when_only = vim.env.only and it or pending
 
       it_when_only('triggers on new file', function()
-        local callback = spy()
+        local callback = spy.new(function() end)
 
         watcher.register(vim.loop.cwd())
         watcher.on('carbon:synchronize', callback)
@@ -58,12 +56,12 @@ describe('carbon.watcher', function()
         vim.wait(100)
 
         assert
-          .spy(callback)
-          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
+          .spy(callback).was
+          .called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
       end)
 
       it_when_only('triggers on file change', function()
-        local callback = spy()
+        local callback = spy.new(function() end)
 
         helpers.ensure_path('check.sh')
 
@@ -73,14 +71,14 @@ describe('carbon.watcher', function()
         helpers.change_file('check.sh')
         vim.wait(100)
 
-        assert.spy(callback).is_called()
+        assert.spy(callback).was.called(1)
         assert
-          .spy(callback)
-          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+          .spy(callback).was
+          .called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
       end)
 
       it_when_only('triggers on file remove', function()
-        local callback = spy()
+        local callback = spy.new(function() end)
 
         helpers.ensure_path('check.sh')
 
@@ -90,44 +88,44 @@ describe('carbon.watcher', function()
         helpers.delete_path('check.sh')
         vim.wait(100)
 
-        assert.spy(callback).is_called()
+        assert.spy(callback).was.called(1)
         assert
-          .spy(callback)
-          .is_called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+          .spy(callback).was
+          .called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
       end)
     end)
   end)
 
   describe('off', function()
     it('clears {callback} for {event}', function()
-      local callback = spy()
+      local callback = spy.new(function() end)
 
       watcher.on('test-event', callback)
       watcher.off('test-event', callback)
 
-      assert.spy(callback).is_not_called()
+      assert.spy(callback).was.not_called(1)
       assert.is_false(watcher.has('test-event', callback))
     end)
 
     it('clears specific {callback} in specified {event}', function()
-      local ignore = spy()
-      local callback = spy()
+      local ignore = spy.new(function() end)
+      local callback = spy.new(function() end)
 
       watcher.on('test-event', ignore)
       watcher.on('test-event', callback)
       watcher.off('test-event', ignore)
       watcher.emit('test-event')
 
-      assert.spy(callback).is_called()
-      assert.spy(ignore).is_not_called()
+      assert.spy(callback).was.called(1)
+      assert.spy(ignore).was.not_called()
       assert.is_true(watcher.has('test-event', callback))
       assert.is_false(watcher.has('test-event', ignore))
     end)
 
     it('clears {event} when {callback} not specified', function()
-      local keep = spy()
-      local ignore = spy()
-      local ignore2 = spy()
+      local keep = spy.new(function() end)
+      local ignore = spy.new(function() end)
+      local ignore2 = spy.new(function() end)
 
       watcher.on('event-1', keep)
       watcher.on('event-2', ignore)
@@ -136,17 +134,17 @@ describe('carbon.watcher', function()
       watcher.emit('event-1')
       watcher.emit('event-2')
 
-      assert.spy(keep).is_called()
-      assert.spy(ignore).is_not_called()
-      assert.spy(ignore2).is_not_called()
+      assert.spy(keep).was.called(1)
+      assert.spy(ignore).was.not_called()
+      assert.spy(ignore2).was.not_called()
       assert.is_true(watcher.has('event-1', keep))
       assert.is_false(watcher.has('event-2', ignore))
       assert.is_false(watcher.has('event-2', ignore2))
     end)
 
     it('clears everything when called without arguments', function()
-      local ignore = spy()
-      local ignore2 = spy()
+      local ignore = spy.new(function() end)
+      local ignore2 = spy.new(function() end)
 
       watcher.on('event-1', ignore)
       watcher.on('event-2', ignore2)
@@ -154,8 +152,8 @@ describe('carbon.watcher', function()
       watcher.emit('event-1')
       watcher.emit('event-2')
 
-      assert.spy(ignore).is_not_called()
-      assert.spy(ignore2).is_not_called()
+      assert.spy(ignore).was.not_called()
+      assert.spy(ignore2).was.not_called()
       assert.is_false(watcher.has('event-1', ignore))
       assert.is_false(watcher.has('event-2', ignore2))
     end)
@@ -163,7 +161,7 @@ describe('carbon.watcher', function()
 
   describe('has', function()
     it('returns true when {callback} registered in {event}', function()
-      local callback = spy()
+      local callback = spy.new(function() end)
 
       watcher.on('test-event', callback)
 
@@ -171,7 +169,7 @@ describe('carbon.watcher', function()
     end)
 
     it('returns false when {callback} not registered in {event}', function()
-      assert.is_false(watcher.has('test-event', spy()))
+      assert.is_false(watcher.has('test-event', spy.new(function() end)))
     end)
   end)
 
@@ -179,7 +177,7 @@ describe('carbon.watcher', function()
     it('returns a table of registered paths', function()
       watcher.register('test/specs')
 
-      assert.is_same({ 'test/specs' }, watcher.registered())
+      assert.is.same({ 'test/specs' }, watcher.registered())
     end)
   end)
 
@@ -192,14 +190,14 @@ describe('carbon.watcher', function()
         return vim.startswith(path, 'test')
       end)
 
-      assert.is_same({ 'test/specs' }, watcher.registered())
+      assert.is.same({ 'test/specs' }, watcher.registered())
     end)
   end)
 
   describe('register', function()
     it('registers {path}', function()
       watcher.register('lua')
-      assert.is_same({ 'lua' }, watcher.registered())
+      assert.is.same({ 'lua' }, watcher.registered())
     end)
   end)
 
@@ -209,7 +207,7 @@ describe('carbon.watcher', function()
       watcher.register('test/specs')
       watcher.release('lua')
 
-      assert.is_same({ 'test/specs' }, watcher.registered())
+      assert.is.same({ 'test/specs' }, watcher.registered())
     end)
 
     it('releases everything when {path} not specified', function()
@@ -217,7 +215,7 @@ describe('carbon.watcher', function()
       watcher.register('test/specs')
       watcher.release()
 
-      assert.is_same({}, watcher.registered())
+      assert.is.same({}, watcher.registered())
     end)
   end)
 end)

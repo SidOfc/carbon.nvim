@@ -11,7 +11,9 @@ require('carbon').setup()
 vim.api.nvim_create_autocmd('VimLeavePre', {
   pattern = '*',
   callback = function()
-    vim.fn.chdir(repo_root)
-    vim.fn.delete(tmp_dir, 'rf')
+    if repo_root then
+      vim.fn.chdir(repo_root)
+      vim.fn.delete(tmp_dir, 'rf')
+    end
   end,
 })
