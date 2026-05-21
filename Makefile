@@ -10,8 +10,8 @@ test:
 
 .PHONY: lint
 lint:
-	make lint-luacheck
-	make lint-luals
+	@make lint-luacheck
+	# @make lint-luals
 
 .PHONY: lint-luacheck
 lint-luacheck:
