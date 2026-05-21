@@ -1,8 +1,8 @@
 .PHONY: all
 all:
 	make lint
-	make test
 	make format-check
+	make test
 
 .PHONY: test
 test:
@@ -11,7 +11,7 @@ test:
 .PHONY: lint
 lint:
 	@make lint-luacheck
-	# @make lint-luals
+	@make lint-luals
 
 .PHONY: lint-luacheck
 lint-luacheck:

@@ -13,7 +13,16 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install dependencies
-        run: sudo apt install -y lua-check
+        run: |
+          LUALS_VERSION=3.18.2
+          LUALS_RELEASE_URL=https://github.com/LuaLS/lua-language-server/releases/download/${LUALS_VERSION}/lua-language-server-${LUALS_VERSION}-linux-x64.tar.gz
+          LUALS_INSTALL_PATH=$HOME/.local/lua-language-server
+
+          sudo apt install -y lua-check
+          curl -L -o lua-language-server.tar.gz $LUALS_RELEASE_URL
+          mkdir -p $LUALS_INSTALL_PATH
+          tar -xzf lua-language-server.tar.gz -C $LUALS_INSTALL_PATH
+          echo "$LUALS_INSTALL_PATH/bin" >> $GITHUB_PATH
 
       - name: Lint
         run: make lint
