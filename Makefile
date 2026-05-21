@@ -1,3 +1,5 @@
+VIMRUNTIME = $(shell nvim --headless --cmd 'lua io.write(vim.env.VIMRUNTIME)' --cmd 'qa')
+
 .PHONY: all
 all:
 	make lint
@@ -6,7 +8,8 @@ all:
 
 .PHONY: test
 test:
-	nvim --headless --clean -c "lua require('test.config.bootstrap')" +qa!
+	@echo "test(PLENARY):"
+	@nvim --headless --clean -c "lua require('test.config.bootstrap')" +qa
 
 .PHONY: lint
 lint:
@@ -15,15 +18,18 @@ lint:
 
 .PHONY: lint-luacheck
 lint-luacheck:
-	luacheck lua
+	@echo "lint(LUACHECK):"
+	@luacheck lua
 
 .PHONY: lint-luals
 lint-luals:
-	lua-language-server --check .
+	@echo "lint(LUALS):"
+	@VIMRUNTIME=$(VIMRUNTIME) lua-language-server --check .
 
 .PHONY: format-check
 format-check:
-	stylua lua --check
+	@echo "format(STYLUA):"
+	@stylua lua --check
 
 .PHONY: dev
 dev:
