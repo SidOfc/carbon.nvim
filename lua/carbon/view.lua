@@ -52,21 +52,20 @@ end
 
 local function create_insert_move(ctx)
   return function()
+    local col = ctx.edit_col
+    local lnum = ctx.edit_lnum
     local text = ctx.edit_prefix
-      .. vim.trim(string.sub(util.get_line(vim.fn.line('.')), ctx.edit_col))
+      .. vim.trim(string.sub(util.get_line(vim.fn.line('.')), col))
     local last_slash_col = vim.fn.strridx(text, '/') + 1
+    local path_hl_start = { lnum, 0 }
+    local path_hl_separator = { lnum, last_slash_col }
+    local path_hl_end = { lnum, -1 }
 
-    vim.api.nvim_buf_set_lines(
-      0,
-      ctx.edit_lnum,
-      ctx.edit_lnum + 1,
-      true,
-      { text }
-    )
-    util.clear_extmarks(0, { ctx.edit_lnum, 0 }, { ctx.edit_lnum, -1 }, {})
-    util.add_highlight(0, 'CarbonDir', ctx.edit_lnum, 0, last_slash_col)
-    util.add_highlight(0, 'CarbonFile', ctx.edit_lnum, last_slash_col, -1)
-    util.cursor(ctx.edit_lnum + 1, math.max(ctx.edit_col, vim.fn.col('.')))
+    vim.api.nvim_buf_set_lines(0, lnum, lnum + 1, true, { text })
+    util.clear_extmarks(0, path_hl_start, path_hl_end, {})
+    util.add_highlight(0, 'CarbonDir', path_hl_start, path_hl_separator)
+    util.add_highlight(0, 'CarbonFile', path_hl_separator, path_hl_end)
+    util.cursor(lnum + 1, math.max(col, vim.fn.col('.')))
   end
 end
 
@@ -846,7 +845,7 @@ function view:delete()
   local count = vim.v.count == 0 and #targets or vim.v.count1
   local path_idx = math.min(count, #targets)
   local target = targets[path_idx]
-  local highlight = {
+  local hl = {
     'CarbonFile',
     cursor.line.depth * 2 + 2 + cursor.line.icon_width,
     lnum_idx,
@@ -857,16 +856,15 @@ function view:delete()
   end
 
   if target.is_directory then
-    highlight[1] = 'CarbonDir'
+    hl[1] = 'CarbonDir'
   end
 
   for idx = 1, path_idx - 1 do
-    highlight[2] = highlight[2] + #cursor.line.path[idx].name + 1
+    hl[2] = hl[2] + #cursor.line.path[idx].name + 1
   end
 
-  util.clear_extmarks(0, { lnum_idx, highlight[2] }, { lnum_idx, -1 }, {})
-  util.add_highlight(0, 'CarbonDanger', lnum_idx, highlight[2], -1)
-
+  util.clear_extmarks(0, { lnum_idx, hl[2] }, { lnum_idx, -1 }, {})
+  util.add_highlight(0, 'CarbonDanger', { lnum_idx, hl[2] }, { lnum_idx, -1 })
   vim.cmd.redraw()
 
   local paths = table.concat(
@@ -899,7 +897,7 @@ function view:delete()
     util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
 
     for _, lhl in ipairs(cursor.line.highlights) do
-      util.add_highlight(0, lhl[1], lnum_idx, lhl[2], lhl[3])
+      util.add_highlight(0, lhl[1], { lnum_idx, lhl[2] }, { lnum_idx, lhl[3] })
     end
 
     self:render()
@@ -932,7 +930,12 @@ function view:move()
   end
 
   util.clear_extmarks(0, { lnum_idx, start_hl }, { lnum_idx, -1 }, {})
-  util.add_highlight(0, 'CarbonPending', lnum_idx, start_hl, -1)
+  util.add_highlight(
+    0,
+    'CarbonPending',
+    { lnum_idx, start_hl },
+    { lnum_idx, -1 }
+  )
   vim.cmd.redraw({ bang = true })
   vim.cmd.echohl('CarbonPending')
 
