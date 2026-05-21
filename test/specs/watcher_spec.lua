@@ -42,11 +42,8 @@ describe('carbon.watcher', function()
       assert.spy(callback2).was.called(2)
     end)
 
-    -- FIXME: remove pending status after figuring out how to wait for fs events
     describe('carbon:synchronize', function()
-      local it_when_only = vim.env.only and it or pending
-
-      it_when_only('triggers on new file', function()
+      it('triggers on new file', function()
         local callback = spy.new(function() end)
 
         watcher.register(vim.loop.cwd())
@@ -60,7 +57,7 @@ describe('carbon.watcher', function()
           .called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
       end)
 
-      it_when_only('triggers on file change', function()
+      it('triggers on file change', function()
         local callback = spy.new(function() end)
 
         helpers.ensure_path('check.sh')
@@ -77,7 +74,7 @@ describe('carbon.watcher', function()
           .called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
       end)
 
-      it_when_only('triggers on file remove', function()
+      it('triggers on file remove', function()
         local callback = spy.new(function() end)
 
         helpers.ensure_path('check.sh')
