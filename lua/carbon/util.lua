@@ -205,7 +205,7 @@ function util.clear_extmarks(buf, ...)
 end
 
 function util.add_highlight(buf, ...)
-  vim.api.vim.hl.range(buf, constants.hl, ...)
+  vim.hl.range(buf, constants.hl, ...)
 end
 
 function util.window_neighbors(window_id, sides)
