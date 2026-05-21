@@ -42,7 +42,6 @@ describe('carbon.watcher', function()
       assert.spy(callback2).was.called(2)
     end)
 
-    -- FIXME: remove pending status after figuring out how to wait for fs events
     describe('carbon:synchronize', function()
       it('triggers on new file', function()
         local callback = spy.new(function() end)
