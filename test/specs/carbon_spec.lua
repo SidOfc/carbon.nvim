@@ -97,11 +97,11 @@ describe('carbon', function()
       assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
     end)
 
-    -- FIXME: Somehow broken even though nothing "functional" seems changed
-    pending('opens files in a new tab', function()
+    it('opens files in a new tab', function()
       assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
 
-      util.cursor(12, 1)
+      -- NOTE: line 13 should refer to a `.toml` file
+      util.cursor(13, 1)
       carbon.tabe()
 
       assert.is.equal('toml', vim.bo.filetype)
@@ -379,17 +379,12 @@ describe('carbon', function()
   end)
 
   describe('quit', function()
-    -- FIXME: Somehow broken even though nothing "functional" seems changed
-    pending('closes the buffer', function()
-      vim.cmd.edit('README.md')
-
-      assert.is.equal('markdown', vim.bo.filetype)
-
+    it('closes the buffer', function()
       carbon.explore()
 
       assert.is.equal('carbon.explorer', vim.bo.filetype)
 
-      helpers.type_keys(settings.actions.quit)
+      carbon.quit()
 
       assert.is_not.equal('carbon.explorer', vim.bo.filetype)
     end)
