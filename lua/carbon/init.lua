@@ -26,7 +26,7 @@ function carbon.setup(user_settings)
     end
 
     local argv = vim.fn.argv()
-    local open = argv[1] and vim.fn.fnamemodify(argv[1], ':p') or vim.loop.cwd()
+    local open = argv[1] and vim.fn.fnamemodify(argv[1], ':p') or vim.uv.cwd()
     local command_opts = { bang = true, nargs = '?', complete = 'dir' }
 
     watcher.on('carbon:synchronize', function(_, path)

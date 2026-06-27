@@ -311,13 +311,13 @@ describe('carbon', function()
 
   describe('up', function()
     it('sets cwd to parent directory', function()
-      local original_cwd = vim.loop.cwd()
+      local original_cwd = vim.uv.cwd()
 
       settings.sync_pwd = true
       carbon.up()
 
       assert.is.equal(
-        vim.loop.cwd(),
+        vim.uv.cwd(),
         original_cwd and vim.fn.fnamemodify(original_cwd, ':h')
       )
 
@@ -336,42 +336,42 @@ describe('carbon', function()
 
   describe('reset', function()
     it('reset to original cwd during startup', function()
-      local original_cwd = vim.loop.cwd()
+      local original_cwd = vim.uv.cwd()
 
       settings.sync_pwd = true
       carbon.up()
       carbon.reset()
       settings.sync_pwd = settings.defaults.sync_pwd
 
-      assert.is.equal(original_cwd, vim.loop.cwd())
+      assert.is.equal(original_cwd, vim.uv.cwd())
     end)
   end)
 
   describe('down', function()
     it('sets cwd to cursor directory', function()
-      local original_cwd = vim.loop.cwd()
+      local original_cwd = vim.uv.cwd()
 
       settings.sync_pwd = true
       util.cursor(2, 1)
       carbon.down()
 
-      assert.is.equal(vim.loop.cwd(), string.format('%s/.github', original_cwd))
+      assert.is.equal(vim.uv.cwd(), string.format('%s/.github', original_cwd))
 
       carbon.reset()
-      assert.is.equal(vim.loop.cwd(), original_cwd)
+      assert.is.equal(vim.uv.cwd(), original_cwd)
       settings.sync_pwd = settings.defaults.sync_pwd
     end)
   end)
 
   describe('cd', function()
     it('sets cwd to target path', function()
-      local jump_cwd = string.format('%s/test/specs', vim.loop.cwd())
+      local jump_cwd = string.format('%s/test/specs', vim.uv.cwd())
 
       settings.sync_pwd = true
       util.cursor(2, 1)
       carbon.cd(jump_cwd)
 
-      assert.is.equal(jump_cwd, vim.loop.cwd())
+      assert.is.equal(jump_cwd, vim.uv.cwd())
 
       carbon.reset()
       settings.sync_pwd = settings.defaults.sync_pwd

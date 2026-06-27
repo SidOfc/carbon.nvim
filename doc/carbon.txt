@@ -728,7 +728,7 @@ UTIL                                                                 *carbon-uti
 
   Signature: `require('carbon.util').is_directory(`{path}`)`
 
-  Uses the `type` attribute returned by `fs_stat` from `vim.loop` to determine
+  Uses the `type` attribute returned by `fs_stat` from `vim.uv` to determine
   whether given {path} is a directory. Returns a boolean value or `nil` if the
   call to `fs_stat` failed.
 
@@ -2093,8 +2093,8 @@ WATCHER                                                           *carbon-watche
 
   Usage: `require('carbon.watcher')`
 
-  This module provides a thin wrapper around `vim.loop.new_fs_event`, see
-  |watch-file| for more information about `vim.loop.new_fs_event`. Paths can
+  This module provides a thin wrapper around `vim.uv.new_fs_event`, see
+  |watch-file| for more information about `vim.uv.new_fs_event`. Paths can
   be registered using |carbon-watcher-register|, once registered, any change
   to that path will cause an event to be emitted. Registered paths can be
   released using |carbon-watcher-release|. Releasing a path will stop the
@@ -2211,7 +2211,7 @@ WATCHER                                                           *carbon-watche
   Signature: `require('carbon.watcher').register(`{path}`)`
 
   Register an absolute {path}. Once registered, any changes made to this path
-  will emit events based on events received from Neovim's Lua |vim.loop| api.
+  will emit events based on events received from Neovim's Lua |vim.uv| api.
 
   See |carbon-watcher-built-in-events| for a list of built-in events.
 
