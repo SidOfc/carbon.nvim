@@ -1011,4 +1011,6 @@ function view:switch_to_existing_view(path)
   end
 end
 
+util.profile_module(view, 'view', { 'render' })
+
 return view

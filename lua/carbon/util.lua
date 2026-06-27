@@ -233,4 +233,26 @@ function util.window_neighbors(window_id, sides)
   return result
 end
 
+function util.profile(label, fn, ...)
+  local start_ns = vim.uv.hrtime()
+  local fn_result = { fn(...) }
+  local elapsed_ms = (vim.uv.hrtime() - start_ns) / 1e6
+
+  print('[' .. label .. ']' .. ' took: ' .. elapsed_ms .. 'ms')
+
+  return unpack(fn_result)
+end
+
+function util.profile_module(mod, label, method_names)
+  for _, method_name in ipairs(method_names or {}) do
+    local original = mod[method_name]
+
+    if type(original) == 'function' then
+      mod[method_name] = function(...)
+        return util.profile(label .. ':' .. method_name, original, ...)
+      end
+    end
+  end
+end
+
 return util
