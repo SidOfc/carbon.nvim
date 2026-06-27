@@ -162,18 +162,4 @@ function entry:get_children()
   return entries
 end
 
-function entry:highlight_group()
-  if self.is_symlink == 1 then
-    return 'CarbonSymlink'
-  elseif self.is_symlink == 2 then
-    return 'CarbonBrokenSymlink'
-  elseif self.is_directory then
-    return 'CarbonDir'
-  elseif self.is_executable then
-    return 'CarbonExe'
-  else
-    return 'CarbonFile'
-  end
-end
-
 return entry
