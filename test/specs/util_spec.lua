@@ -15,7 +15,7 @@ describe('carbon.util', function()
 
   describe('explore_path', function()
     it('{path} is expanded to an absolute path', function()
-      local cwd = vim.loop.cwd()
+      local cwd = vim.uv.cwd()
       local parent = cwd and vim.fn.fnamemodify(cwd, ':h')
 
       assert.is.equal(parent, util.explore_path('../'))
@@ -42,7 +42,7 @@ describe('carbon.util', function()
 
   describe('is_directory', function()
     it('returns true when {path} is a directory', function()
-      assert.is_true(util.is_directory(vim.loop.cwd()))
+      assert.is_true(util.is_directory(vim.uv.cwd()))
     end)
 
     it('returns false when {path} is a file', function()

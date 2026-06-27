@@ -39,7 +39,7 @@ describe('carbon.entry', function()
       local original = helpers.resolve('README.md')
       local symlink = string.format('%s-symlink', original)
 
-      vim.loop.fs_symlink(original, symlink)
+      vim.uv.fs_symlink(original, symlink)
 
       assert.is.equal(1, entry.new(symlink).is_symlink)
 
@@ -51,7 +51,7 @@ describe('carbon.entry', function()
       local broken = string.format('%s-broken', original)
       local symlink = string.format('%s-symlink', original)
 
-      vim.loop.fs_symlink(broken, symlink)
+      vim.uv.fs_symlink(broken, symlink)
 
       assert.is.equal(2, entry.new(symlink).is_symlink)
 

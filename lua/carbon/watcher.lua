@@ -25,7 +25,7 @@ end
 
 function watcher.register(path)
   if not watcher.listeners[path] then
-    watcher.listeners[path] = vim.loop.new_fs_event()
+    watcher.listeners[path] = vim.uv.new_fs_event()
 
     watcher.listeners[path]:start(
       path,

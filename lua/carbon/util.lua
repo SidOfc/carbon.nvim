@@ -10,11 +10,11 @@ function util.explore_path(path, current_view)
   path = string.gsub(path, '%s', '')
 
   if path == '' then
-    path = vim.loop.cwd() or ''
+    path = vim.uv.cwd() or ''
   end
 
   if not vim.startswith(path, '/') then
-    local base_path = current_view and current_view.root.path or vim.loop.cwd()
+    local base_path = current_view and current_view.root.path or vim.uv.cwd()
 
     path = string.format('%s/%s', base_path, path)
   end
@@ -47,7 +47,7 @@ function util.cursor(row, col)
 end
 
 function util.is_directory(path)
-  return (vim.loop.fs_stat(path) or {}).type == 'directory'
+  return (vim.uv.fs_stat(path) or {}).type == 'directory'
 end
 
 function util.plug(name)

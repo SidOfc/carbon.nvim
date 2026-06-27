@@ -18,13 +18,13 @@ end
 function entry.new(path, parent)
   local raw_path = path == '' and '/' or path
   local clean = string.gsub(raw_path, '/+$', '')
-  local lstat = select(2, pcall(vim.loop.fs_lstat, raw_path)) or {}
+  local lstat = select(2, pcall(vim.uv.fs_lstat, raw_path)) or {}
   local is_executable = false
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
   if is_symlink then
-    local ok, stat = pcall(vim.loop.fs_stat, raw_path)
+    local ok, stat = pcall(vim.uv.fs_stat, raw_path)
 
     if ok and stat then
       is_directory = stat.type == 'directory'
@@ -145,11 +145,11 @@ end
 
 function entry:get_children()
   local entries = {}
-  local handle = vim.loop.fs_scandir(self.raw_path)
+  local handle = vim.uv.fs_scandir(self.raw_path)
 
   if type(handle) == 'userdata' then
     local function iterator()
-      return vim.loop.fs_scandir_next(handle)
+      return vim.uv.fs_scandir_next(handle)
     end
 
     for name in iterator do

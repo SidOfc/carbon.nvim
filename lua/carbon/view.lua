@@ -115,7 +115,7 @@ function view.activate(options_param)
   local original_window = vim.api.nvim_get_current_win()
   local current_view = (options.path and view.get(options.path))
     or view.current()
-    or view.get(vim.loop.cwd())
+    or view.get(vim.uv.cwd())
 
   if options.reveal or settings.auto_reveal then
     current_view:expand_to_path(vim.fn.expand('%'))
@@ -539,7 +539,7 @@ end
 
 function view:set_root(target, options_param)
   local options = options_param or {}
-  local is_cwd = self.root.path == vim.loop.cwd()
+  local is_cwd = self.root.path == vim.uv.cwd()
 
   if type(target) == 'string' then
     target = entry.new(target)
@@ -959,7 +959,7 @@ function view:move()
 
   if updated_path == ctx.target.path then
     self:render()
-  elseif vim.loop.fs_stat(updated_path) then
+  elseif vim.uv.fs_stat(updated_path) then
     self:render()
     vim.api.nvim_echo({
       { 'Failed to move: ', 'CarbonDanger' },
@@ -1008,7 +1008,7 @@ function view:switch_to_existing_view(path)
   if destination_view then
     vim.api.nvim_win_set_buf(0, destination_view:buffer())
 
-    if settings.sync_pwd and self.root.path == vim.loop.cwd() then
+    if settings.sync_pwd and self.root.path == vim.uv.cwd() then
       vim.api.nvim_set_current_dir(destination_view.root.path)
     end
 

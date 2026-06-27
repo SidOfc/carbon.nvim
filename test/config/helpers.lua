@@ -20,7 +20,7 @@ end
 function helpers.resolve(relative_path)
   local clean_path = string.gsub(relative_path, '/+^', '')
 
-  return string.format('%s/%s', vim.loop.cwd(), clean_path)
+  return string.format('%s/%s', vim.uv.cwd(), clean_path)
 end
 
 function helpers.change_file(relative_path)
@@ -36,7 +36,7 @@ function helpers.delete_path(relative_path)
 end
 
 function helpers.has_path(relative_path)
-  return vim.loop.fs_stat(helpers.resolve(relative_path)) ~= nil
+  return vim.uv.fs_stat(helpers.resolve(relative_path)) ~= nil
 end
 
 function helpers.is_directory(relative_path)
@@ -88,7 +88,7 @@ function helpers.autocmd(event, options)
 end
 
 function helpers.entry(relative_path)
-  return entry.find(string.format('%s/%s', vim.loop.cwd(), relative_path))
+  return entry.find(string.format('%s/%s', vim.uv.cwd(), relative_path))
 end
 
 function helpers.is_open(path)

@@ -46,7 +46,7 @@ describe('carbon.watcher', function()
       it('triggers on new file', function()
         local callback = spy.new(function() end)
 
-        watcher.register(vim.loop.cwd())
+        watcher.register(vim.uv.cwd())
         watcher.on('carbon:synchronize', callback)
 
         helpers.ensure_path('check.txt')
@@ -54,7 +54,7 @@ describe('carbon.watcher', function()
 
         assert
           .spy(callback).was
-          .called_with('carbon:synchronize', vim.loop.cwd(), 'check.txt', nil)
+          .called_with('carbon:synchronize', vim.uv.cwd(), 'check.txt', nil)
       end)
 
       it('triggers on file change', function()
@@ -62,7 +62,7 @@ describe('carbon.watcher', function()
 
         helpers.ensure_path('check.sh')
 
-        watcher.register(vim.loop.cwd())
+        watcher.register(vim.uv.cwd())
         watcher.on('carbon:synchronize', callback)
 
         helpers.change_file('check.sh')
@@ -71,7 +71,7 @@ describe('carbon.watcher', function()
         assert.spy(callback).was.called(1)
         assert
           .spy(callback).was
-          .called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+          .called_with('carbon:synchronize', vim.uv.cwd(), 'check.sh', nil)
       end)
 
       it('triggers on file remove', function()
@@ -79,7 +79,7 @@ describe('carbon.watcher', function()
 
         helpers.ensure_path('check.sh')
 
-        watcher.register(vim.loop.cwd())
+        watcher.register(vim.uv.cwd())
         watcher.on('carbon:synchronize', callback)
 
         helpers.delete_path('check.sh')
@@ -88,7 +88,7 @@ describe('carbon.watcher', function()
         assert.spy(callback).was.called(1)
         assert
           .spy(callback).was
-          .called_with('carbon:synchronize', vim.loop.cwd(), 'check.sh', nil)
+          .called_with('carbon:synchronize', vim.uv.cwd(), 'check.sh', nil)
       end)
     end)
   end)

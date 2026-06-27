@@ -1,4 +1,4 @@
-local repo_root = vim.loop.cwd()
+local repo_root = vim.uv.cwd()
 local tmp_dir = vim.fn.tempname()
 
 vim.opt.runtimepath:prepend(repo_root)

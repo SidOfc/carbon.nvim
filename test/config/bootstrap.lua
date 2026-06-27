@@ -1,4 +1,4 @@
-vim.env.CARBON_REPO_ROOT = vim.loop.cwd()
+vim.env.CARBON_REPO_ROOT = vim.uv.cwd()
 
 local test_options = { minimal_init = 'test/config/init.lua' }
 local plenary_repo = 'https://github.com/nvim-lua/plenary.nvim'
