@@ -1518,18 +1518,27 @@ VIEW                                                                 *carbon-vie
     <string HighlightGroupName>,
     <number start_column>,
     <number end_column>,
+    extmark = {
+      start_row = <number line_index>,
+      start_col = <number start_column>,
+      opts = {
+        hl_group = <string HighlightGroupName>,
+        end_row = <number line_index>,
+        end_col = <number end_column>,
+        strict = false,
+      }
+    }
   }
 <
-  |carbon-view-render| uses |vim.hl.range| to set the highlights.
+  |carbon-view-render| uses |nvim_buf_set_extmark| to set the highlights.
   It is called the following way:
 
-  `vim.vim.hl.range(`
+  `vim.api.nvim_buf_set_extmark(`
     |carbon-view-buffer|,
     |carbon-constant-hl|,
-    `highlight[1],`
-    `lnum - 1,`
-    `highlight[2],`
-    `highlight[3],`
+    `highlight.extmark.start_row,`
+    `highlight.extmark.start_col,`
+    `highlight.extmark.opts,`
   `)`
 
   Property: `path`

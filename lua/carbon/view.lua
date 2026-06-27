@@ -362,19 +362,19 @@ function view:render()
   local lines = {}
   local hls = {}
 
-  for lnum, line_data in ipairs(self:current_lines()) do
+  for _, line_data in ipairs(self:current_lines()) do
     lines[#lines + 1] = line_data.line
 
     if self.flash and self.flash.path == line_data.entry.path then
       cursor = {
-        lnum = lnum,
+        lnum = line_data.lnum,
         col = 1 + (line_data.depth + 1) * 2,
         line = line_data.line,
       }
     end
 
     for _, hl in ipairs(line_data.highlights) do
-      hls[#hls + 1] = { hl[1], { lnum - 1, hl[2] }, { lnum - 1, hl[3] } }
+      hls[#hls + 1] = hl
     end
   end
 
@@ -392,7 +392,15 @@ function view:render()
   end
 
   for _, hl in ipairs(hls) do
-    vim.hl.range(buf, constants.hl, hl[1], hl[2], hl[3])
+    local ext = hl.extmark
+
+    vim.api.nvim_buf_set_extmark(
+      buf,
+      constants.hl,
+      ext.start_row,
+      ext.start_col,
+      ext.opts
+    )
   end
 
   if cursor then
@@ -622,12 +630,14 @@ function view:lines(input_target, lines, depth)
   end
 
   if not input_target and #lines == 0 then
+    local line = self.root.name .. '/'
+
     lines[#lines + 1] = {
       lnum = 1,
       depth = -1,
       entry = self.root,
-      line = self.root.name .. '/',
-      highlights = { { 'CarbonDir', 0, -1 } },
+      line = line,
+      highlights = { { 'CarbonDir', 0, #line } },
       icon_width = 0,
       path = {},
     }
@@ -761,6 +771,21 @@ function view:lines(input_target, lines, depth)
 
     if tmp.is_directory and self:get_path_attr(tmp.path, 'open') then
       self:lines(tmp, lines, depth + 1)
+    end
+  end
+
+  for _, line in ipairs(lines) do
+    for _, hl in ipairs(line.highlights) do
+      hl.extmark = {
+        start_row = line.lnum - 1,
+        start_col = hl[2],
+        opts = {
+          hl_group = hl[1],
+          end_row = line.lnum - 1,
+          end_col = hl[3],
+          strict = false,
+        },
+      }
     end
   end
 
@@ -1011,6 +1036,6 @@ function view:switch_to_existing_view(path)
   end
 end
 
-util.profile_module(view, 'view', { 'render' })
+-- util.profile_module(view, 'view', { 'render' })
 
 return view
