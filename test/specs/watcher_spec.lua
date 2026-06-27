@@ -50,7 +50,7 @@ describe('carbon.watcher', function()
         watcher.on('carbon:synchronize', callback)
 
         helpers.ensure_path('check.txt')
-        vim.wait(100)
+        helpers.poll_spy_calls(callback, 1)
 
         assert
           .spy(callback).was
@@ -66,7 +66,7 @@ describe('carbon.watcher', function()
         watcher.on('carbon:synchronize', callback)
 
         helpers.change_file('check.sh')
-        vim.wait(100)
+        helpers.poll_spy_calls(callback, 1)
 
         assert.spy(callback).was.called(1)
         assert
@@ -83,7 +83,7 @@ describe('carbon.watcher', function()
         watcher.on('carbon:synchronize', callback)
 
         helpers.delete_path('check.sh')
-        vim.wait(100)
+        helpers.poll_spy_calls(callback, 1)
 
         assert.spy(callback).was.called(1)
         assert

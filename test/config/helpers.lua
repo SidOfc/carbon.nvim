@@ -53,6 +53,16 @@ function helpers.ensure_path(relative_path)
   end
 end
 
+function helpers.poll_spy_calls(spy, call_count, timeout, interval, fast_only)
+  timeout = math.max(0, timeout or 3000)
+  call_count = math.max(0, call_count or 1)
+  interval = interval or math.max(10, timeout / 100)
+
+  vim.wait(timeout, function()
+    return #spy.calls >= call_count
+  end, interval, fast_only)
+end
+
 function helpers.type_keys(keys_to_type)
   return vim.api.nvim_feedkeys(
     vim.api.nvim_replace_termcodes(keys_to_type, true, false, true),
