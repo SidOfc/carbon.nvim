@@ -204,6 +204,16 @@ function util.clear_extmarks(buf, ...)
   end
 end
 
+function util.add_extmark(buf, extmark)
+  vim.api.nvim_buf_set_extmark(
+    buf,
+    constants.hl,
+    extmark.start_row,
+    extmark.start_col,
+    extmark.opts
+  )
+end
+
 function util.add_highlight(buf, ...)
   vim.hl.range(buf, constants.hl, ...)
 end

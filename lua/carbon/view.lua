@@ -392,15 +392,7 @@ function view:render()
   end
 
   for _, hl in ipairs(hls) do
-    local ext = hl.extmark
-
-    vim.api.nvim_buf_set_extmark(
-      buf,
-      constants.hl,
-      ext.start_row,
-      ext.start_col,
-      ext.opts
-    )
+    util.add_extmark(buf, hl.extmark)
   end
 
   if cursor then
@@ -922,7 +914,7 @@ function view:delete()
     util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
 
     for _, lhl in ipairs(cursor.line.highlights) do
-      util.add_highlight(0, lhl[1], { lnum_idx, lhl[2] }, { lnum_idx, lhl[3] })
+      util.add_extmark(0, lhl.extmark)
     end
 
     self:render()
