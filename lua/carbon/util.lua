@@ -62,16 +62,6 @@ function util.tbl_key(tbl, item)
   end
 end
 
-function util.tbl_some(tbl, callback)
-  for key, value in pairs(tbl) do
-    if callback(value, key) then
-      return true
-    end
-  end
-
-  return false
-end
-
 function util.tbl_find(tbl, callback)
   for key, value in pairs(tbl) do
     if callback(value, key) then
@@ -204,6 +194,16 @@ function util.clear_extmarks(buf, ...)
   end
 end
 
+function util.add_extmark(buf, extmark)
+  vim.api.nvim_buf_set_extmark(
+    buf,
+    constants.hl,
+    extmark.start_row,
+    extmark.start_col,
+    extmark.opts
+  )
+end
+
 function util.add_highlight(buf, ...)
   vim.hl.range(buf, constants.hl, ...)
 end
@@ -231,6 +231,28 @@ function util.window_neighbors(window_id, sides)
   vim.api.nvim_set_current_win(original_window)
 
   return result
+end
+
+function util.profile(label, fn, ...)
+  local start_ns = vim.uv.hrtime()
+  local fn_result = { fn(...) }
+  local elapsed_ms = (vim.uv.hrtime() - start_ns) / 1e6
+
+  print('[' .. label .. ']' .. ' took: ' .. elapsed_ms .. 'ms')
+
+  return unpack(fn_result)
+end
+
+function util.profile_module(mod, label, method_names)
+  for _, method_name in ipairs(method_names or {}) do
+    local original = mod[method_name]
+
+    if type(original) == 'function' then
+      mod[method_name] = function(...)
+        return util.profile(label .. ':' .. method_name, original, ...)
+      end
+    end
+  end
 end
 
 return util

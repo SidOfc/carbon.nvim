@@ -813,6 +813,35 @@ UTIL                                                                 *carbon-uti
   {properties} must be a table.
 
   `------------------------------------------------------------------------------`
+  clear_extmarks                                      *carbon-util-clear-extmarks*
+
+  Signature: `require('carbon.util').clear_extmarks(`{buf}, {...}`)`
+
+  Retrieves extmarks for {buf} using |nvim_buf_get_extmarks| like the following:
+
+  `vim.api.nvim_buf_get_extmarks(`{buf}, <ns_id>, {...}`)`
+
+  <ns_id> will be set to |carbon-constant-hl|.
+
+  `------------------------------------------------------------------------------`
+  add_extmark                                            *carbon-util-add-extmark*
+
+  Signature: `require('carbon.util').add_extmark(`{buf}, {extmark}`)`
+
+  {extmark} is a custom format as provided by each item in the `highlights`
+  property of |carbon-view-lines|. Calls |nvim_buf_set_extmark| like this:
+
+  `vim.api.nvim_buf_set_extmark(`
+    {buf},
+    <ns_id>,
+    {extmark.start_row},
+    {extmark.start_col},
+    {extmark.opts}
+  `)`
+
+  <ns_id> will be set to |carbon-constant-hl|.
+
+  `------------------------------------------------------------------------------`
   add_highlight                                        *carbon-util-add-highlight*
 
   Signature: `require('carbon.util').add_highlight(`{buf}, {...}`)`
@@ -989,6 +1018,59 @@ UTIL                                                                 *carbon-uti
 
   Returns the contents of line {lnum} in {buffer}.
   When {buffer} is absent `0` (current buffer) is used.
+
+  `------------------------------------------------------------------------------`
+  profile                                                    *carbon-util-profile*
+
+  Signature: `require('carbon.util').profile(`{label}, {fn}, {...}`)`
+
+  This method is primarily used for local development.
+
+  Prints the time it takes {fn} to execute in milliseconds.
+  Any {...} arguments are passed to {fn}.
+
+  Examples:
+>
+  local function wait(wait_time)
+    vim.wait(wait_time or 100)
+  end
+
+  util.profile('wait', wait)
+  -- prints "[wait] took: 100ms"
+
+  util.profile('wait', wait, 4075)
+  -- prints "[wait] took: 4075ms"
+<
+  `------------------------------------------------------------------------------`
+  profile_module                                      *carbon-util-profile-module*
+
+  Signature: `require('carbon.util').profile_module(`
+              {mod},
+              {label},
+              {method_names}
+            `)`
+
+  This method is primarily used for local development.
+
+  Given a Lua module {mod}, an identifiable {label} and a table of
+  {method_names}, this method wraps each given method with a call to
+  |carbon-util-profile|.
+
+  Example:
+>
+  local util = require('carbon.util')
+  local M = {}
+
+  function M.wait(wait_time)
+    vim.wait(wait_time or 100)
+  end
+
+  util.profile_module(M, 'M', {'wait'})
+
+  return M
+<
+  Whenever calling `M.wait` in above example, it will show the same output as
+  |carbon-util-profile|.
 
 ================================================================================
 ENTRY                                                               *carbon-entry*
@@ -1230,6 +1312,14 @@ VIEW                                                                 *carbon-vie
   synchronized with changes from the file system.
 
   `------------------------------------------------------------------------------`
+  file_icons                                              *carbon-view-file-icons*
+
+  Signature: `require('carbon.view').file_icons(`{path}`)`
+
+  Lazily require nvim-web-devicons. If successful, returns the required module
+  for use by Carbon. Returns `nil` when nvim-web-devicons is not installed.
+
+  `------------------------------------------------------------------------------`
   find                                                          *carbon-view-find*
 
   Signature: `require('carbon.view').find(`{path}`)`
@@ -1391,6 +1481,18 @@ VIEW                                                                 *carbon-vie
   local variable which is attached to new Carbon buffers via |carbon-view-buffer|.
 
   `------------------------------------------------------------------------------`
+  terminate                                                *carbon-view-terminate*
+
+  Signature: `view:terminate()`
+
+  Termination of a `view` instance will result in forceful deletion
+  of all buffers showing it. After this has been done |carbon-entry-terminate|
+  is called on the `view.root` entry.
+
+  If this results in Neovim being left without any open buffers, Carbon
+  reopens automatically.
+
+  `------------------------------------------------------------------------------`
   buffer                                                      *carbon-view-buffer*
 
   Signature: `view:buffer()`
@@ -1483,7 +1585,23 @@ VIEW                                                                 *carbon-vie
     depth = <number>,
     path = <table<entry>>,
     icon_width = <number>,
-    highlights = <table<table<string, number, number>>>,
+    highlights = <table
+      <table
+        <string>,
+        <number>,
+        <number>,
+        extmark = <table
+          start_row = <number>
+          start_col = <number>,
+          opts = <table
+            hl_group = <string>,
+            end_row = <number>,
+            end_col = <number>,
+            strict = <boolean>
+          >
+        >
+      >
+    >,
   }
 <
   Property: `entry`
@@ -1518,18 +1636,27 @@ VIEW                                                                 *carbon-vie
     <string HighlightGroupName>,
     <number start_column>,
     <number end_column>,
+    extmark = {
+      start_row = <number line_index>,
+      start_col = <number start_column>,
+      opts = {
+        hl_group = <string HighlightGroupName>,
+        end_row = <number line_index>,
+        end_col = <number end_column>,
+        strict = false,
+      }
+    }
   }
 <
-  |carbon-view-render| uses |vim.hl.range| to set the highlights.
+  |carbon-view-render| uses |nvim_buf_set_extmark| to set the highlights.
   It is called the following way:
 
-  `vim.vim.hl.range(`
+  `vim.api.nvim_buf_set_extmark(`
     |carbon-view-buffer|,
     |carbon-constant-hl|,
-    `highlight[1],`
-    `lnum - 1,`
-    `highlight[2],`
-    `highlight[3],`
+    `highlight.extmark.start_row,`
+    `highlight.extmark.start_col,`
+    `highlight.extmark.opts,`
   `)`
 
   Property: `path`

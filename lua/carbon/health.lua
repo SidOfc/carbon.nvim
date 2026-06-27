@@ -30,10 +30,21 @@ end
 
 function health.report_views()
   vim.health.start('view::active')
+  local active_views = {}
+
+  for _, current_view in pairs(view.items) do
+    if current_view then
+      active_views[#active_views + 1] = current_view
+    end
+  end
+
+  table.sort(active_views, function(v1, v2)
+    return v1.index < v2.index
+  end)
 
   local view_roots = vim.tbl_map(function(item)
     return item.root
-  end, view.get_sorted_items())
+  end, active_views)
 
   table.sort(view_roots)
 
