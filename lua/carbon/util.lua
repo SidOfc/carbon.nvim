@@ -62,16 +62,6 @@ function util.tbl_key(tbl, item)
   end
 end
 
-function util.tbl_some(tbl, callback)
-  for key, value in pairs(tbl) do
-    if callback(value, key) then
-      return true
-    end
-  end
-
-  return false
-end
-
 function util.tbl_find(tbl, callback)
   for key, value in pairs(tbl) do
     if callback(value, key) then

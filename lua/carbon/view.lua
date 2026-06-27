@@ -69,22 +69,6 @@ local function create_insert_move(ctx)
   end
 end
 
-function view.get_sorted_items()
-  local active_views = {}
-
-  for _, current_view in pairs(view.items) do
-    if current_view then
-      active_views[#active_views + 1] = current_view
-    end
-  end
-
-  table.sort(active_views, function(v1, v2)
-    return v1.index < v2.index
-  end)
-
-  return active_views
-end
-
 function view.file_icons()
   if settings.file_icons then
     local ok, module = pcall(require, 'nvim-web-devicons')
@@ -578,9 +562,13 @@ function view:set_root(target, options_param)
   )
 
   watcher.keep(function(path)
-    return util.tbl_some(view.items, function(current_view)
-      return vim.startswith(path, current_view.root.path)
-    end)
+    for _, target_view in pairs(view.items) do
+      if vim.startswith(path, target_view.root.path) then
+        return true
+      end
+    end
+
+    return false
   end)
 
   if settings.sync_pwd and is_cwd then

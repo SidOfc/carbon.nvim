@@ -36,6 +36,36 @@ end
 
 describe('documentation', function()
   describe('carbon.txt', function()
+    describe('Lua API helptag', function()
+      for _, mod_name in ipairs({ 'entry', 'util', 'view', 'watcher' }) do
+        local expected_tags = {}
+        local mod = require(string.format('carbon.%s', mod_name))
+
+        for property, value in pairs(mod) do
+          if
+            type(value) == 'function' and not vim.startswith(property, '__')
+          then
+            local property_tag = string.gsub(property, '_', '-')
+
+            expected_tags[#expected_tags + 1] = {
+              help_name = string.format('carbon-%s-%s', mod_name, property_tag),
+              module_name = mod_name,
+              method_name = property,
+            }
+          end
+        end
+
+        for _, tag in ipairs(expected_tags) do
+          it(tag.help_name, function()
+            assert(
+              (carbon_txt.tags[tag.help_name] or 0) >= 1,
+              string.format('%s is not documented', tag.help_name)
+            )
+          end)
+        end
+      end
+    end)
+
     describe('helptags', function()
       for tag, count in pairs(carbon_txt.tags) do
         it(tag, function()
