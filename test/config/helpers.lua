@@ -79,6 +79,9 @@ function helpers.inspect_buffer(start, finish)
   print(table.concat(helpers.buffer_line_range(start, finish), '\n'))
 end
 
+---@param event string
+---@param options table | nil
+---@return table
 function helpers.autocmd(event, options)
   return vim.api.nvim_get_autocmds({
     group = constants.augroup,
@@ -92,14 +95,14 @@ function helpers.entry(relative_path)
 end
 
 function helpers.is_open(path)
-  return view.execute(function(ctx)
-    return ctx.view:get_path_attr(path, 'open')
+  return view.execute(function(current_view)
+    return current_view:get_path_attr(path, 'open')
   end)
 end
 
 function helpers.line_with_file()
-  return view.execute(function(ctx)
-    return util.tbl_find(ctx.view:current_lines(), function(line)
+  return view.execute(function(current_view)
+    return util.tbl_find(current_view:current_lines(), function(line)
       return not line.entry.is_directory
     end)
   end)
