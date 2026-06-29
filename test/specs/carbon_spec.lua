@@ -120,13 +120,13 @@ describe('carbon', function()
       util.cursor(4, 1)
       carbon.edit()
 
-      view.execute(function(ctx)
-        assert.is_true(ctx.view:get_path_attr(doc_entry.path, 'open'))
+      view.execute(function(current_view)
+        assert.is_true(current_view:get_path_attr(doc_entry.path, 'open'))
       end)
 
       carbon.edit()
-      view.execute(function(ctx)
-        assert.is_false(ctx.view:get_path_attr(doc_entry.path, 'open'))
+      view.execute(function(current_view)
+        assert.is_false(current_view:get_path_attr(doc_entry.path, 'open'))
       end)
     end)
 

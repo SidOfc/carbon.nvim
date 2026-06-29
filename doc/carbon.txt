@@ -1384,12 +1384,7 @@ VIEW                                                                 *carbon-vie
   Calls {callback} when the current active buffer is a Carbon buffer. Does
   nothing otherwise.
 
-  Executes {callback} with a table containing the following keys:
-
-  `{`
-    `cursor =` |carbon-view-cursor|`,`
-    `view = `|carbon-view-instance|`,`
-  `}`
+  Executes {callback} with |carbon-view-instance| as the first parameter.
 
   `------------------------------------------------------------------------------`
   resync                                                      *carbon-view-resync*
@@ -1677,41 +1672,26 @@ VIEW                                                                 *carbon-vie
   `------------------------------------------------------------------------------`
   cursor                                                      *carbon-view-cursor*
 
-  Signature: `view:cursor(`[{opts}]`)`
+  Retrieve entry information at cursor position while taking into account the
+  mechanics of |carbon-setting-compress|.
 
-  The variable `view` in this section refers to a |carbon-view-instance|.
+  Signature: ~
+    `view:cursor(`[{opts}]`)`
 
-  Returns a table with the following shape:
->
-  {
-    line = <line>,
-    target = <entry>,
-    target_line = <line>,
-  }
-<
-  Property: `line`
+  Parameters: ~
+    • {opts} Optional parameters
+      • target_directory_only: (`boolean?` default: false) When true, ensures
+        |carbon-entry-new| entry is a directory. When a file is encountered
+        the target will become the parent directory of that file.
+      • count: (`number?` default: |vim.v|.count) nth entry from the start of the line.
 
-  An item at index `line('.')` from |carbon-view-lines|.
-
-  Property: `target`
-
-  Equal to `line.entry` by default but when called during a mapping, will respect
-  |v:count| where possible. This is used for example to start deleting from
-  "left to right" on compressed paths by prefixing a mapping with a [count].
-
-  When {opts}`.target_directory_only` is truthy and `target.is_directory` is `false`
-  then `target` will be set to `line.path[#line.path] or target.parent` BEFORE
-  any [count] logic is applied.
-
-  One way to describe the difference between `line.entry` and `target` is that
-  `line.entry` will always point to the last path component entry on the current
-  line whereas `target` points to the entry targetted by the user.
-
-  Property: `target_line`
-
-  Like `line` but `target_line` refers to the line which `target` is located on.
-
-  For more information about compressed paths, see: |carbon-setting-compress|.
+  Return: ~
+      (`table<string, any>`) Cursor line information with the following keys:
+      • target: (|carbon-entry-new| entry) The target entry, by default the
+        rightmost entry unless {opts}.count is specified in which case it will
+        be the {opts}.count entry from the left.
+      • line: (|carbon-view-lines| line) The line object on which the target
+        entry exists.
 
   `------------------------------------------------------------------------------`
   show                                                          *carbon-view-show*

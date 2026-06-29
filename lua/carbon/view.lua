@@ -15,7 +15,7 @@ view.last_index = 0
 local function create_leave(ctx)
   vim.cmd.stopinsert()
   ctx.view:set_path_attr(ctx.target.path, 'compressible', ctx.prev_compressible)
-  util.cursor(ctx.target_line.lnum, 1)
+  util.cursor(ctx.line.lnum, 1)
   vim.keymap.del('i', '<cr>', { buffer = 0 })
   vim.keymap.del('i', '<esc>', { buffer = 0 })
   util.clear_autocmd('CursorMovedI', { buffer = 0 })
@@ -228,7 +228,7 @@ function view.execute(callback)
   local current_view = view.current()
 
   if current_view then
-    return callback({ cursor = current_view:cursor(), view = current_view })
+    return callback(current_view)
   end
 end
 
@@ -517,8 +517,8 @@ function view:cd(path)
 end
 
 function view:down(count)
-  local cursor = self:cursor()
-  local new_root = cursor.line.path[count or vim.v.count1] or cursor.line.entry
+  local cursor = self:cursor({ count = math.max(1, count or vim.v.count1) })
+  local new_root = cursor.target
 
   if not new_root.is_directory then
     new_root = new_root.parent
@@ -777,14 +777,13 @@ function view:cursor(opts)
   local lines = self:current_lines()
   local line = lines[vim.fn.line('.')]
   local target = line.entry
-  local target_line
 
   if options.target_directory_only and not target.is_directory then
     target = target.parent
   end
 
-  target = line.path[vim.v.count] or target
-  target_line = util.tbl_find(lines, function(current)
+  target = line.path[options.count or vim.v.count] or target
+  line = util.tbl_find(lines, function(current)
     if current.entry.path == target.path then
       return true
     end
@@ -796,67 +795,61 @@ function view:cursor(opts)
     end)
   end)
 
-  return { line = line, target = target, target_line = target_line }
+  return { target = target, line = line }
 end
 
 function view:create()
-  local ctx = self:cursor({ target_directory_only = true })
+  local cursor = self:cursor({ target_directory_only = true })
 
-  ctx.view = self
-  ctx.compact = ctx.target.is_directory and #ctx.target:children() == 0
-  ctx.prev_open = self:get_path_attr(ctx.target.path, 'open')
-  ctx.prev_compressible = self:get_path_attr(ctx.target.path, 'compressible')
+  cursor.view = self
+  cursor.compact = cursor.target.is_directory and #cursor.target:children() == 0
+  cursor.prev_open = self:get_path_attr(cursor.target.path, 'open')
+  cursor.prev_compressible =
+    self:get_path_attr(cursor.target.path, 'compressible')
 
-  self:set_path_attr(ctx.target.path, 'open', true)
-  self:set_path_attr(ctx.target.path, 'compressible', false)
+  self:set_path_attr(cursor.target.path, 'open', true)
+  self:set_path_attr(cursor.target.path, 'compressible', false)
 
-  if ctx.compact then
-    ctx.edit_prefix = ctx.line.line
-    ctx.edit_lnum = ctx.line.lnum - 1
-    ctx.edit_col = #ctx.edit_prefix + 1
-    ctx.init_end_lnum = ctx.edit_lnum + 1
+  if cursor.compact then
+    cursor.edit_prefix = cursor.line.line
+    cursor.edit_lnum = cursor.line.lnum - 1
+    cursor.edit_col = #cursor.edit_prefix + 1
+    cursor.init_end_lnum = cursor.edit_lnum + 1
   else
-    ctx.edit_prefix = string.rep('  ', ctx.target_line.depth + 2)
-    ctx.edit_lnum = ctx.target_line.lnum + #self:lines(ctx.target)
-    ctx.edit_col = #ctx.edit_prefix + 1
-    ctx.init_end_lnum = ctx.edit_lnum
+    cursor.edit_prefix = string.rep('  ', cursor.line.depth + 2)
+    cursor.edit_lnum = cursor.line.lnum + #self:lines(cursor.target)
+    cursor.edit_col = #cursor.edit_prefix + 1
+    cursor.init_end_lnum = cursor.edit_lnum
   end
 
   self:update()
   self:render()
-  util.autocmd('CursorMovedI', create_insert_move(ctx), { buffer = 0 })
-  vim.keymap.set('i', '<cr>', create_confirm(ctx), { buffer = 0 })
-  vim.keymap.set('i', '<esc>', create_cancel(ctx), { buffer = 0 })
+  util.autocmd('CursorMovedI', create_insert_move(cursor), { buffer = 0 })
+  vim.keymap.set('i', '<cr>', create_confirm(cursor), { buffer = 0 })
+  vim.keymap.set('i', '<esc>', create_cancel(cursor), { buffer = 0 })
   vim.cmd.startinsert({ bang = true })
   vim.api.nvim_set_option_value('modifiable', true, { buf = 0 })
   vim.api.nvim_buf_set_lines(
     0,
-    ctx.edit_lnum,
-    ctx.init_end_lnum,
+    cursor.edit_lnum,
+    cursor.init_end_lnum,
     true,
-    { ctx.edit_prefix }
+    { cursor.edit_prefix }
   )
-  util.cursor(ctx.edit_lnum + 1, ctx.edit_col)
+  util.cursor(cursor.edit_lnum + 1, cursor.edit_col)
 end
 
 function view:delete()
   local cursor = self:cursor()
-  local targets = vim.list_extend(
-    { unpack(cursor.line.path) },
-    { cursor.line.entry }
-  )
-
+  local target = cursor.target
+  local target_count = #cursor.line.path + 1
   local lnum_idx = cursor.line.lnum - 1
-  local count = vim.v.count == 0 and #targets or vim.v.count1
-  local path_idx = math.min(count, #targets)
-  local target = targets[path_idx]
-  local hl = {
-    'CarbonFile',
-    cursor.line.depth * 2 + 2 + cursor.line.icon_width,
-    lnum_idx,
-  }
+  local indent = cursor.line.depth * 2 + 2 + cursor.line.icon_width
+  local hl = { 'CarbonFile', indent, lnum_idx }
+  local count = vim.v.count == 0 and target_count
+    or math.min(target_count, vim.v.count1)
 
-  if targets[path_idx].path == self.root.path then
+  if target.path == self.root.path or #target.path < #self.root.path then
     return
   end
 
@@ -864,7 +857,7 @@ function view:delete()
     hl[1] = 'CarbonDir'
   end
 
-  for idx = 1, path_idx - 1 do
+  for idx = 1, count - 1 do
     hl[2] = hl[2] + #cursor.line.path[idx].name + 1
   end
 
@@ -910,23 +903,20 @@ function view:delete()
 end
 
 function view:move()
-  local ctx = self:cursor()
-  local target_line = ctx.target_line
-  local targets = vim.list_extend(
-    { unpack(target_line.path) },
-    { target_line.entry }
-  )
+  local cursor = self:cursor()
+  local line = cursor.line
+  local targets = vim.list_extend({ unpack(line.path) }, { line.entry })
   local target_names = vim.tbl_map(function(part)
     return part.name
   end, targets)
 
-  if ctx.target.path == self.root.path then
+  if cursor.target.path == self.root.path then
     return
   end
 
-  local path_start = target_line.depth * 2 + 2 + target_line.icon_width
-  local lnum_idx = target_line.lnum - 1
-  local target_idx = util.tbl_key(targets, ctx.target)
+  local path_start = line.depth * 2 + 2 + line.icon_width
+  local lnum_idx = line.lnum - 1
+  local target_idx = util.tbl_key(targets, cursor.target)
   local clamped_names = { unpack(target_names, 1, target_idx - 1) }
   local start_hl = path_start + #table.concat(clamped_names, '/')
 
@@ -947,8 +937,8 @@ function view:move()
   local updated_path = string.gsub(
     vim.fn.input({
       prompt = 'destination: ',
-      default = ctx.target.path,
-      cancelreturn = ctx.target.path,
+      default = cursor.target.path,
+      cancelreturn = cursor.target.path,
     }),
     '/+$',
     ''
@@ -957,30 +947,30 @@ function view:move()
   vim.cmd.echohl('None')
   vim.api.nvim_echo({ { ' ' } }, false, {})
 
-  if updated_path == ctx.target.path then
+  if updated_path == cursor.target.path then
     self:render()
   elseif vim.uv.fs_stat(updated_path) then
     self:render()
     vim.api.nvim_echo({
       { 'Failed to move: ', 'CarbonDanger' },
-      { vim.fn.fnamemodify(ctx.target.path, ':.'), 'CarbonIndicator' },
+      { vim.fn.fnamemodify(cursor.target.path, ':.'), 'CarbonIndicator' },
       { ' => ' },
       { vim.fn.fnamemodify(updated_path, ':.'), 'CarbonIndicator' },
       { ' (destination exists)', 'CarbonPending' },
     }, false, {})
   else
     local directory = vim.fn.fnamemodify(updated_path, ':h')
-    local tmp_path = ctx.target.path
+    local tmp_path = cursor.target.path
 
     if vim.startswith(updated_path, tmp_path) then
       tmp_path = vim.fn.tempname()
 
-      vim.fn.rename(ctx.target.path, tmp_path)
+      vim.fn.rename(cursor.target.path, tmp_path)
     end
 
     vim.fn.mkdir(directory, 'p')
     vim.fn.rename(tmp_path, updated_path)
-    view.resync(vim.fn.fnamemodify(ctx.target.path, ':h'))
+    view.resync(vim.fn.fnamemodify(cursor.target.path, ':h'))
   end
 end
 

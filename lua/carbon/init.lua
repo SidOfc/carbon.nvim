@@ -102,8 +102,8 @@ function carbon.session_load_post(event)
     local is_sidebar = window_width == settings.sidebar_width
 
     view.activate({ path = event.file })
-    view.execute(function(ctx)
-      ctx.view:show()
+    view.execute(function(current_view)
+      current_view:show()
     end)
 
     if is_sidebar then
@@ -122,20 +122,22 @@ function carbon.session_load_post(event)
 end
 
 function carbon.toggle_hidden()
-  view.execute(function(ctx)
-    ctx.view.show_hidden = not ctx.view.show_hidden
+  view.execute(function(current_view)
+    current_view.show_hidden = not current_view.show_hidden
 
-    ctx.view:update()
-    ctx.view:render()
+    current_view:update()
+    current_view:render()
   end)
 end
 
 function carbon.toggle_recursive()
-  view.execute(function(ctx)
-    if ctx.cursor.line.entry.is_directory then
+  view.execute(function(current_view)
+    local cursor = current_view:cursor()
+
+    if cursor.line.entry.is_directory then
       local function toggle_recursive(target, value)
         if target.is_directory then
-          ctx.view:set_path_attr(target.path, 'open', value)
+          current_view:set_path_attr(target.path, 'open', value)
 
           if target:has_children() then
             for _, child in ipairs(target:children()) do
@@ -146,38 +148,42 @@ function carbon.toggle_recursive()
       end
 
       toggle_recursive(
-        ctx.cursor.line.entry,
-        not ctx.view:get_path_attr(ctx.cursor.line.entry.path, 'open')
+        cursor.line.entry,
+        not current_view:get_path_attr(cursor.line.entry.path, 'open')
       )
 
-      ctx.view:update()
-      ctx.view:render()
+      current_view:update()
+      current_view:render()
     end
   end)
 end
 
 function carbon.tabe()
-  view.execute(function(ctx)
+  view.execute(function(current_view)
+    local cursor = current_view:cursor()
+
     view.handle_sidebar_or_float()
     vim.cmd.tabedit({
-      vim.fn.fnameescape(ctx.cursor.line.entry.path),
+      vim.fn.fnameescape(cursor.line.entry.path),
       mods = { keepalt = #vim.fn.getreg('#') ~= 0 },
     })
   end)
 end
 
 function carbon.edit()
-  view.execute(function(ctx)
-    if ctx.cursor.line.entry.is_directory then
-      local open = ctx.view:get_path_attr(ctx.cursor.line.entry.path, 'open')
+  view.execute(function(current_view)
+    local cursor = current_view:cursor()
 
-      ctx.view:set_path_attr(ctx.cursor.line.entry.path, 'open', not open)
-      ctx.view:update()
-      ctx.view:render()
+    if cursor.line.entry.is_directory then
+      local open = current_view:get_path_attr(cursor.line.entry.path, 'open')
+
+      current_view:set_path_attr(cursor.line.entry.path, 'open', not open)
+      current_view:update()
+      current_view:render()
     else
       view.handle_sidebar_or_float()
       vim.cmd.edit({
-        vim.fn.fnameescape(ctx.cursor.line.entry.path),
+        vim.fn.fnameescape(cursor.line.entry.path),
         mods = { keepalt = #vim.fn.getreg('#') ~= 0 },
       })
     end
@@ -185,68 +191,72 @@ function carbon.edit()
 end
 
 function carbon.split()
-  view.execute(function(ctx)
-    if not ctx.cursor.line.entry.is_directory then
+  view.execute(function(current_view)
+    local cursor = current_view:cursor()
+
+    if not cursor.line.entry.is_directory then
       if vim.w.carbon_fexplore_window then
         vim.api.nvim_win_close(0, true)
       end
 
       view.handle_sidebar_or_float()
-      vim.cmd.split(vim.fn.fnameescape(ctx.cursor.line.entry.path))
+      vim.cmd.split(vim.fn.fnameescape(cursor.line.entry.path))
     end
   end)
 end
 
 function carbon.vsplit()
-  view.execute(function(ctx)
-    if not ctx.cursor.line.entry.is_directory then
+  view.execute(function(current_view)
+    local cursor = current_view:cursor()
+
+    if not cursor.line.entry.is_directory then
       if vim.w.carbon_fexplore_window then
         vim.api.nvim_win_close(0, true)
       end
 
       view.handle_sidebar_or_float()
-      vim.cmd.vsplit(vim.fn.fnameescape(ctx.cursor.line.entry.path))
+      vim.cmd.vsplit(vim.fn.fnameescape(cursor.line.entry.path))
     end
   end)
 end
 
 function carbon.up()
-  view.execute(function(ctx)
-    if ctx.view:up() then
-      ctx.view:update()
-      ctx.view:render()
+  view.execute(function(current_view)
+    if current_view:up() then
+      current_view:update()
+      current_view:render()
       util.cursor(1, 1)
     end
   end)
 end
 
 function carbon.reset()
-  view.execute(function(ctx)
-    if ctx.view:reset() then
-      ctx.view:update()
-      ctx.view:render()
+  view.execute(function(current_view)
+    if current_view:reset() then
+      current_view:update()
+      current_view:render()
       util.cursor(1, 1)
     end
   end)
 end
 
 function carbon.down()
-  view.execute(function(ctx)
-    if ctx.view:down() then
-      ctx.view:update()
-      ctx.view:render()
+  view.execute(function(current_view)
+    if current_view:down() then
+      current_view:update()
+      current_view:render()
       util.cursor(1, 1)
     end
   end)
 end
 
 function carbon.cd(path)
-  view.execute(function(ctx)
+  view.execute(function(current_view)
     local destination = path and path.file or path or vim.v.event.cwd
 
-    if ctx.view:cd(destination) then
-      ctx.view:update()
-      ctx.view:render()
+    if current_view:cd(destination) then
+      current_view:update()
+      current_view:render()
       util.cursor(1, 1)
     end
   end)
@@ -324,8 +334,8 @@ function carbon.explore_buf_dir(params)
 
   if params and params.file and util.is_directory(params.file) then
     view.activate({ path = params.file })
-    view.execute(function(ctx)
-      ctx.view:show()
+    view.execute(function(current_view)
+      current_view:show()
     end)
   end
 end
@@ -339,28 +349,29 @@ function carbon.quit()
 end
 
 function carbon.create()
-  view.execute(function(ctx)
-    ctx.view:create()
+  view.execute(function(current_view)
+    current_view:create()
   end)
 end
 
 function carbon.delete()
-  view.execute(function(ctx)
-    ctx.view:delete()
+  view.execute(function(current_view)
+    current_view:delete()
   end)
 end
 
 function carbon.move()
-  view.execute(function(ctx)
-    ctx.view:move()
+  view.execute(function(current_view)
+    current_view:move()
   end)
 end
 
 function carbon.close_parent()
-  view.execute(function(ctx)
+  view.execute(function(current_view)
     local count = 0
-    local lines = { unpack(ctx.view:current_lines(), 2) }
-    local entry = ctx.cursor.line.entry
+    local lines = { unpack(current_view:current_lines(), 2) }
+    local cursor = current_view:cursor()
+    local entry = cursor.line.entry
     local line
 
     while count < vim.v.count1 do
@@ -373,7 +384,7 @@ function carbon.close_parent()
         count = count + 1
         entry = line.path[1] and line.path[1].parent or line.entry
 
-        ctx.view:set_path_attr(entry.path, 'open', false)
+        current_view:set_path_attr(entry.path, 'open', false)
       else
         break
       end
@@ -387,8 +398,8 @@ function carbon.close_parent()
       vim.fn.cursor(line.lnum, (line.depth + 1) * 2 + 1)
     end
 
-    ctx.view:update()
-    ctx.view:render()
+    current_view:update()
+    current_view:render()
   end)
 end
 
