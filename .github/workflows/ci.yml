@@ -31,7 +31,7 @@ jobs:
 
       - name: Install lua-language-server
         run: |
-          LUALS_VERSION=3.18.2-dev
+          LUALS_VERSION=3.18.2
           LUALS_RELEASE_URL=https://github.com/LuaLS/lua-language-server/releases/download/${LUALS_VERSION}/lua-language-server-${LUALS_VERSION}-linux-x64.tar.gz
           LUALS_INSTALL_PATH=$HOME/.local/lua-language-server
 
