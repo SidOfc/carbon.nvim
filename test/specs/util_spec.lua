@@ -1,12 +1,13 @@
 local spy = require('luassert.spy')
 local view = require('carbon.view')
 local util = require('carbon.util')
+local constants = require('carbon.constants')
 local helpers = require('test.config.helpers')
 
 describe('carbon.util', function()
   describe('get_line', function()
     it('returns the contents of given {lnum}', function()
-      local expected = vim.fn.getline(1)
+      local expected = vim.api.nvim_buf_get_lines(0, 0, 1, true)[1]
       local received = util.get_line(1)
 
       assert.is.equal(expected, received)
@@ -16,15 +17,15 @@ describe('carbon.util', function()
   describe('explore_path', function()
     it('{path} is expanded to an absolute path', function()
       local cwd = vim.uv.cwd()
-      local parent = cwd and vim.fn.fnamemodify(cwd, ':h')
+      local parent = cwd and vim.fs.dirname(cwd)
 
       assert.is.equal(parent, util.explore_path('../'))
       assert.is.equal(parent, util.explore_path('..'))
     end)
 
     it('{path} is expanded relative to {current_view}', function()
-      local current_view = view.get(vim.fn.tempname())
-      local parent = vim.fn.fnamemodify(current_view.root.path, ':h')
+      local current_view = view.get(os.tmpname())
+      local parent = vim.fs.dirname(current_view.root.path)
 
       assert.is.equal(parent, util.explore_path('../', current_view))
       assert.is.equal(parent, util.explore_path('..', current_view))
@@ -34,9 +35,7 @@ describe('carbon.util', function()
   describe('cursor', function()
     it('{lnum} and {col} are both 1-based', function()
       util.cursor(2, 2)
-
-      assert.is.equal(2, vim.fn.line('.'))
-      assert.is.equal(2, vim.fn.col('.'))
+      assert.is.same({ 2, 1 }, vim.api.nvim_win_get_cursor(0))
     end)
   end)
 
@@ -47,6 +46,28 @@ describe('carbon.util', function()
 
     it('returns false when {path} is a file', function()
       assert.is_false(util.is_directory('README.md'))
+    end)
+  end)
+
+  describe('extname', function()
+    it('returns extension for a file with extension', function()
+      assert.is.equal('txt', util.extname('file.txt'))
+    end)
+
+    it('returns nil for a file without', function()
+      assert.is_nil(util.extname('file'))
+    end)
+  end)
+
+  describe('relative_path', function()
+    it('Makes an absolute path relative to provided {base}', function()
+      local entry = helpers.entry('doc/assets') --[[@as carbon.entry.Entry]]
+      local cwd = vim.uv.cwd() --[[@as string]]
+      local relative_path = util.relative_path(entry.path, cwd)
+
+      assert.is_true(vim.startswith(entry.path, cwd))
+      assert.is_false(vim.startswith(relative_path, cwd))
+      assert.is_false(vim.startswith(relative_path, '/'))
     end)
   end)
 
@@ -63,7 +84,7 @@ describe('carbon.util', function()
   describe('bufwinid', function()
     it('returns window id of {buf}', function()
       assert.is.same(
-        vim.fn.win_getid(),
+        vim.api.nvim_get_current_win(),
         util.bufwinid(vim.api.nvim_get_current_buf())
       )
     end)
@@ -96,7 +117,10 @@ describe('carbon.util', function()
     it('calls callback({value}, {key})', function()
       local callback = spy.new(function() end)
 
-      util.tbl_find({ 2, 4, 6 }, callback)
+      util.tbl_find(
+        { 2, 4, 6 },
+        callback --[[@as fun(value: unknown, key: unknown): ...?]]
+      )
 
       assert.spy(callback).was.called(3)
       assert.spy(callback).was.called_with(2, 1)
@@ -152,7 +176,10 @@ describe('carbon.util', function()
     it('creates highlight group', function()
       util.highlight('CreateHighlightTest', { link = 'Normal' })
 
-      assert.is_not.same(0, vim.fn.hlID('CreateHighlightTest'))
+      assert.is_not.same(
+        0,
+        vim.api.nvim_get_hl(constants.hl, { name = 'CreateHighlightTest' })
+      )
     end)
   end)
 
@@ -221,7 +248,7 @@ describe('carbon.util', function()
 
       assert.is.same(
         'scratch-test',
-        vim.fn.fnamemodify(vim.api.nvim_buf_get_name(scratch), ':t')
+        vim.fs.basename(vim.api.nvim_buf_get_name(scratch))
       )
 
       vim.api.nvim_buf_delete(scratch, { force = true })

@@ -4,6 +4,12 @@ local settings = require('carbon.settings')
 local view = require('carbon.view')
 local carbon = {}
 
+--- @class carbon.ExploreOptions
+--- @field sidebar? carbon.settings.SidebarPosition
+--- @field bang? boolean
+--- @field fargs? string[]
+
+---@param user_settings? carbon.settings.UserSettings
 function carbon.setup(user_settings)
   if type(user_settings) ~= 'table' then
     user_settings = {}
@@ -26,18 +32,24 @@ function carbon.setup(user_settings)
     end
 
     local argv = vim.fn.argv()
-    local open = argv[1] and vim.fn.fnamemodify(argv[1], ':p') or vim.uv.cwd()
-    local command_opts = { bang = true, nargs = '?', complete = 'dir' }
+    local open = argv[1] and vim.fs.abspath(argv[1]) or vim.uv.cwd()
+    local function create_command(lhs, rhs)
+      return vim.api.nvim_create_user_command(lhs, rhs, {
+        bang = true,
+        nargs = '?',
+        complete = 'dir',
+      })
+    end
 
     watcher.on('carbon:synchronize', function(_, path)
       view.resync(path)
     end)
 
-    util.command('Carbon', carbon.explore, command_opts)
-    util.command('Rcarbon', carbon.explore_right, command_opts)
-    util.command('Lcarbon', carbon.explore_left, command_opts)
-    util.command('Fcarbon', carbon.explore_float, command_opts)
-    util.command('ToggleSidebarCarbon', carbon.toggle_sidebar, command_opts)
+    create_command('Carbon', carbon.explore)
+    create_command('Rcarbon', carbon.explore_right)
+    create_command('Lcarbon', carbon.explore_left)
+    create_command('Fcarbon', carbon.explore_float)
+    create_command('ToggleSidebarCarbon', carbon.toggle_sidebar)
 
     util.autocmd('SessionLoadPost', carbon.session_load_post, { pattern = '*' })
     util.autocmd('WinResized', carbon.win_resized, { pattern = '*' })
@@ -57,10 +69,10 @@ function carbon.setup(user_settings)
       pcall(vim.api.nvim_del_augroup_by_name, 'FileExplorer')
       pcall(vim.api.nvim_del_augroup_by_name, 'Network')
 
-      util.command('Explore', carbon.explore, command_opts)
-      util.command('Rexplore', carbon.explore_right, command_opts)
-      util.command('Lexplore', carbon.explore_left, command_opts)
-      util.command('ToggleSidebarExplore', carbon.toggle_sidebar, command_opts)
+      create_command('Explore', carbon.explore)
+      create_command('Lexplore', carbon.explore_left)
+      create_command('Rexplore', carbon.explore_right)
+      create_command('ToggleSidebarExplore', carbon.toggle_sidebar)
     end
 
     for action in pairs(settings.defaults.actions) do
@@ -95,9 +107,15 @@ function carbon.win_resized()
   end
 end
 
+--- @param event carbon.util.AutocommandEvent
 function carbon.session_load_post(event)
   if util.is_directory(event.file) then
     local window_id = util.bufwinid(event.buf)
+
+    if not window_id then
+      return
+    end
+
     local window_width = vim.api.nvim_win_get_width(window_id)
     local is_sidebar = window_width == settings.sidebar_width
 
@@ -250,6 +268,7 @@ function carbon.down()
   end)
 end
 
+--- @param path string | carbon.util.AutocommandEvent Path to cd into
 function carbon.cd(path)
   view.execute(function(current_view)
     local destination = path and path.file or path or vim.v.event.cwd
@@ -262,15 +281,17 @@ function carbon.cd(path)
   end)
 end
 
-function carbon.explore(options_param)
-  local options = options_param or {}
+--- @param opts? carbon.ExploreOptions
+function carbon.explore(opts)
+  local options = opts or {}
   local path =
     util.explore_path(options.fargs and options.fargs[1] or '', view.current())
 
   view.activate({ path = path, reveal = options.bang })
 end
 
-function carbon.toggle_sidebar(options)
+--- @param opts? carbon.ExploreOptions
+function carbon.toggle_sidebar(opts)
   local current_win = vim.api.nvim_get_current_win()
 
   if vim.api.nvim_win_is_valid(view.sidebar.origin) then
@@ -278,7 +299,7 @@ function carbon.toggle_sidebar(options)
   else
     local explore_options = vim.tbl_extend(
       'force',
-      options or {},
+      opts or {},
       { sidebar = settings.sidebar_position }
     )
 
@@ -290,8 +311,9 @@ function carbon.toggle_sidebar(options)
   end
 end
 
-function carbon.explore_sidebar(options_param)
-  local options = options_param or {}
+--- @param opts? carbon.ExploreOptions
+function carbon.explore_sidebar(opts)
+  local options = opts or {}
   local sidebar = options.sidebar or settings.sidebar_position
   local path =
     util.explore_path(options.fargs and options.fargs[1] or '', view.current())
@@ -299,28 +321,31 @@ function carbon.explore_sidebar(options_param)
   view.activate({ path = path, reveal = options.bang, sidebar = sidebar })
 end
 
-function carbon.explore_left(options_param)
+--- @param opts? carbon.ExploreOptions
+function carbon.explore_left(opts)
   if view.sidebar.position ~= 'left' then
     view.close_sidebar()
   end
 
   carbon.explore_sidebar(
-    vim.tbl_extend('force', options_param or {}, { sidebar = 'left' })
+    vim.tbl_extend('force', opts or {}, { sidebar = 'left' })
   )
 end
 
-function carbon.explore_right(options_param)
+--- @param opts? carbon.ExploreOptions
+function carbon.explore_right(opts)
   if view.sidebar.position ~= 'right' then
     view.close_sidebar()
   end
 
   carbon.explore_sidebar(
-    vim.tbl_extend('force', options_param or {}, { sidebar = 'right' })
+    vim.tbl_extend('force', opts or {}, { sidebar = 'right' })
   )
 end
 
-function carbon.explore_float(options_param)
-  local options = options_param or {}
+--- @param opts? carbon.ExploreOptions
+function carbon.explore_float(opts)
+  local options = opts or {}
   local path =
     util.explore_path(options.fargs and options.fargs[1] or '', view.current())
 
@@ -377,12 +402,11 @@ function carbon.close_parent()
     while count < vim.v.count1 do
       line = util.tbl_find(lines, function(current)
         return current.entry == entry.parent
-          or vim.tbl_contains(current.path, entry.parent)
       end)
 
       if line then
         count = count + 1
-        entry = line.path[1] and line.path[1].parent or line.entry
+        entry = line.entry
 
         current_view:set_path_attr(entry.path, 'open', false)
       else
@@ -395,7 +419,7 @@ function carbon.close_parent()
     end)
 
     if line then
-      vim.fn.cursor(line.lnum, (line.depth + 1) * 2 + 1)
+      vim.api.nvim_win_set_cursor(0, { line.lnum, (line.depth + 1) * 2 })
     end
 
     current_view:update()

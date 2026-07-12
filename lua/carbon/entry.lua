@@ -1,8 +1,20 @@
 local watcher = require('carbon.watcher')
+
+--- @class carbon.entry.Entry
+--- @field raw_path string
+--- @field path string
+--- @field name string
+--- @field parent carbon.entry.Entry?
+--- @field is_directory boolean
+--- @field is_executable boolean
+--- @field is_symlink boolean
 local entry = {}
 
 entry.items = {}
 entry.__index = entry
+
+--- @param a carbon.entry.Entry
+--- @param b carbon.entry.Entry
 entry.__lt = function(a, b)
   if a.is_directory and b.is_directory then
     return string.lower(a.name) < string.lower(b.name)
@@ -15,6 +27,9 @@ entry.__lt = function(a, b)
   return string.lower(a.name) < string.lower(b.name)
 end
 
+--- @param path string
+--- @param parent carbon.entry.Entry?
+--- @return carbon.entry.Entry
 function entry.new(path, parent)
   local raw_path = path == '' and '/' or path
   local clean = string.gsub(raw_path, '/+$', '')
@@ -43,7 +58,7 @@ function entry.new(path, parent)
   return setmetatable({
     raw_path = raw_path,
     path = clean,
-    name = vim.fn.fnamemodify(clean, ':t'),
+    name = vim.fs.basename(clean),
     parent = parent,
     is_directory = is_directory,
     is_executable = is_executable,
@@ -51,6 +66,8 @@ function entry.new(path, parent)
   }, entry)
 end
 
+--- @param path string
+--- @return carbon.entry.Entry?
 function entry.find(path)
   for _, children in pairs(entry.items) do
     for _, child in ipairs(children) do
@@ -61,6 +78,7 @@ function entry.find(path)
   end
 end
 
+--- @param paths string[]?
 function entry:synchronize(paths)
   if not self.is_directory then
     return
@@ -127,6 +145,7 @@ function entry:terminate()
   end
 end
 
+--- @return carbon.entry.Entry[]
 function entry:children()
   if self.is_directory and not self:has_children() then
     self:set_children(self:get_children())
@@ -135,14 +154,17 @@ function entry:children()
   return entry.items[self.path] or {}
 end
 
+--- @return boolean
 function entry:has_children()
   return entry.items[self.path] and true or false
 end
 
+--- @param children carbon.entry.Entry[]?
 function entry:set_children(children)
   entry.items[self.path] = children
 end
 
+--- @return carbon.entry.Entry[]
 function entry:get_children()
   local entries = {}
   local handle = vim.uv.fs_scandir(self.raw_path)

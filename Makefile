@@ -34,3 +34,7 @@ format-check:
 .PHONY: dev
 dev:
 	nvim -Nu dev/init.lua
+
+.PHONY: doc
+doc:
+	nvim -l dev/doc_gen.lua

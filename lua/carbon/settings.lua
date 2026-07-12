@@ -1,9 +1,55 @@
+--- @alias carbon.settings.SidebarPosition 'left' | 'right'
+
+--- @class carbon.settings.Settings
+--- @field sync_pwd boolean
+--- @field compress boolean
+--- @field auto_open boolean
+--- @field keep_netrw boolean
+--- @field file_icons boolean
+--- @field sync_on_cd boolean
+--- @field sync_delay integer
+--- @field open_on_dir boolean
+--- @field auto_reveal boolean
+--- @field sidebar_width integer
+--- @field sidebar_toggle_focus boolean
+--- @field sidebar_position carbon.settings.SidebarPosition
+--- @field exclude string[]
+--- @field indicators { expand: string, collapse: string }
+--- @field flash { delay: integer, duration: integer }
+--- @field float_settings fun(...): vim.api.keyset.win_config
+--- @field actions table<string, boolean | string | string[]>
+--- @field highlights table<string, vim.api.keyset.highlight>
+
+--- @class carbon.settings.UserSettings : carbon.settings.Settings
+--- @field sync_pwd? boolean
+--- @field compress? boolean
+--- @field auto_open? boolean
+--- @field keep_netrw? boolean
+--- @field file_icons? boolean
+--- @field sync_on_cd? boolean
+--- @field sync_delay? integer
+--- @field open_on_dir? boolean
+--- @field auto_reveal? boolean
+--- @field sidebar_width? integer
+--- @field sidebar_toggle_focus? boolean
+--- @field sidebar_position? 'left' | 'right'
+--- @field exclude? string[]
+--- @field indicators? { expand: string, collapse: string }
+--- @field flash? { delay: integer, duration: integer }
+--- @field float_settings? fun(...): vim.api.keyset.win_config
+--- @field actions? boolean | table<string, boolean | string | string[]>
+--- @field highlights? boolean | table<string, vim.api.keyset.highlight>
+
+--- @class carbon.settings.SettingsWithDefaults : carbon.settings.Settings
+--- @field defaults carbon.settings.Settings
+
+--- @type carbon.settings.Settings
 local defaults = {
   sync_pwd = false,
   compress = true,
   auto_open = true,
   keep_netrw = false,
-  file_icons = pcall(require, 'nvim-web-devicons'),
+  file_icons = pcall(require, 'nvim-web-devicons') and true or false,
   sync_on_cd = not vim.opt.autochdir:get(),
   sync_delay = 20,
   open_on_dir = true,
@@ -81,4 +127,5 @@ local defaults = {
   },
 }
 
+---@type carbon.settings.SettingsWithDefaults
 return vim.tbl_extend('force', vim.deepcopy(defaults), { defaults = defaults })

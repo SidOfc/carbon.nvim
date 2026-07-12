@@ -1,8 +1,15 @@
+--- @alias carbon.watcher.CallbackFunction fun(event: string, ...)
+
+--- @class carbon.watcher.Watcher
 local watcher = {}
 
+--- @type table<string, uv.uv_fs_event_t>
 watcher.listeners = {}
+
+--- @type table<string, carbon.watcher.CallbackFunction[]>
 watcher.events = {}
 
+--- @param callback fun(path: string): boolean
 function watcher.keep(callback)
   for path in pairs(watcher.listeners) do
     if not callback(path) then
@@ -11,6 +18,7 @@ function watcher.keep(callback)
   end
 end
 
+--- @param path string?
 function watcher.release(path)
   if not path then
     for listener_path in pairs(watcher.listeners) do
@@ -23,8 +31,9 @@ function watcher.release(path)
   end
 end
 
+--- @param path string?
 function watcher.register(path)
-  if not watcher.listeners[path] then
+  if path and not watcher.listeners[path] then
     watcher.listeners[path] = vim.uv.new_fs_event()
 
     watcher.listeners[path]:start(
@@ -37,6 +46,8 @@ function watcher.register(path)
   end
 end
 
+--- @param event string
+--- @param ... unknown
 function watcher.emit(event, ...)
   for callback in pairs(watcher.events[event] or {}) do
     callback(event, ...)
@@ -47,6 +58,8 @@ function watcher.emit(event, ...)
   end
 end
 
+--- @param event string | string[]
+--- @param callback carbon.watcher.CallbackFunction
 function watcher.on(event, callback)
   if type(event) == 'table' then
     for _, key in ipairs(event) do
@@ -58,6 +71,8 @@ function watcher.on(event, callback)
   end
 end
 
+--- @param event? string | string[]
+--- @param callback? carbon.watcher.CallbackFunction
 function watcher.off(event, callback)
   if not event then
     watcher.events = {}
@@ -74,11 +89,15 @@ function watcher.off(event, callback)
   end
 end
 
+--- @param event string
+--- @param callback carbon.watcher.CallbackFunction
+--- @return boolean
 function watcher.has(event, callback)
   return watcher.events[event] and watcher.events[event][callback] and true
     or false
 end
 
+--- @return string[]
 function watcher.registered()
   return vim.tbl_keys(watcher.listeners)
 end

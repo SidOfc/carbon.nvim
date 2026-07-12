@@ -98,10 +98,16 @@ describe('carbon', function()
     end)
 
     it('opens files in a new tab', function()
+      helpers.ensure_path('file.toml')
+
       assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
 
-      -- NOTE: line 13 should refer to a `.toml` file
-      util.cursor(13, 1)
+      local file_line = helpers.line_with_file('%.toml$')
+
+      assert.is_not_nil(file_line)
+      ---@cast file_line carbon.view.Line
+
+      util.cursor(file_line.lnum, 1)
       carbon.tabe()
 
       assert.is.equal('toml', vim.bo.filetype)
@@ -115,7 +121,7 @@ describe('carbon', function()
 
   describe('edit', function()
     it('toggles directory when on directory', function()
-      local doc_entry = helpers.entry('doc')
+      local doc_entry = helpers.entry('doc') --[[@as carbon.entry.Entry]]
 
       util.cursor(4, 1)
       carbon.edit()
@@ -142,11 +148,14 @@ describe('carbon', function()
 
   describe('split', function()
     it('open file in horizontal split', function()
+      helpers.ensure_path('file.txt')
+
       assert.is.equal('carbon.explorer', vim.bo.filetype)
 
       local file_line = helpers.line_with_file()
 
       assert.is_not_nil(file_line)
+      ---@cast file_line carbon.view.Line
 
       util.cursor(file_line.lnum, 1)
       carbon.split()
@@ -161,11 +170,14 @@ describe('carbon', function()
 
   describe('vsplit', function()
     it('open file in vertical split', function()
+      helpers.ensure_path('file.txt')
+
       assert.is.equal('carbon.explorer', vim.bo.filetype)
 
       local file_line = helpers.line_with_file()
 
       assert.is_not_nil(file_line)
+      ---@cast file_line carbon.view.Line
 
       util.cursor(file_line.lnum, 1)
       carbon.vsplit()
@@ -199,12 +211,14 @@ describe('carbon', function()
 
   describe('toggle_recursive', function()
     it('toggles recursively opened directory', function()
-      local assets_entry = helpers.entry('doc/assets')
+      local dir_entry = helpers.entry('doc') --[[@as carbon.entry.Entry]]
+      local assets_entry = helpers.entry('doc/assets') --[[@as carbon.entry.Entry]]
 
       util.cursor(4, 1)
-      assert.is_not_nil(assets_entry)
+      assert.is_not_nil(dir_entry)
 
       carbon.toggle_recursive()
+      assert.is_true(helpers.is_open(dir_entry.path))
       assert.is_true(helpers.is_open(assets_entry.path))
       assert.is.same(
         { '- doc/', '  - assets/' },
@@ -212,6 +226,7 @@ describe('carbon', function()
       )
 
       carbon.toggle_recursive()
+      assert.is_false(helpers.is_open(dir_entry.path))
       assert.is_false(helpers.is_open(assets_entry.path))
       assert.is.same(
         { '+ doc/', '+ lua/carbon/' },
@@ -227,8 +242,7 @@ describe('carbon', function()
       util.cursor(8, 1)
       carbon.close_parent()
 
-      assert.is.equal(6, vim.fn.line('.'))
-      assert.is.equal(3, vim.fn.col('.'))
+      assert.is.same({ 6, 2 }, vim.api.nvim_win_get_cursor(0))
     end)
   end)
 
@@ -237,6 +251,7 @@ describe('carbon', function()
       local file_line = helpers.line_with_file()
 
       assert.is_not_nil(file_line)
+      ---@cast file_line carbon.view.Line
 
       util.cursor(file_line.lnum, 1)
       carbon.edit()
@@ -253,12 +268,12 @@ describe('carbon', function()
         util.cursor(12, 1)
         carbon.edit()
 
-        local before_bufname = vim.fn.bufname()
+        local before_bufname = vim.api.nvim_buf_get_name(0)
 
         carbon.explore_sidebar()
         vim.cmd.wincmd('l')
 
-        assert.is.equal(before_bufname, vim.fn.bufname())
+        assert.is.equal(before_bufname, vim.api.nvim_buf_get_name(0))
 
         vim.cmd.bdelete()
       end
@@ -270,12 +285,12 @@ describe('carbon', function()
       util.cursor(12, 1)
       carbon.edit()
 
-      local before_bufname = vim.fn.bufname()
+      local before_bufname = vim.api.nvim_buf_get_name(0)
 
       carbon.explore_right()
       vim.cmd.wincmd('h')
 
-      assert.is.equal(before_bufname, vim.fn.bufname())
+      assert.is.equal(before_bufname, vim.api.nvim_buf_get_name(0))
 
       vim.cmd.bdelete()
     end)
@@ -286,12 +301,12 @@ describe('carbon', function()
       util.cursor(12, 1)
       carbon.edit()
 
-      local before_bufname = vim.fn.bufname()
+      local before_bufname = vim.api.nvim_buf_get_name(0)
 
       carbon.explore_left()
       vim.cmd.wincmd('l')
 
-      assert.is.equal(before_bufname, vim.fn.bufname())
+      assert.is.equal(before_bufname, vim.api.nvim_buf_get_name(0))
 
       vim.cmd.bdelete()
     end)
@@ -318,7 +333,7 @@ describe('carbon', function()
 
       assert.is.equal(
         vim.uv.cwd(),
-        original_cwd and vim.fn.fnamemodify(original_cwd, ':h')
+        original_cwd and vim.fs.dirname(original_cwd)
       )
 
       carbon.reset()
@@ -385,6 +400,7 @@ describe('carbon', function()
       assert.is.equal('carbon.explorer', vim.bo.filetype)
 
       carbon.quit()
+      vim.wait(100)
 
       assert.is_not.equal('carbon.explorer', vim.bo.filetype)
     end)

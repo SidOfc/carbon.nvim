@@ -18,7 +18,7 @@ describe('carbon.entry', function()
 
     it('name property is filename of path', function()
       local absolute_path = helpers.resolve('lua')
-      local filename = vim.fn.fnamemodify(absolute_path, ':t')
+      local filename = vim.fs.basename(absolute_path)
 
       assert.is.equal(filename, entry.new(absolute_path).name)
     end)
@@ -43,7 +43,7 @@ describe('carbon.entry', function()
 
       assert.is.equal(1, entry.new(symlink).is_symlink)
 
-      vim.fn.delete(symlink)
+      vim.fs.rm(symlink)
     end)
 
     it('is_symlink is number 2 when broken symlink', function()
@@ -55,7 +55,7 @@ describe('carbon.entry', function()
 
       assert.is.equal(2, entry.new(symlink).is_symlink)
 
-      vim.fn.delete(symlink)
+      vim.fs.rm(symlink)
     end)
   end)
 
@@ -82,12 +82,13 @@ describe('carbon.entry', function()
     end)
 
     it('calls synchronize recursively on directory', function()
-      local lua = entry.find(helpers.resolve('lua'))
-      local lua_carbon = entry.find(helpers.resolve('lua/carbon'))
+      local lua = entry.find(helpers.resolve('lua')) --[[@as carbon.entry.Entry]]
+      local lua_carbon = entry.find(helpers.resolve('lua/carbon')) --[[@as carbon.entry.Entry]]
       local lua_synchronize = spy.on(lua, 'synchronize')
       local lua_carbon_synchronize = spy.on(lua_carbon, 'synchronize')
 
       lua:synchronize()
+
       assert.spy(lua_synchronize).was.called(1)
       assert.spy(lua_carbon_synchronize).was.called(1)
     end)

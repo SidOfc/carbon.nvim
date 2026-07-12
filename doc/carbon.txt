@@ -733,6 +733,43 @@ UTIL                                                                 *carbon-uti
   call to `fs_stat` failed.
 
   `------------------------------------------------------------------------------`
+  extname                                                    *carbon-util-extname*
+
+  Get the extension (without preceding period character) of {path}.
+
+  Signature: ~
+    `require('carbon.util').extname(`{path}`)`
+
+  Examples: ~
+>lua
+    -- File with extension
+    require('carbon.util').extname('file.txt')
+    -- returns 'txt'
+
+    -- File without extension
+    require('carbon.util').extname('file')
+    -- returns nil
+<
+  Parameters: ~
+    • {path} (`string?`) Path
+
+  Return: ~
+    (`string?`) Found file extension or `nil`
+
+  `------------------------------------------------------------------------------`
+  relative_path                                        *carbon-util-relative-path*
+
+  Signature: ~
+    `require('carbon.util').relative_path(`{path}, {base}`)`
+
+  Parameters: ~
+    • {path} (`string`) Path to make relative
+    • {base} (`string?`) Base directory to remove. Default: |uv.cwd|
+
+  Return: ~
+    (`string`) Relative path
+
+  `------------------------------------------------------------------------------`
   bufwinid                                                  *carbon-util-bufwinid*
 
   Signature: `require('carbon.util').bufwinid(`{buf}`)`
@@ -886,8 +923,7 @@ UTIL                                                                 *carbon-uti
   Signature: `require('carbon.util').resolve(`{path}`)`
 
   Returns normalized absolute path of given {path}. Uses |vim.fs.normalize|
-  followed by |fnamemodify| with `:p` as modifier to get the full path.
-  Trailing slashes are stripped.
+  followed by |vim.fs.abspath| to get full path. Trailing slashes are stripped.
 
   `------------------------------------------------------------------------------`
   autocmd                                                    *carbon-util-autocmd*
@@ -1029,17 +1065,17 @@ UTIL                                                                 *carbon-uti
   Prints the time it takes {fn} to execute in milliseconds.
   Any {...} arguments are passed to {fn}.
 
-  Examples:
->
-  local function wait(wait_time)
-    vim.wait(wait_time or 100)
-  end
+  Examples: ~
+>lua
+    local function wait(wait_time)
+      vim.wait(wait_time or 100)
+    end
 
-  util.profile('wait', wait)
-  -- prints "[wait] took: 100ms"
+    util.profile('wait', wait)
+    -- prints "[wait] took: 100ms"
 
-  util.profile('wait', wait, 4075)
-  -- prints "[wait] took: 4075ms"
+    util.profile('wait', wait, 4075)
+    -- prints "[wait] took: 4075ms"
 <
   `------------------------------------------------------------------------------`
   profile_module                                      *carbon-util-profile-module*
@@ -1056,8 +1092,9 @@ UTIL                                                                 *carbon-uti
   {method_names}, this method wraps each given method with a call to
   |carbon-util-profile|.
 
-  Example:
->
+  Examples: ~
+
+>lua
   local util = require('carbon.util')
   local M = {}
 
@@ -1101,8 +1138,9 @@ ENTRY                                                               *carbon-entr
   for {path}.
 
   The returned entry object has the following shape:
->
+>lua
   {
+    raw_path = '/absolute/path/to/file-or-dir',
     path = '/absolute/path/to/file-or-dir',
     name = 'file-or-dir',
     is_directory = false,
@@ -1111,9 +1149,9 @@ ENTRY                                                               *carbon-entr
   }
 <
   - `path` is the absolute {path}.
-  - `name` is the tail of given {path} as returned by |fnamemodify| `:t`.
-  - `is_directory` is `true` when |isdirectory| equals `1`.
-  - `is_executable` is `true` when |isdirectory| equals `0` and |executable| equals `1`.
+  - `name` is the tail of given {path} as returned by |vim.fs.basename|
+  - `is_directory` is `true` when |uv.fs_stat| `type` equals `'directory'`.
+  - `is_executable` is `true` when `is_directory` equals `false` and |executable| equals `1`.
   - `is_symlink` is:
     - `2` when {path} does not equal |resolve| of {path} and |getftime| equals `-1`.
     - `1` when {path} does not equal |resolve| of {path} and |getftime| is not `-1`.
@@ -1676,10 +1714,10 @@ VIEW                                                                 *carbon-vie
   mechanics of |carbon-setting-compress|.
 
   Signature: ~
-    `view:cursor(`[{opts}]`)`
+    `view:cursor(`{opts}`)`
 
   Parameters: ~
-    • {opts} Optional parameters
+    • {opts} (`table?`) Optional table with the following keys:
       • target_directory_only: (`boolean?` default: false) When true, ensures
         |carbon-entry-new| entry is a directory. When a file is encountered
         the target will become the parent directory of that file.
@@ -2531,8 +2569,8 @@ SETTINGS                                                         *carbon-setting
     `  toggle_recursive = '!',`            *carbon-setting-actions-toggle-recursive*
     `}`
 
-  Default mappings for |carbon-plugs|. Setting this to `nil` will prevent
-  Carbon from creating any mapping. Setting one of its properties to `nil`
+  Default mappings for |carbon-plugs|. Setting this to `false` will prevent
+  Carbon from creating any mapping. Setting one of its properties to `false`
   will disable the mapping for that specific property.
 
   More than one key may be mapped to an action by supplying a table of keys.

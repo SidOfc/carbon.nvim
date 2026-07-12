@@ -36,9 +36,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo add-apt-repository ppa:neovim-ppa/unstable
-          sudo apt update
-          sudo apt install -y neovim
+          curl -LO https://github.com/neovim/neovim/releases/nightly/download/nvim-linux-x86_64.appimage
+          chmod +x nvim-linux-x86_64.appimage
+          sudo mv nvim-linux-x86_64.appimage /usr/local/bin/nvim
 
       - name: Test
         run: make test
