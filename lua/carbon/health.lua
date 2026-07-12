@@ -3,10 +3,14 @@ local view = require('carbon.view')
 local watcher = require('carbon.watcher')
 local health = {}
 
+--- @param a string
+--- @param b string
 local function sort_names(a, b)
   return string.lower(a) < string.lower(b)
 end
 
+--- @param a string
+--- @param b string
 local function sort_paths(a, b)
   local a_is_directory = util.is_directory(a)
   local b_is_directory = util.is_directory(b)

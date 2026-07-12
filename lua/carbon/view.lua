@@ -3,15 +3,69 @@ local entry = require('carbon.entry')
 local watcher = require('carbon.watcher')
 local settings = require('carbon.settings')
 local constants = require('carbon.constants')
+
+--- @class carbon.view.LineHighlight
+--- @field [1] string Highlight group name
+--- @field [2] integer Start column
+--- @field [3] integer End column
+--- @field extmark carbon.util.Extmark
+
+--- @class carbon.view.Line
+--- @field path carbon.entry.Entry[]
+--- @field lnum integer
+--- @field depth integer
+--- @field entry carbon.entry.Entry
+--- @field line string
+--- @field icon_width integer
+--- @field highlights carbon.view.LineHighlight[]
+
+--- @class carbon.view.Sidebar
+--- @field origin integer
+--- @field target integer
+--- @field position? carbon.settings.SidebarPosition
+
+--- @class carbon.view.Float
+--- @field origin integer
+--- @field target integer
+
+--- @class carbon.view.View
+--- @field index integer
+--- @field initial string,
+--- @field states table<string, table<string, boolean>>
+--- @field show_hidden boolean
+--- @field root carbon.entry.Entry
 local view = {}
 
 view.__index = view
+
+--- @type carbon.view.Sidebar
 view.sidebar = { origin = -1, target = -1 }
+
+--- @type carbon.view.Float
 view.float = { origin = -1, target = -1 }
+
+--- @type table<integer, carbon.view.View>
 view.items = {}
+
+--- @type table<string, boolean>
 view.resync_paths = {}
+
+--- @type integer
 view.last_index = 0
 
+--- @class carbon.view.CursorContext
+--- @field target carbon.entry.Entry
+--- @field line table
+
+--- @class carbon.view.CursorEditingContext : carbon.view.CursorContext
+--- @field view carbon.view.View
+--- @field prev_compressible boolean
+--- @field prev_open boolean
+--- @field edit_col integer
+--- @field edit_lnum integer
+--- @field edit_prefix string
+
+--- @param ctx carbon.view.CursorEditingContext
 local function create_leave(ctx)
   vim.cmd.stopinsert()
   ctx.view:set_path_attr(ctx.target.path, 'compressible', ctx.prev_compressible)
@@ -23,14 +77,15 @@ local function create_leave(ctx)
   ctx.view:render()
 end
 
+--- @param ctx carbon.view.CursorEditingContext
 local function create_confirm(ctx)
   return function()
-    local text =
-      vim.trim(string.sub(util.get_line(vim.fn.line('.')), ctx.edit_col))
-    local name = vim.fn.fnamemodify(text, ':t')
+    local confirm_lnum = vim.api.nvim_win_get_cursor(0)[1]
+    local text = vim.trim(string.sub(util.get_line(confirm_lnum), ctx.edit_col))
+    local name = vim.fs.basename(text)
     local parent_directory = ctx.target.path
       .. '/'
-      .. vim.trim(vim.fn.fnamemodify(text, ':h'))
+      .. vim.trim(vim.fs.dirname(text))
 
     vim.fn.mkdir(parent_directory, 'p')
 
@@ -39,10 +94,11 @@ local function create_confirm(ctx)
     end
 
     create_leave(ctx)
-    view.resync(vim.fn.fnamemodify(parent_directory, ':h'))
+    view.resync(vim.fs.dirname(parent_directory))
   end
 end
 
+--- @param ctx carbon.view.CursorEditingContext
 local function create_cancel(ctx)
   return function()
     ctx.view:set_path_attr(ctx.target.path, 'open', ctx.prev_open)
@@ -50,13 +106,22 @@ local function create_cancel(ctx)
   end
 end
 
+--- @param ctx carbon.view.CursorEditingContext
 local function create_insert_move(ctx)
   return function()
     local col = ctx.edit_col
     local lnum = ctx.edit_lnum
+    local insert_lnum = vim.api.nvim_win_get_cursor(0)[1]
     local text = ctx.edit_prefix
-      .. vim.trim(string.sub(util.get_line(vim.fn.line('.')), col))
-    local last_slash_col = vim.fn.strridx(text, '/') + 1
+      .. vim.trim(string.sub(util.get_line(insert_lnum), col))
+    local current_slash_col = 0 --[[@type integer?]]
+    local last_slash_col = 0
+
+    while current_slash_col do
+      last_slash_col = current_slash_col
+      current_slash_col = string.find(text, '/', last_slash_col + 1, true)
+    end
+
     local path_hl_start = { lnum, 0 }
     local path_hl_separator = { lnum, last_slash_col }
     local path_hl_end = { lnum, -1 }
@@ -65,7 +130,7 @@ local function create_insert_move(ctx)
     util.clear_extmarks(0, path_hl_start, path_hl_end, {})
     util.add_highlight(0, 'CarbonDir', path_hl_start, path_hl_separator)
     util.add_highlight(0, 'CarbonFile', path_hl_separator, path_hl_end)
-    util.cursor(lnum + 1, math.max(col, vim.fn.col('.')))
+    util.cursor(lnum + 1, math.max(col, vim.api.nvim_win_get_cursor(0)[2] + 1))
   end
 end
 
@@ -79,16 +144,24 @@ function view.file_icons()
   end
 end
 
+--- @param path string
+--- @return carbon.view.View?
 function view.find(path)
   local resolved = util.resolve(path)
 
-  return util.tbl_find(view.items, function(target_view)
-    return target_view.root.path == resolved
-  end)
+  return select(
+    1,
+    util.tbl_find(view.items, function(target_view)
+      return target_view.root.path == resolved
+    end)
+  )
 end
 
+--- @param path string?
+--- @return carbon.view.View
 function view.get(path)
-  local found_view = view.find(path)
+  path = path or vim.uv.cwd() or '/'
+  local found_view = path and view.find(path)
 
   if found_view then
     return found_view
@@ -110,8 +183,9 @@ function view.get(path)
   return instance
 end
 
-function view.activate(options_param)
-  local options = options_param or {}
+--- @param opts {reveal?: boolean, float?: boolean, sidebar?: 'right' | 'left', path?: string}?
+function view.activate(opts)
+  local options = opts or {}
   local original_window = vim.api.nvim_get_current_win()
   local current_view = (options.path and view.get(options.path))
     or view.current()
@@ -141,22 +215,23 @@ function view.activate(options_param)
       }
     end
 
+    --- @diagnostic disable-next-line: deprecated
     vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
     vim.api.nvim_win_set_buf(view.sidebar.origin, current_view:buffer())
   elseif options.float then
+    local win_config
     local float_settings = settings.float_settings
       or settings.defaults.float_settings
 
-    float_settings = type(float_settings) == 'function' and float_settings()
-      or vim.deepcopy(float_settings)
+    if type(float_settings) == 'function' then
+      win_config = float_settings()
+    else
+      win_config = vim.deepcopy(float_settings)
+    end
 
     view.float = {
       target = original_window,
-      origin = vim.api.nvim_open_win(
-        current_view:buffer(),
-        true,
-        float_settings
-      ),
+      origin = vim.api.nvim_open_win(current_view:buffer(), true, win_config),
     }
 
     vim.api.nvim_set_option_value(
@@ -209,6 +284,8 @@ function view.handle_sidebar_or_float()
         vim.cmd.split({ mods = { vertical = true, split = split } })
 
         view.sidebar.target = vim.api.nvim_get_current_win()
+
+        --- @diagnostic disable-next-line: deprecated
         vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
       end
     end
@@ -217,13 +294,18 @@ function view.handle_sidebar_or_float()
   end
 end
 
+--- @return carbon.view.View?
 function view.current()
   local bufnr = vim.api.nvim_get_current_buf()
   local ref = select(2, pcall(vim.api.nvim_buf_get_var, bufnr, 'carbon'))
 
-  return ref and view.items[ref.index] or false
+  if ref then
+    return view.items[ref.index]
+  end
 end
 
+--- @param callback fun(...): ...
+--- @return ...?
 function view.execute(callback)
   local current_view = view.current()
 
@@ -232,6 +314,7 @@ function view.execute(callback)
   end
 end
 
+--- @param path string
 function view.resync(path)
   view.resync_paths[path] = true
 
@@ -259,6 +342,7 @@ function view.resync(path)
   end, settings.sync_delay)
 end
 
+--- @param path string
 function view:expand_to_path(path)
   local resolved = util.resolve(path)
 
@@ -266,15 +350,19 @@ function view:expand_to_path(path)
     local dirs = vim.split(string.sub(resolved, #self.root.path + 2), '/')
     local current = self.root
 
-    for _, dir in ipairs(dirs) do
-      current:children()
+    if current then
+      for _, dir in ipairs(dirs) do
+        current:children()
 
-      current = entry.find(string.format('%s/%s', current.path, dir))
+        local next = entry.find(string.format('%s/%s', current.path, dir))
 
-      if current then
-        self:set_path_attr(current.path, 'open', true)
-      else
-        break
+        if next then
+          self:set_path_attr(next.path, 'open', true)
+
+          current = next
+        else
+          break
+        end
       end
     end
 
@@ -290,6 +378,8 @@ function view:expand_to_path(path)
   end
 end
 
+--- @param path string
+--- @param attr string
 function view:get_path_attr(path, attr)
   local state = self.states[path]
   local value = state and state[attr]
@@ -301,6 +391,9 @@ function view:get_path_attr(path, attr)
   return value
 end
 
+--- @param path string
+--- @param attr string
+--- @param value unknown
 function view:set_path_attr(path, attr, value)
   if not self.states[path] then
     self.states[path] = {}
@@ -311,6 +404,7 @@ function view:set_path_attr(path, attr, value)
   return value
 end
 
+--- @return integer[]
 function view:buffers()
   return vim.tbl_filter(function(bufnr)
     local ref = select(2, pcall(vim.api.nvim_buf_get_var, bufnr, 'carbon'))
@@ -397,6 +491,11 @@ function view:render()
   self.flash = nil
 end
 
+--- Create a temporary highlight
+--- @param duration number Duration in milliseconds
+--- @param group string Highlight group name
+--- @param start [integer, integer] | string Start of region
+--- @param finish [integer, integer] | string Start of region
 function view:focus_flash(duration, group, start, finish)
   local buf = self:buffer()
 
@@ -409,6 +508,7 @@ function view:focus_flash(duration, group, start, finish)
   end, duration)
 end
 
+--- @return number Buffer number of view instance.
 function view:buffer()
   local buffers = self:buffers()
 
@@ -479,6 +579,7 @@ function view:show()
   self:render()
 end
 
+--- @param count integer? Number of directories to go up. Default 1
 function view:up(count)
   local parents = self:parents(count)
   local destination = parents[#parents]
@@ -499,6 +600,7 @@ function view:reset()
   return self:cd(self.initial)
 end
 
+--- @param path string Path to cd into
 function view:cd(path)
   if path == self.root.path then
     return false
@@ -516,6 +618,7 @@ function view:cd(path)
   end
 end
 
+--- @param count integer? Number of directories to go down. Default 1, minimum 1.
 function view:down(count)
   local cursor = self:cursor({ count = math.max(1, count or vim.v.count1) })
   local new_root = cursor.target
@@ -537,8 +640,10 @@ function view:down(count)
   end
 end
 
-function view:set_root(target, options_param)
-  local options = options_param or {}
+--- @param target carbon.entry.Entry
+--- @param opts? { rename: boolean }
+function view:set_root(target, opts)
+  local options = opts or {}
   local is_cwd = self.root.path == vim.uv.cwd()
 
   if type(target) == 'string' then
@@ -586,16 +691,21 @@ function view:current_lines()
   return self.cached_lines
 end
 
+--- @param target carbon.entry.Entry
 function view:entry_children(target)
   if self.show_hidden then
     return target:children()
   else
     return vim.tbl_filter(function(child)
-      return not util.is_excluded(vim.fn.fnamemodify(child.path, ':.'))
+      return not util.is_excluded(child.path)
     end, target:children())
   end
 end
 
+--- @param input_target carbon.entry.Entry?
+--- @param lines carbon.view.Line[]?
+--- @param depth integer?
+--- @return carbon.view.Line[]
 function view:lines(input_target, lines, depth)
   lines = lines or {}
   depth = depth or 0
@@ -611,13 +721,23 @@ function view:lines(input_target, lines, depth)
 
   if not input_target and #lines == 0 then
     local line = self.root.name .. '/'
+    local extmark = {
+      start_row = 0,
+      start_col = 0,
+      opts = {
+        hl_group = 'CarbonDir',
+        end_row = 0,
+        end_col = #line,
+        strict = false,
+      },
+    }
 
     lines[#lines + 1] = {
       lnum = 1,
       depth = -1,
       entry = self.root,
       line = line,
-      highlights = { { 'CarbonDir', 0, #line } },
+      highlights = { { 'CarbonDir', 0, #line, extmark = extmark } },
       icon_width = 0,
       path = {},
     }
@@ -672,7 +792,7 @@ function view:lines(input_target, lines, depth)
       local info = {
         file_icons.get_icon(
           tmp.name .. path_suffix,
-          vim.fn.fnamemodify(tmp.name, ':e'),
+          util.extname(tmp.name),
           { default = true }
         ),
       }
@@ -756,26 +876,30 @@ function view:lines(input_target, lines, depth)
 
   for _, line in ipairs(lines) do
     for _, hl in ipairs(line.highlights) do
-      hl.extmark = {
-        start_row = line.lnum - 1,
-        start_col = hl[2],
-        opts = {
-          hl_group = hl[1],
-          end_row = line.lnum - 1,
-          end_col = hl[3],
-          strict = false,
-        },
-      }
+      if not hl.extmark then
+        hl.extmark = {
+          start_row = line.lnum - 1,
+          start_col = hl[2],
+          opts = {
+            hl_group = hl[1],
+            end_row = line.lnum - 1,
+            end_col = hl[3],
+            strict = false,
+          },
+        }
+      end
     end
   end
 
   return lines
 end
 
+--- @param opts { target_directory_only?: boolean, count?: integer }?
+--- @return { target: carbon.entry.Entry, line: carbon.view.Line }
 function view:cursor(opts)
   local options = opts or {}
   local lines = self:current_lines()
-  local line = lines[vim.fn.line('.')]
+  local line = lines[vim.api.nvim_win_get_cursor(0)[1]]
   local target = line.entry
 
   if options.target_directory_only and not target.is_directory then
@@ -793,13 +917,14 @@ function view:cursor(opts)
         return true
       end
     end)
-  end)
+  end) or line
 
   return { target = target, line = line }
 end
 
 function view:create()
-  local cursor = self:cursor({ target_directory_only = true })
+  local cursor =
+    vim.tbl_extend('force', {}, self:cursor({ target_directory_only = true }))
 
   cursor.view = self
   cursor.compact = cursor.target.is_directory and #cursor.target:children() == 0
@@ -867,7 +992,7 @@ function view:delete()
 
   local paths = table.concat(
     vim.tbl_map(function(path)
-      return string.format('=> %s', vim.fn.fnamemodify(path, ':.'))
+      return string.format('=> %s', util.relative_path(path))
     end, { target.path }),
     '\n'
   )
@@ -880,16 +1005,15 @@ function view:delete()
   )
 
   if answer == 1 then
-    local result =
-      vim.fn.delete(target.path, target.is_directory and 'rf' or '')
+    local result = vim.fs.rm(target.path, { recursive = target.is_directory })
 
     if result == -1 then
       vim.api.nvim_echo({
         { 'Failed to delete: ', 'CarbonDanger' },
-        { vim.fn.fnamemodify(target.path, ':.'), 'CarbonIndicator' },
+        { util.relative_path(target.path), 'CarbonIndicator' },
       }, false, {})
     else
-      view.resync(vim.fn.fnamemodify(target.path, ':h'))
+      view.resync(vim.fs.dirname(target.path))
     end
   else
     util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
@@ -953,34 +1077,36 @@ function view:move()
     self:render()
     vim.api.nvim_echo({
       { 'Failed to move: ', 'CarbonDanger' },
-      { vim.fn.fnamemodify(cursor.target.path, ':.'), 'CarbonIndicator' },
+      { util.relative_path(cursor.target.path), 'CarbonIndicator' },
       { ' => ' },
-      { vim.fn.fnamemodify(updated_path, ':.'), 'CarbonIndicator' },
+      { util.relative_path(updated_path), 'CarbonIndicator' },
       { ' (destination exists)', 'CarbonPending' },
     }, false, {})
   else
-    local directory = vim.fn.fnamemodify(updated_path, ':h')
+    local directory = vim.fs.dirname(updated_path)
     local tmp_path = cursor.target.path
 
     if vim.startswith(updated_path, tmp_path) then
       tmp_path = vim.fn.tempname()
 
-      vim.fn.rename(cursor.target.path, tmp_path)
+      vim.uv.fs_rename(cursor.target.path, tmp_path)
     end
 
     vim.fn.mkdir(directory, 'p')
-    vim.fn.rename(tmp_path, updated_path)
-    view.resync(vim.fn.fnamemodify(cursor.target.path, ':h'))
+    vim.uv.fs_rename(tmp_path, updated_path)
+    view.resync(vim.fs.dirname(cursor.target.path))
   end
 end
 
+--- @param count integer? Amount of parent entries from root to retrieve
+--- @return carbon.entry.Entry[]
 function view:parents(count)
   local path = self.root.path
   local parents = {}
 
   if path ~= '' then
     for _ = count or vim.v.count1, 1, -1 do
-      path = vim.fn.fnamemodify(path, ':h')
+      path = vim.fs.dirname(path)
       parents[#parents + 1] = entry.new(path)
 
       if path == '/' then
@@ -992,6 +1118,7 @@ function view:parents(count)
   return parents
 end
 
+--- @param path string
 function view:switch_to_existing_view(path)
   local destination_view = view.find(path)
 

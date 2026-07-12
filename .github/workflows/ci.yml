@@ -12,19 +12,39 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install dependencies
+      - name: Install Neovim nightly
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: nightly
+
+      - name: Install Lua
+        uses: leafo/gh-actions-lua@v13
+        with:
+          luaVersion: "luajit"
+
+      - name: Install Luarocks
+        uses: leafo/gh-actions-luarocks@v6
+
+      - name: Install Luacheck
+        run: luarocks install luacheck
+
+      - name: Install lua-language-server
         run: |
           LUALS_VERSION=3.18.2
           LUALS_RELEASE_URL=https://github.com/LuaLS/lua-language-server/releases/download/${LUALS_VERSION}/lua-language-server-${LUALS_VERSION}-linux-x64.tar.gz
           LUALS_INSTALL_PATH=$HOME/.local/lua-language-server
 
-          sudo add-apt-repository ppa:neovim-ppa/unstable
-          sudo apt update
-          sudo apt install -y lua-check neovim
           curl -L -o lua-language-server.tar.gz $LUALS_RELEASE_URL
           mkdir -p $LUALS_INSTALL_PATH
           tar -xzf lua-language-server.tar.gz -C $LUALS_INSTALL_PATH
           echo "$LUALS_INSTALL_PATH/bin" >> $GITHUB_PATH
+
+      - name: Verify dependencies
+        run: |
+          nvim --version
+          luacheck --version
+          lua-language-server --version
 
       - name: Lint
         run: make lint
@@ -34,11 +54,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install dependencies
-        run: |
-          sudo add-apt-repository ppa:neovim-ppa/unstable
-          sudo apt update
-          sudo apt install -y neovim
+      - name: Install Neovim nightly
+        uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: nightly
+
+      - name: Verify Installation
+        run: nvim --version
 
       - name: Test
         run: make test

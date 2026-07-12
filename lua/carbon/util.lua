@@ -2,10 +2,39 @@ local constants = require('carbon.constants')
 local settings = require('carbon.settings')
 local util = {}
 
+--- @class carbon.util.AutocommandEvent
+--- @field buf integer \<abuf>
+--- @field data any Data passed from |nvim_exec_autocmds()|
+--- @field event vim.api.keyset.events Name of event |autocmd-events|
+--- @field file string \<afile> (not expanded to full path)
+--- @field id integer Autocommand id
+--- @field match string \<amatch> (expanded to full path)
+
+--- @alias carbon.util.VariadicReturn ...
+--- @alias carbon.util.Direction 'top' | 'right' | 'bottom' | 'left'
+--- @alias carbon.util.AutocommandCallback fun(event: carbon.util.AutocommandEvent)
+--- @alias carbon.util.Mapping table<table<string, string, string, table?>>
+
+--- @class carbon.util.ScratchBufferSettings
+--- @field name? string
+--- @field filetype? 'carbon.explorer'
+--- @field modifiable? boolean
+--- @field modified? boolean
+--- @field bufhidden? 'wipe'
+--- @field mappings? carbon.util.Mapping[]
+--- @field autocmds? table<string, carbon.util.AutocommandCallback>
+--- @field lines? table<string>
+
+--- @param lnum integer 1-based line number
+--- @param buffer integer? Target {bufnr}. Default 0 (current buffer)
+--- @return string
 function util.get_line(lnum, buffer)
   return vim.api.nvim_buf_get_lines(buffer or 0, lnum - 1, lnum, true)[1]
 end
 
+--- @param path string
+--- @param current_view? carbon.view.View
+--- @return string
 function util.explore_path(path, current_view)
   path = string.gsub(path, '%s', '')
 
@@ -19,17 +48,20 @@ function util.explore_path(path, current_view)
     path = string.format('%s/%s', base_path, path)
   end
 
-  return string.gsub(vim.fn.simplify(path), '/+$', '')
+  return select(1, string.gsub(vim.fs.normalize(path), '/+$', ''))
 end
 
+--- @param path string
+--- @return string normalized_path
 function util.resolve(path)
-  return string.gsub(
-    vim.fn.fnamemodify(vim.fs.normalize(path), ':p'),
-    '/+$',
-    ''
+  return select(
+    1,
+    string.gsub(vim.fs.abspath(vim.fs.normalize(path)), '/+$', '')
   )
 end
 
+--- @param path string
+--- @return boolean
 function util.is_excluded(path)
   if settings.exclude then
     for _, pattern in ipairs(settings.exclude) do
@@ -42,18 +74,62 @@ function util.is_excluded(path)
   return false
 end
 
+--- Set cursor position to {row} {col} in current window
+--- @param row integer 1-based line number
+--- @param col integer 1-based column number
 function util.cursor(row, col)
-  return vim.api.nvim_win_set_cursor(0, { row, col - 1 })
+  vim.api.nvim_win_set_cursor(0, { row, col - 1 })
 end
 
+--- Check if {path} is a directory
+--- @param path string?
+--- @return boolean
 function util.is_directory(path)
-  return (vim.uv.fs_stat(path) or {}).type == 'directory'
+  return type(path) == 'string'
+    and (vim.uv.fs_stat(path) or {}).type == 'directory'
 end
 
+--- @param filename string
+--- @return string?
+function util.extname(filename)
+  if type(filename) == 'string' then
+    local matches = vim.split(filename, '.', { plain = true })
+    local last = matches[#matches]
+    local first = matches[1]
+
+    if last == '' or last == first then
+      return nil
+    end
+
+    return last
+  end
+end
+
+--- @param path string Path to make relative
+--- @param base string? Parent path to remove from {path}. Default |vim.uv.cwd|
+--- @return string relative_path
+function util.relative_path(path, base)
+  local base_path = base or vim.uv.cwd()
+  base_path = base_path and vim.fs.abspath(vim.fs.normalize(base_path))
+
+  if base_path and vim.startswith(path, base_path) then
+    return string.sub(path, #base_path + 2)
+  end
+
+  return path
+end
+
+--- Generate normalized <plug> mapping name from {name}
+--- @param name string
+--- @return string normalized_plug_name
 function util.plug(name)
   return string.format('<plug>(carbon-%s)', string.gsub(name, '_', '-'))
 end
 
+--- Returns table key in {tbl} for found {item}
+--- @param tbl table
+--- @param item unknown
+--- @return unknown?
 function util.tbl_key(tbl, item)
   for key, tbl_item in pairs(tbl) do
     if tbl_item == item then
@@ -62,6 +138,11 @@ function util.tbl_key(tbl, item)
   end
 end
 
+--- Returns {value} and {key} when {callback} returns a truthy value
+--- @generic K, V
+--- @param tbl table<K, V>
+--- @param callback fun(value: V, key: K): ...?
+--- @return V?, K?
 function util.tbl_find(tbl, callback)
   for key, value in pairs(tbl) do
     if callback(value, key) then
@@ -70,6 +151,10 @@ function util.tbl_find(tbl, callback)
   end
 end
 
+--- Exclude {keys} from {tbl}. Returns shallow copy.
+--- @param tbl table
+--- @param keys string[]
+--- @return table
 function util.tbl_except(tbl, keys)
   local result = {}
 
@@ -82,6 +167,9 @@ function util.tbl_except(tbl, keys)
   return result
 end
 
+--- @param event vim.api.keyset.events | vim.api.keyset.events[] Event name(s) that will trigger the handler
+--- @param cmd_or_callback string | fun(event: carbon.util.AutocommandEvent) `Command` or Lua `callback` to execute
+--- @param opts vim.api.keyset.create_autocmd? Optional settings for vim.api.nvim_create_autocmd
 function util.autocmd(event, cmd_or_callback, opts)
   return vim.api.nvim_create_autocmd(
     event,
@@ -92,6 +180,8 @@ function util.autocmd(event, cmd_or_callback, opts)
   )
 end
 
+--- @param event string Autocommand name
+--- @param opts table? Additional options for vim.api.nvim_clear_autocmds
 function util.clear_autocmd(event, opts)
   return vim.api.nvim_clear_autocmds(vim.tbl_extend('force', {
     group = constants.augroup,
@@ -99,16 +189,24 @@ function util.clear_autocmd(event, opts)
   }, opts or {}))
 end
 
-function util.command(lhs, rhs, options)
-  return vim.api.nvim_create_user_command(lhs, rhs, options or {})
+--- Wraps |nvim_create_user_command|
+--- @param lhs string Command name
+--- @param rhs string | fun(args: vim.api.keyset.create_user_command.command_args) Command or Lua callback to execute
+--- @param opts vim.api.keyset.user_command? Optional settings for vim.api.nvim_create_user_command
+function util.command(lhs, rhs, opts)
+  return vim.api.nvim_create_user_command(lhs, rhs, opts or {})
 end
 
+--- @param group string Highlight group name
+--- @param opts table? Additional opts for vim.api.nvim_set_hl
 function util.highlight(group, opts)
   local merged = vim.tbl_extend('force', { default = true }, opts or {})
 
   vim.api.nvim_set_hl(0, group, merged)
 end
 
+--- @param buf integer Buffer number
+--- @return integer? win Window id from |nvim_list_wins|
 function util.bufwinid(buf)
   for _, win in ipairs(vim.api.nvim_list_wins()) do
     if vim.api.nvim_win_get_buf(win) == buf then
@@ -117,12 +215,20 @@ function util.bufwinid(buf)
   end
 end
 
+--- @param name string Buffer name to find
+--- @return integer? buf Buffer number from |nvim_list_bufs|
 function util.find_buf_by_name(name)
-  return util.tbl_find(vim.api.nvim_list_bufs(), function(bufnr)
-    return name == vim.api.nvim_buf_get_name(bufnr)
-  end)
+  if name then
+    name = vim.fs.normalize(name)
+
+    return util.tbl_find(vim.api.nvim_list_bufs(), function(bufnr)
+      return name == vim.fs.normalize(vim.api.nvim_buf_get_name(bufnr))
+    end)
+  end
 end
 
+--- @param options carbon.util.ScratchBufferSettings?
+--- @return integer buf Buffer number
 function util.create_scratch_buf(options)
   options = options or {}
   local found = util.find_buf_by_name(options.name)
@@ -134,7 +240,9 @@ function util.create_scratch_buf(options)
   }, util.tbl_except(options, { 'name', 'lines', 'mappings', 'autocmds' }))
 
   if options.name then
-    vim.api.nvim_buf_set_name(buf, options.name == '' and '/' or options.name)
+    local name = options.name --[[@as string]]
+
+    vim.api.nvim_buf_set_name(buf, name == '' and '/' or name)
   end
 
   if options.lines then
@@ -157,6 +265,8 @@ function util.create_scratch_buf(options)
   return buf
 end
 
+--- @param buf integer Buffer number
+--- @param mappings carbon.util.Mapping[]
 function util.set_buf_mappings(buf, mappings)
   for _, mapping in ipairs(mappings) do
     vim.keymap.set(
@@ -168,12 +278,16 @@ function util.set_buf_mappings(buf, mappings)
   end
 end
 
+--- @param buf integer Buffer number
+--- @param autocmds table<string, carbon.util.AutocommandCallback>
 function util.set_buf_autocmds(buf, autocmds)
   for autocmd, rhs in pairs(autocmds) do
     util.autocmd(autocmd, rhs, { buffer = buf })
   end
 end
 
+--- @param win integer Window number
+--- @param highlights table<string, string>
 function util.set_winhl(win, highlights)
   local winhls = {}
 
@@ -186,6 +300,8 @@ function util.set_winhl(win, highlights)
   vim.api.nvim_set_option_value('winhl', combined_winhls, { win = win })
 end
 
+--- @param buf integer Buffer number
+--- @param ... unknown[] Additional arguments for vim.api.nvim_buf_get_extmarks
 function util.clear_extmarks(buf, ...)
   local extmarks = vim.api.nvim_buf_get_extmarks(buf, constants.hl, ...)
 
@@ -194,6 +310,13 @@ function util.clear_extmarks(buf, ...)
   end
 end
 
+--- @class carbon.util.Extmark
+--- @field start_row integer
+--- @field start_col integer
+--- @field opts vim.api.keyset.set_extmark
+
+--- @param buf integer Buffer number
+--- @param extmark carbon.util.Extmark
 function util.add_extmark(buf, extmark)
   vim.api.nvim_buf_set_extmark(
     buf,
@@ -204,10 +327,21 @@ function util.add_extmark(buf, extmark)
   )
 end
 
-function util.add_highlight(buf, ...)
-  vim.hl.range(buf, constants.hl, ...)
+--- Wraps |vim.hl.range| with its {ns} parameter set to `carbon.constants.Constants.hl`.
+--- All parameters  are forwarded to |vim.hl.range| as-is.
+--- @param buf integer Buffer number
+--- @param group integer | integer[] | string | string[] Highlight group
+--- @param start [integer, integer] | string Start of region
+--- @param finish [integer, integer] | string End of region
+--- @param opts table? Optional settings
+function util.add_highlight(buf, group, start, finish, opts)
+  vim.hl.range(buf, constants.hl, group, start, finish, opts)
 end
 
+--- List windows neighboring {window_id} on selected {sides}
+--- @param window_id integer
+--- @param sides carbon.util.Direction[]
+--- @return { origin: integer, position: carbon.util.Direction, target: integer }[]
 function util.window_neighbors(window_id, sides)
   local original_window = vim.api.nvim_get_current_win()
   local result = {}
@@ -233,6 +367,11 @@ function util.window_neighbors(window_id, sides)
   return result
 end
 
+--- @generic FnArgs
+--- @param label string Profile debugging label
+--- @param fn fun(...: FnArgs): ...
+--- @param ... FnArgs
+--- @return ... Callback return values
 function util.profile(label, fn, ...)
   local start_ns = vim.uv.hrtime()
   local fn_result = { fn(...) }
@@ -243,6 +382,9 @@ function util.profile(label, fn, ...)
   return unpack(fn_result)
 end
 
+--- @param mod table<string, unknown>
+--- @param label string Label for |carbon-util-profile|
+--- @param method_names string[] methods of {mod} to profile
 function util.profile_module(mod, label, method_names)
   for _, method_name in ipairs(method_names or {}) do
     local original = mod[method_name]

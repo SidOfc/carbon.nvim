@@ -12,9 +12,17 @@ describe('carbon.watcher', function()
     it('registers {callback} for {event}', function()
       local callback = spy.new(function() end)
 
-      watcher.on('test-event', callback)
+      watcher.on(
+        'test-event',
+        callback --[[@as carbon.watcher.CallbackFunction]]
+      )
 
-      assert.is_true(watcher.has('test-event', callback))
+      assert.is_true(
+        watcher.has(
+          'test-event',
+          callback --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
     end)
   end)
 
@@ -22,7 +30,10 @@ describe('carbon.watcher', function()
     it('calls registered callbacks for {event}', function()
       local callback = spy.new(function() end)
 
-      watcher.on('test-event', callback)
+      watcher.on(
+        'test-event',
+        callback --[[@as carbon.watcher.CallbackFunction]]
+      )
       watcher.emit('test-event')
 
       assert.spy(callback).was.called(1)
@@ -32,11 +43,11 @@ describe('carbon.watcher', function()
       local callback = spy.new(function() end)
       local callback2 = spy.new(function() end)
 
-      watcher.on('*', callback)
-      watcher.on('*', callback2)
+      watcher.on('*', callback --[[@as carbon.watcher.CallbackFunction]])
+      watcher.on('*', callback2 --[[@as carbon.watcher.CallbackFunction]])
 
-      watcher.emit(os.clock() * math.random(1000))
-      watcher.emit(os.clock() * math.random(1000))
+      watcher.emit(tostring(os.clock() * math.random(1000)))
+      watcher.emit(tostring(os.clock() * math.random(1000)))
 
       assert.spy(callback).was.called(2)
       assert.spy(callback2).was.called(2)
@@ -47,7 +58,10 @@ describe('carbon.watcher', function()
         local callback = spy.new(function() end)
 
         watcher.register(vim.uv.cwd())
-        watcher.on('carbon:synchronize', callback)
+        watcher.on(
+          'carbon:synchronize',
+          callback --[[@as carbon.watcher.CallbackFunction]]
+        )
 
         helpers.ensure_path('check.txt')
         helpers.poll_spy_calls(callback, 1)
@@ -63,7 +77,10 @@ describe('carbon.watcher', function()
         helpers.ensure_path('check.sh')
 
         watcher.register(vim.uv.cwd())
-        watcher.on('carbon:synchronize', callback)
+        watcher.on(
+          'carbon:synchronize',
+          callback --[[@as carbon.watcher.CallbackFunction]]
+        )
 
         helpers.change_file('check.sh')
         helpers.poll_spy_calls(callback, 1)
@@ -80,7 +97,11 @@ describe('carbon.watcher', function()
         helpers.ensure_path('check.sh')
 
         watcher.register(vim.uv.cwd())
-        watcher.on('carbon:synchronize', callback)
+        vim.wait(100)
+        watcher.on(
+          'carbon:synchronize',
+          callback --[[@as carbon.watcher.CallbackFunction]]
+        )
 
         helpers.delete_path('check.sh')
         helpers.poll_spy_calls(callback, 1)
@@ -97,26 +118,53 @@ describe('carbon.watcher', function()
     it('clears {callback} for {event}', function()
       local callback = spy.new(function() end)
 
-      watcher.on('test-event', callback)
-      watcher.off('test-event', callback)
+      watcher.on(
+        'test-event',
+        callback --[[@as carbon.watcher.CallbackFunction]]
+      )
+      watcher.off(
+        'test-event',
+        callback --[[@as carbon.watcher.CallbackFunction]]
+      )
 
       assert.spy(callback).was.not_called(1)
-      assert.is_false(watcher.has('test-event', callback))
+      assert.is_false(
+        watcher.has(
+          'test-event',
+          callback --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
     end)
 
     it('clears specific {callback} in specified {event}', function()
       local ignore = spy.new(function() end)
       local callback = spy.new(function() end)
 
-      watcher.on('test-event', ignore)
-      watcher.on('test-event', callback)
-      watcher.off('test-event', ignore)
+      watcher.on('test-event', ignore --[[@as carbon.watcher.CallbackFunction]])
+      watcher.on(
+        'test-event',
+        callback --[[@as carbon.watcher.CallbackFunction]]
+      )
+      watcher.off(
+        'test-event',
+        ignore --[[@as carbon.watcher.CallbackFunction]]
+      )
       watcher.emit('test-event')
 
       assert.spy(callback).was.called(1)
       assert.spy(ignore).was.not_called()
-      assert.is_true(watcher.has('test-event', callback))
-      assert.is_false(watcher.has('test-event', ignore))
+      assert.is_true(
+        watcher.has(
+          'test-event',
+          callback --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
+      assert.is_false(
+        watcher.has(
+          'test-event',
+          ignore --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
     end)
 
     it('clears {event} when {callback} not specified', function()
@@ -124,9 +172,9 @@ describe('carbon.watcher', function()
       local ignore = spy.new(function() end)
       local ignore2 = spy.new(function() end)
 
-      watcher.on('event-1', keep)
-      watcher.on('event-2', ignore)
-      watcher.on('event-2', ignore2)
+      watcher.on('event-1', keep --[[@as carbon.watcher.CallbackFunction]])
+      watcher.on('event-2', ignore --[[@as carbon.watcher.CallbackFunction]])
+      watcher.on('event-2', ignore2 --[[@as carbon.watcher.CallbackFunction]])
       watcher.off('event-2')
       watcher.emit('event-1')
       watcher.emit('event-2')
@@ -134,25 +182,41 @@ describe('carbon.watcher', function()
       assert.spy(keep).was.called(1)
       assert.spy(ignore).was.not_called()
       assert.spy(ignore2).was.not_called()
-      assert.is_true(watcher.has('event-1', keep))
-      assert.is_false(watcher.has('event-2', ignore))
-      assert.is_false(watcher.has('event-2', ignore2))
+      assert.is_true(
+        watcher.has('event-1', keep --[[@as carbon.watcher.CallbackFunction]])
+      )
+      assert.is_false(
+        watcher.has('event-2', ignore --[[@as carbon.watcher.CallbackFunction]])
+      )
+      assert.is_false(
+        watcher.has(
+          'event-2',
+          ignore2 --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
     end)
 
     it('clears everything when called without arguments', function()
       local ignore = spy.new(function() end)
       local ignore2 = spy.new(function() end)
 
-      watcher.on('event-1', ignore)
-      watcher.on('event-2', ignore2)
+      watcher.on('event-1', ignore --[[@as carbon.watcher.CallbackFunction]])
+      watcher.on('event-2', ignore2 --[[@as carbon.watcher.CallbackFunction]])
       watcher.off()
       watcher.emit('event-1')
       watcher.emit('event-2')
 
       assert.spy(ignore).was.not_called()
       assert.spy(ignore2).was.not_called()
-      assert.is_false(watcher.has('event-1', ignore))
-      assert.is_false(watcher.has('event-2', ignore2))
+      assert.is_false(
+        watcher.has('event-1', ignore --[[@as carbon.watcher.CallbackFunction]])
+      )
+      assert.is_false(
+        watcher.has(
+          'event-2',
+          ignore2 --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
     end)
   end)
 
@@ -160,13 +224,26 @@ describe('carbon.watcher', function()
     it('returns true when {callback} registered in {event}', function()
       local callback = spy.new(function() end)
 
-      watcher.on('test-event', callback)
+      watcher.on(
+        'test-event',
+        callback --[[@as carbon.watcher.CallbackFunction]]
+      )
 
-      assert.is_true(watcher.has('test-event', callback))
+      assert.is_true(
+        watcher.has(
+          'test-event',
+          callback --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
     end)
 
     it('returns false when {callback} not registered in {event}', function()
-      assert.is_false(watcher.has('test-event', spy.new(function() end)))
+      assert.is_false(
+        watcher.has(
+          'test-event',
+          spy.new(function() end) --[[@as carbon.watcher.CallbackFunction]]
+        )
+      )
     end)
   end)
 
