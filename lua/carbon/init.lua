@@ -102,6 +102,7 @@ function carbon.win_resized()
     local window_width = vim.api.nvim_win_get_width(view.sidebar.origin)
 
     if window_width ~= settings.sidebar_width then
+      --- @diagnostic disable-next-line: deprecated
       vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
     end
   end

@@ -215,6 +215,7 @@ function view.activate(opts)
       }
     end
 
+    --- @diagnostic disable-next-line: deprecated
     vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
     vim.api.nvim_win_set_buf(view.sidebar.origin, current_view:buffer())
   elseif options.float then
@@ -283,6 +284,8 @@ function view.handle_sidebar_or_float()
         vim.cmd.split({ mods = { vertical = true, split = split } })
 
         view.sidebar.target = vim.api.nvim_get_current_win()
+
+        --- @diagnostic disable-next-line: deprecated
         vim.api.nvim_win_set_width(view.sidebar.origin, settings.sidebar_width)
       end
     end

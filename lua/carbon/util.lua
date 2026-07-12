@@ -218,9 +218,13 @@ end
 --- @param name string Buffer name to find
 --- @return integer? buf Buffer number from |nvim_list_bufs|
 function util.find_buf_by_name(name)
-  return util.tbl_find(vim.api.nvim_list_bufs(), function(bufnr)
-    return name == vim.api.nvim_buf_get_name(bufnr)
-  end)
+  if name then
+    name = vim.fs.normalize(name)
+
+    return util.tbl_find(vim.api.nvim_list_bufs(), function(bufnr)
+      return name == vim.fs.normalize(vim.api.nvim_buf_get_name(bufnr))
+    end)
+  end
 end
 
 --- @param options carbon.util.ScratchBufferSettings?
