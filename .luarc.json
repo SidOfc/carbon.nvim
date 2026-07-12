@@ -3,6 +3,7 @@
     "runtime.path": ["?.lua", "lua/?.lua", "lua/?/init.lua"],
 
     "workspace.checkThirdParty": false,
+    "workspace.ignoreDir": [".lua", ".luarocks"],
     "workspace.library": [
         "${env:VIMRUNTIME}",
         "${3rd}/luv/library",

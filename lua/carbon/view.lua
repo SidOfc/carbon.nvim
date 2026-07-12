@@ -1084,13 +1084,7 @@ function view:move()
     local tmp_path = cursor.target.path
 
     if vim.startswith(updated_path, tmp_path) then
-      tmp_path = vim.fs.normalize(
-        string.format(
-          '%s/%s',
-          vim.fn.stdpath('state'),
-          vim.fs.basename(os.tmpname())
-        )
-      )
+      tmp_path = vim.fn.tempname()
 
       vim.uv.fs_rename(cursor.target.path, tmp_path)
     end

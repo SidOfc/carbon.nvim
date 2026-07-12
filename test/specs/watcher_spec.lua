@@ -97,6 +97,7 @@ describe('carbon.watcher', function()
         helpers.ensure_path('check.sh')
 
         watcher.register(vim.uv.cwd())
+        vim.wait(100)
         watcher.on(
           'carbon:synchronize',
           callback --[[@as carbon.watcher.CallbackFunction]]

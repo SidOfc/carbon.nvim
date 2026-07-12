@@ -1,7 +1,5 @@
 local repo_root = vim.uv.cwd()
-local tmp_dir = vim.fs.normalize(
-  string.format('%s/%s', vim.fn.stdpath('state'), vim.fs.basename(os.tmpname()))
-)
+local tmp_dir = vim.fn.tempname()
 
 vim.opt.runtimepath:prepend(tmp_dir)
 

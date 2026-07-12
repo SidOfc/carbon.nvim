@@ -24,7 +24,7 @@ describe('carbon.util', function()
     end)
 
     it('{path} is expanded relative to {current_view}', function()
-      local current_view = view.get(os.tmpname())
+      local current_view = view.get(vim.fn.tempname())
       local parent = vim.fs.dirname(current_view.root.path)
 
       assert.is.equal(parent, util.explore_path('../', current_view))
