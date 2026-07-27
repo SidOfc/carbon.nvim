@@ -1,4 +1,6 @@
+local helpers = require('test.config.helpers')
 local util = require('carbon.util')
+local constants = require('carbon.constants')
 local settings = require('carbon.settings')
 
 describe('carbon.settings', function()
@@ -34,19 +36,31 @@ describe('carbon.settings', function()
     end)
 
     it('deletes augroup FileExplorer', function()
-      assert.is_nil(
-        util.tbl_find(vim.api.nvim_get_autocmds({}), function(autocmd)
-          return autocmd.group_name == 'FileExplorer'
-        end)
-      )
+      assert.is_false(helpers.augroup_exists('FileExplorer'))
     end)
 
     it('deletes augroup Network', function()
-      assert.is_nil(
-        util.tbl_find(vim.api.nvim_get_autocmds({}), function(autocmd)
-          return autocmd.group_name == 'Network'
-        end)
-      )
+      assert.is_false(helpers.augroup_exists('Network'))
+    end)
+  end)
+
+  describe('keep_nvim_dir', function()
+    it('is a boolean', function()
+      assert.is_boolean(settings.keep_nvim_dir)
+    end)
+
+    it('sets vim.g.loaded_nvim_dir_plugin', function()
+      assert.is.same(1, vim.g.loaded_nvim_dir_plugin)
+    end)
+
+    it('deletes augroup nvim.dir', function()
+      assert.is_false(helpers.augroup_exists('nvim.dir'))
+    end)
+  end)
+
+  describe('file_icons', function()
+    it('is a boolean', function()
+      assert.is_boolean(settings.file_icons)
     end)
   end)
 
@@ -57,6 +71,30 @@ describe('carbon.settings', function()
 
     it('is a opposite of vim.o.autochdir', function()
       assert.is_not.same(settings.sync_on_cd, vim.o.autochdir)
+    end)
+  end)
+
+  describe('open_on_dir', function()
+    it('is a boolean', function()
+      assert.is_boolean(settings.open_on_dir)
+    end)
+
+    for _, ft_pat in ipairs({ 'netrw', 'directory' }) do
+      it(string.format('creates %s FileType autocmd', ft_pat), function()
+        assert.is_not_nil(vim.api.nvim_get_autocmds({
+          event = 'FileType',
+          group = constants.augroup,
+          pattern = ft_pat,
+        })[1])
+      end)
+    end
+
+    it(':edit [dirname] shows Carbon buffer', function()
+      assert.is_not.same(vim.bo.filetype, 'carbon.explorer')
+
+      vim.cmd.edit('lua')
+
+      assert.is.same(vim.bo.filetype, 'carbon.explorer')
     end)
   end)
 

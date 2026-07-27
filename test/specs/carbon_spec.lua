@@ -7,11 +7,7 @@ local settings = require('carbon.settings')
 local helpers = require('test.config.helpers')
 
 describe('carbon', function()
-  before_each(function()
-    carbon.explore()
-    util.cursor(1, 1)
-    vim.cmd.only({ mods = { silent = true } })
-  end)
+  before_each(helpers.reset_editor_state)
 
   describe('autocommands', function()
     describe('DirChanged', function()
@@ -28,6 +24,14 @@ describe('carbon', function()
       end)
     end)
 
+    describe('FileType', function()
+      it('has global event', function()
+        local autocmd = helpers.autocmd('FileType')
+
+        assert.is_false(autocmd.buflocal)
+      end)
+    end)
+
     describe('BufWinEnter', function()
       it('has buffer local event', function()
         local autocmd = helpers.autocmd(
@@ -36,12 +40,6 @@ describe('carbon', function()
         )
 
         assert.is_true(autocmd.buflocal)
-      end)
-
-      it('has a global event', function()
-        local autocmd = helpers.autocmd('BufWinEnter')
-
-        assert.is_false(autocmd.buflocal)
       end)
     end)
 
@@ -83,8 +81,6 @@ describe('carbon', function()
   end)
 
   describe('tabe', function()
-    -- FIXME: Don't know what is going on, fine locally, GH actions complains
-    --        "file <temp path> already exists"
     pending('opens directories in new tab', function()
       assert.is.equal(#vim.api.nvim_list_tabpages(), 1)
 

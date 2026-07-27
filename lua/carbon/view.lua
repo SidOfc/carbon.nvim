@@ -952,8 +952,8 @@ function view:create()
   util.autocmd('CursorMovedI', create_insert_move(cursor), { buffer = 0 })
   vim.keymap.set('i', '<cr>', create_confirm(cursor), { buffer = 0 })
   vim.keymap.set('i', '<esc>', create_cancel(cursor), { buffer = 0 })
-  vim.cmd.startinsert({ bang = true })
   vim.api.nvim_set_option_value('modifiable', true, { buf = 0 })
+  vim.cmd.startinsert({ bang = true })
   vim.api.nvim_buf_set_lines(
     0,
     cursor.edit_lnum,

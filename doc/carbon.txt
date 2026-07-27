@@ -2387,11 +2387,25 @@ SETTINGS                                                         *carbon-setting
   Sets both `vim.g.loaded_netrw` and `vim.g.loaded_netrwPlugin` to `1` and
   deletes |augroup| `FileExplorer` and `Network`.
 
-  When `true` NetRW will not be harmed by Carbon. This also means that
-  `Explore` and `Lexplore` are no longer aliased to `Carbon` and `Lcarbon` anymore.
+  When `true` NetRW will not be harmed by Carbon. This also
+  means that the `Explore`, `Lexplore`, `Rexplore` and `ToggleSidebarExplore`
+  commands are no longer aliased to `Carbon`, `Lcarbon` and `Rcarbon` and
+  `ToggleSidebarCarbon` (respectively) anymore.
 
   This does not prevent Carbon from showing on vim startup instead of NetRW.
   To control this behavior, see |carbon-setting-auto-open|.
+
+  `------------------------------------------------------------------------------`
+  keep_nvim_dir                                     *carbon-setting-keep-nvim-dir*
+
+  Default: `false`
+
+  Sets `vim.g.loaded_nvim_dir_plugin` to `1` and deletes |augroup| `nvim.dir`.
+
+  When `true` the builtin |dir| plugin will not be harmed by Carbon.
+
+  This does not prevent Carbon from showing on vim startup instead of the
+  builtin |dir| plugin. To control this behavior, see |carbon-setting-auto-open|.
 
   `------------------------------------------------------------------------------`
   file_icons                                           *carbon-setting-file-icons*

@@ -34,8 +34,13 @@ describe('carbon.util', function()
 
   describe('cursor', function()
     it('{lnum} and {col} are both 1-based', function()
+      vim.cmd.enew()
+      vim.api.nvim_buf_set_lines(0, 0, -1, true, { 'line 1', 'line 2' })
+
       util.cursor(2, 2)
       assert.is.same({ 2, 1 }, vim.api.nvim_win_get_cursor(0))
+
+      vim.cmd.bdelete({ bang = true })
     end)
   end)
 
@@ -61,11 +66,11 @@ describe('carbon.util', function()
 
   describe('relative_path', function()
     it('Makes an absolute path relative to provided {base}', function()
-      local entry = helpers.entry('doc/assets') --[[@as carbon.entry.Entry]]
+      local abs_path = vim.fs.abspath('doc/assets')
       local cwd = vim.uv.cwd() --[[@as string]]
-      local relative_path = util.relative_path(entry.path, cwd)
+      local relative_path = util.relative_path(abs_path, cwd)
 
-      assert.is_true(vim.startswith(entry.path, cwd))
+      assert.is_true(vim.startswith(abs_path, cwd))
       assert.is_false(vim.startswith(relative_path, cwd))
       assert.is_false(vim.startswith(relative_path, '/'))
     end)

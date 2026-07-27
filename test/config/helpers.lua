@@ -1,8 +1,33 @@
+local carbon = require('carbon')
 local util = require('carbon.util')
 local view = require('carbon.view')
 local entry = require('carbon.entry')
 local constants = require('carbon.constants')
 local helpers = {}
+
+--- @param path string? (Default: |uv.cwd|) Absolute path to load entries from
+--- @return carbon.entry.Entry[]
+function helpers.load_entries(path)
+  return entry.new(path or vim.uv.cwd() --[[@as string]]):children()
+end
+
+--- @param name string Autocommand name
+--- @param opts vim.api.keyset.get_autocmds? (Default: `{}`) Options to pass to |nvim_get_autocmds|
+--- @return boolean `true` if autocommand {name} exists
+function helpers.augroup_exists(name, opts)
+  local autocmds = vim.api.nvim_get_autocmds(opts or {})
+  local result = util.tbl_find(autocmds, function(autocmd)
+    return autocmd.group_name == name
+  end)
+
+  return result and true or false
+end
+
+function helpers.reset_editor_state()
+  carbon.explore()
+  util.cursor(1, 1)
+  vim.cmd.only({ mods = { silent = true } })
+end
 
 --- @param header string
 function helpers.github_anchor(header)

@@ -54,12 +54,19 @@ function carbon.setup(user_settings)
     util.autocmd('SessionLoadPost', carbon.session_load_post, { pattern = '*' })
     util.autocmd('WinResized', carbon.win_resized, { pattern = '*' })
 
-    if settings.open_on_dir then
-      util.autocmd('BufWinEnter', carbon.explore_buf_dir, { pattern = '*' })
-    end
-
     if settings.sync_on_cd then
       util.autocmd('DirChanged', carbon.cd, { pattern = 'global' })
+    end
+
+    if settings.open_on_dir then
+      local fts = {}
+
+      fts[#fts + 1] = not settings.keep_netrw and 'netrw' or nil
+      fts[#fts + 1] = not settings.keep_nvim_dir and 'directory' or nil
+
+      local pattern = table.concat(fts, ',')
+
+      util.autocmd('FileType', carbon.explore_buf_dir, { pattern = pattern })
     end
 
     if not settings.keep_netrw then
@@ -75,6 +82,12 @@ function carbon.setup(user_settings)
       create_command('ToggleSidebarExplore', carbon.toggle_sidebar)
     end
 
+    if not settings.keep_nvim_dir then
+      vim.g.loaded_nvim_dir_plugin = 1
+
+      pcall(vim.api.nvim_del_augroup_by_name, 'nvim.dir')
+    end
+
     for action in pairs(settings.defaults.actions) do
       vim.keymap.set('', util.plug(action), carbon[action])
     end
@@ -86,8 +99,9 @@ function carbon.setup(user_settings)
     end
 
     if
-      vim.fn.has('vim_starting')
+      vim.fn.has('vim_starting') == 1
       and settings.auto_open
+      and not settings.open_on_dir
       and util.is_directory(open)
     then
       view.activate({ path = open })
@@ -354,7 +368,10 @@ function carbon.explore_float(opts)
 end
 
 function carbon.explore_buf_dir(params)
-  if vim.bo.filetype == 'carbon.explorer' then
+  local is_carbon_buf = vim.bo.filetype == 'carbon.explorer'
+  local vim_starting = vim.fn.has('vim_starting') == 1
+
+  if is_carbon_buf or vim_starting and not settings.auto_open then
     return
   end
 
