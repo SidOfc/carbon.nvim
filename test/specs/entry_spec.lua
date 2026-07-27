@@ -61,10 +61,12 @@ describe('carbon.entry', function()
 
   describe('find', function()
     it('returns loaded children', function()
-      assert.is.same(
-        entry,
-        getmetatable(entry.find(helpers.resolve('lua')) or {})
-      )
+      helpers.load_entries(vim.uv.cwd())
+
+      local lua = entry.find(helpers.resolve('lua')) --[[@as carbon.entry.Entry]]
+
+      assert.is_not_nil(lua)
+      assert.is.same(entry, getmetatable(lua))
     end)
 
     it('returns nil for not loaded children', function()
@@ -82,8 +84,15 @@ describe('carbon.entry', function()
     end)
 
     it('calls synchronize recursively on directory', function()
+      helpers.load_entries(vim.fs.abspath('lua'))
+      helpers.load_entries(vim.fs.abspath('lua/carbon'))
+
       local lua = entry.find(helpers.resolve('lua')) --[[@as carbon.entry.Entry]]
       local lua_carbon = entry.find(helpers.resolve('lua/carbon')) --[[@as carbon.entry.Entry]]
+
+      assert.is_not_nil(lua)
+      assert.is_not_nil(lua_carbon)
+
       local lua_synchronize = spy.on(lua, 'synchronize')
       local lua_carbon_synchronize = spy.on(lua_carbon, 'synchronize')
 

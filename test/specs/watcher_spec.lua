@@ -56,6 +56,7 @@ describe('carbon.watcher', function()
     describe('carbon:synchronize', function()
       it('triggers on new file', function()
         local callback = spy.new(function() end)
+        local tmp_name = vim.fs.basename(os.tmpname())
 
         watcher.register(vim.uv.cwd())
         watcher.on(
@@ -63,12 +64,13 @@ describe('carbon.watcher', function()
           callback --[[@as carbon.watcher.CallbackFunction]]
         )
 
-        helpers.ensure_path('check.txt')
+        vim.wait(50)
+        helpers.ensure_path(tmp_name)
         helpers.poll_spy_calls(callback, 1)
 
         assert
           .spy(callback).was
-          .called_with('carbon:synchronize', vim.uv.cwd(), 'check.txt', nil)
+          .called_with('carbon:synchronize', vim.uv.cwd(), tmp_name, nil)
       end)
 
       it('triggers on file change', function()

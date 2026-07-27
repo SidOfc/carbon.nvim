@@ -33,7 +33,7 @@ format-check:
 
 .PHONY: dev
 dev:
-	nvim -Nu dev/init.lua
+	nvim -Nu dev/init.lua .
 
 .PHONY: doc
 doc:
