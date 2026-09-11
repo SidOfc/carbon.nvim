@@ -1140,7 +1140,6 @@ ENTRY                                                               *carbon-entr
   The returned entry object has the following shape:
 >lua
   {
-    raw_path = '/absolute/path/to/file-or-dir',
     path = '/absolute/path/to/file-or-dir',
     name = 'file-or-dir',
     is_directory = false,
@@ -1329,7 +1328,7 @@ ENTRY                                                               *carbon-entr
   The variable `entry` in this section refers to an entry object as returned by
   the |carbon-entry-new| method.
 
-  Returns a table of entry object elements by calling |readdir| on `entry.path`.
+  Returns a table of entry object elements of the current `entry.path`.
   The entry objects will be direct children of `entry.path`. The table will be
   sorted in case-insensitive alphabetical order and all directories will come
   before any files.

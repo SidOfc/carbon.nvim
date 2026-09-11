@@ -1,7 +1,6 @@
 local watcher = require('carbon.watcher')
 
 --- @class carbon.entry.Entry
---- @field raw_path string
 --- @field path string
 --- @field name string
 --- @field parent carbon.entry.Entry?
@@ -31,15 +30,15 @@ end
 --- @param parent carbon.entry.Entry?
 --- @return carbon.entry.Entry
 function entry.new(path, parent)
-  local raw_path = path == '' and '/' or path
-  local clean = string.gsub(raw_path, '/+$', '')
-  local lstat = select(2, pcall(vim.uv.fs_lstat, raw_path)) or {}
+  path = #path > 1 and string.gsub(path, '/+$', '') or '/'
+
+  local lstat = select(2, pcall(vim.uv.fs_lstat, path)) or {}
   local is_executable = false
   local is_directory = lstat.type == 'directory'
   local is_symlink = lstat.type == 'link' and 1
 
   if is_symlink then
-    local ok, stat = pcall(vim.uv.fs_stat, raw_path)
+    local ok, stat = pcall(vim.uv.fs_stat, path)
 
     if ok and stat then
       is_directory = stat.type == 'directory'
@@ -56,9 +55,8 @@ function entry.new(path, parent)
   end
 
   return setmetatable({
-    raw_path = raw_path,
-    path = clean,
-    name = vim.fs.basename(clean),
+    path = path,
+    name = vim.fs.basename(path),
     parent = parent,
     is_directory = is_directory,
     is_executable = is_executable,
@@ -167,7 +165,7 @@ end
 --- @return carbon.entry.Entry[]
 function entry:get_children()
   local entries = {}
-  local handle = vim.uv.fs_scandir(self.raw_path)
+  local handle = vim.uv.fs_scandir(self.path)
 
   if type(handle) == 'userdata' then
     local function iterator()

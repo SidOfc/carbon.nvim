@@ -17,7 +17,7 @@ local constants = require('carbon.constants')
 --- @field entry carbon.entry.Entry
 --- @field line string
 --- @field icon_width integer
---- @field highlights carbon.view.LineHighlight[]
+--- @field highlights carbon.util.Extmark[]
 
 --- @class carbon.view.Sidebar
 --- @field origin integer
@@ -64,6 +64,18 @@ view.last_index = 0
 --- @field edit_col integer
 --- @field edit_lnum integer
 --- @field edit_prefix string
+
+--- @param name string
+--- @param start_col integer
+--- @param end_col integer
+--- @return carbon.util.Extmark
+local function line_hl(name, lnum, start_col, end_col)
+  return {
+    start_row = lnum - 1,
+    start_col = start_col,
+    opts = { hl_group = name, end_col = end_col, end_row = lnum - 1 },
+  }
+end
 
 --- @param ctx carbon.view.CursorEditingContext
 local function create_leave(ctx)
@@ -470,7 +482,7 @@ function view:render()
   end
 
   for _, hl in ipairs(hls) do
-    util.add_extmark(buf, hl.extmark)
+    util.add_extmark(buf, hl)
   end
 
   if cursor then
@@ -657,7 +669,7 @@ function view:set_root(target, opts)
   self.root = target
 
   if options.rename ~= false then
-    vim.api.nvim_buf_set_name(self:buffer(), self.root.raw_path)
+    vim.api.nvim_buf_set_name(self:buffer(), self.root.path)
   end
 
   vim.api.nvim_buf_set_var(
@@ -721,23 +733,12 @@ function view:lines(input_target, lines, depth)
 
   if not input_target and #lines == 0 then
     local line = self.root.name .. '/'
-    local extmark = {
-      start_row = 0,
-      start_col = 0,
-      opts = {
-        hl_group = 'CarbonDir',
-        end_row = 0,
-        end_col = #line,
-        strict = false,
-      },
-    }
-
     lines[#lines + 1] = {
       lnum = 1,
       depth = -1,
       entry = self.root,
       line = line,
-      highlights = { { 'CarbonDir', 0, #line, extmark = extmark } },
+      highlights = { line_hl('CarbonDir', 1, 0, #line) },
       icon_width = 0,
       path = {},
     }
@@ -753,7 +754,6 @@ function view:lines(input_target, lines, depth)
     local indent = string.rep('  ', depth)
     local is_empty = true
     local indicator = ''
-    local path_suffix = ''
 
     if settings.compress then
       while
@@ -772,7 +772,6 @@ function view:lines(input_target, lines, depth)
       watcher.register(tmp.path)
 
       is_empty = #self:entry_children(tmp) == 0
-      path_suffix = '/'
 
       if not is_empty and self:get_path_attr(tmp.path, 'open') then
         indicator = collapse_indicator
@@ -791,7 +790,7 @@ function view:lines(input_target, lines, depth)
     if file_icons and settings.file_icons and not tmp.is_directory then
       local info = {
         file_icons.get_icon(
-          tmp.name .. path_suffix,
+          tmp.name,
           util.extname(tmp.name),
           { default = true }
         ),
@@ -801,11 +800,12 @@ function view:lines(input_target, lines, depth)
       icon_highlight = info[2]
     end
 
-    local full_path = tmp.name .. path_suffix
+    local full_path = tmp.is_directory and tmp.name .. '/' or tmp.name
     local indent_end = #indent
     local icon_width = #icon ~= 0 and #icon + 1 or 0
     local indicator_width = #indicator ~= 0 and #indicator + 1 or 0
-    local path_start = indent_end + icon_width + indicator_width
+    local indicator_end = indent_end + indicator_width
+    local path_start = indicator_end + icon_width
     local dir_path = table.concat(
       vim.tbl_map(function(parent)
         return parent.name
@@ -819,21 +819,21 @@ function view:lines(input_target, lines, depth)
 
     if indicator_width ~= 0 and not is_empty then
       hls[#hls + 1] =
-        { 'CarbonIndicator', indent_end, indent_end + indicator_width }
+        line_hl('CarbonIndicator', lnum, indent_end, indicator_end)
     end
 
     if icon and icon_highlight then
-      hls[#hls + 1] =
-        { icon_highlight, indent_end + indicator_width, path_start - 1 }
+      hls[#hls + 1] = line_hl(icon_highlight, lnum, indicator_end, path_start)
     end
 
     local entries = { unpack(path) }
     entries[#entries + 1] = tmp
 
     for _, current_entry in ipairs(entries) do
-      local part = current_entry.name .. '/'
-      local path_end = path_start + #part
       local highlight_group = 'CarbonFile'
+      local path_end = path_start
+        + #current_entry.name
+        + (current_entry.is_directory and 1 or 0)
 
       if current_entry.is_symlink == 1 then
         highlight_group = 'CarbonSymlink'
@@ -845,7 +845,7 @@ function view:lines(input_target, lines, depth)
         highlight_group = 'CarbonExe'
       end
 
-      hls[#hls + 1] = { highlight_group, path_start, path_end }
+      hls[#hls + 1] = line_hl(highlight_group, lnum, path_start, path_end)
       path_start = path_end
     end
 
@@ -871,23 +871,6 @@ function view:lines(input_target, lines, depth)
 
     if tmp.is_directory and self:get_path_attr(tmp.path, 'open') then
       self:lines(tmp, lines, depth + 1)
-    end
-  end
-
-  for _, line in ipairs(lines) do
-    for _, hl in ipairs(line.highlights) do
-      if not hl.extmark then
-        hl.extmark = {
-          start_row = line.lnum - 1,
-          start_col = hl[2],
-          opts = {
-            hl_group = hl[1],
-            end_row = line.lnum - 1,
-            end_col = hl[3],
-            strict = false,
-          },
-        }
-      end
     end
   end
 
@@ -1019,7 +1002,7 @@ function view:delete()
     util.clear_extmarks(0, { lnum_idx, 0 }, { lnum_idx, -1 }, {})
 
     for _, lhl in ipairs(cursor.line.highlights) do
-      util.add_extmark(0, lhl.extmark)
+      util.add_extmark(0, lhl)
     end
 
     self:render()
